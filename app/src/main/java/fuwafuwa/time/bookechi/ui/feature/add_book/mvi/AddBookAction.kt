@@ -6,7 +6,8 @@ sealed interface AddBookAction : Action {
 
     data class SaveBook(
         val bookName: String,
-        val bookAuthor: String
+        val bookAuthor: String,
+        val bookCoverPath: String
     ) : AddBookAction
 
     data object LoadBookCover : AddBookAction

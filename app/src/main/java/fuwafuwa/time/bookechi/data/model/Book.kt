@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Book(
-    @PrimaryKey val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val author: String,
     val coverPath: String,

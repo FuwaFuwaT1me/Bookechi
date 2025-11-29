@@ -27,7 +27,7 @@ class AddBookModel(
             Book(
                 name = action.bookName,
                 author = action.bookAuthor,
-                coverPath = bookCoverPath,
+                coverPath = action.bookCoverPath,
                 pages = bookPages,
                 currentPage = bookCurrentPage
             )

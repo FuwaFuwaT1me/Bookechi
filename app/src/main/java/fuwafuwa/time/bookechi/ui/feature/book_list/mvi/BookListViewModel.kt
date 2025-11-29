@@ -6,7 +6,4 @@ class BookListViewModel(
     override val model: BookListModel
 ) : BaseViewModel<BookListAction, BookListState>() {
 
-    init {
-        init()
-    }
 }

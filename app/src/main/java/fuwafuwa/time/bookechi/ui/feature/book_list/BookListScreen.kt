@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -46,6 +47,19 @@ fun BookListScreen(
 ) {
     val state by viewModel.model.state.collectAsState()
 
+    BookListScreenPrivate(
+        state = state,
+        onAddBookClick = {
+            viewModel.sendNavigationEvent(NavigateToAddBook())
+        }
+    )
+}
+
+@Composable
+private fun BookListScreenPrivate(
+    state: BookListState,
+    onAddBookClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 32.dp)
@@ -55,7 +69,7 @@ fun BookListScreen(
         FloatingActionButton(
             modifier = Modifier.align(Alignment.BottomEnd),
             onClick = {
-                viewModel.sendNavigationEvent(NavigateToAddBook())
+                onAddBookClick()
             }
         ) {
             Icon(
@@ -115,4 +129,25 @@ private fun BookItem(book: Book) {
             Text("${book.currentPage} / ${book.pages}")
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BookListScreenPreview() {
+    BookListScreenPrivate(
+        state = BookListState(
+            isLoading = false,
+            error = null,
+            books = listOf(
+                Book(
+                    name = "Book 1",
+                    author = "Author 1",
+                    coverPath = "https://picsum.photos/200/300",
+                    currentPage = 1,
+                    pages = 100
+                )
+            )
+        ),
+        onAddBookClick = {}
+    )
 }

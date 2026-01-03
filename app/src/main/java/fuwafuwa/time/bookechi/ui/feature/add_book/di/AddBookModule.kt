@@ -18,7 +18,7 @@ val addBookModule = module {
         AddBookState(
             bookName = "",
             bookAuthor = "",
-            bookCoverPath = "",
+            bookCoverPath = null,
             bookPages = 0,
             bookCurrentPage = 0,
             isBookCoverLoading = false,

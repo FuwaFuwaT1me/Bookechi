@@ -4,10 +4,10 @@ import fuwafuwa.time.bookechi.mvi.api.Action
 
 sealed interface AddBookAction : Action {
 
-    data class SaveBook(
-        val bookName: String,
-        val bookAuthor: String,
-        val bookCoverPath: String
+    data object SaveBook: AddBookAction
+
+    data class UpdateBookDetails(
+        val state: AddBookState
     ) : AddBookAction
 
     data object LoadBookCover : AddBookAction

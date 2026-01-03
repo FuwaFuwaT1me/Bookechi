@@ -15,15 +15,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,14 +58,13 @@ fun AddBookScreen(
 
     AddBookScreenPrivate(
         state = state,
-        onSaveBookAction = { name, author, coverPath ->
+        onSaveBookAction = {
             viewModel.sendAction(
-                AddBookAction.SaveBook(
-                    bookName = name,
-                    bookAuthor = author,
-                    bookCoverPath = coverPath
-                )
+                AddBookAction.SaveBook
             )
+        },
+        onStateUpdate = {
+            viewModel.sendAction(AddBookAction.UpdateBookDetails(it))
         },
         onNavigateBack = {
             viewModel.sendNavigationEvent(BaseNavigationEvent.NavigateBack)
@@ -70,32 +75,34 @@ fun AddBookScreen(
 @Composable
 private fun AddBookScreenPrivate(
     state: AddBookState,
-    onSaveBookAction: (String, String, String) -> Unit,
+    onSaveBookAction: () -> Unit,
+    onStateUpdate: (AddBookState) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
-    val bookCoverPath = remember {
-        mutableStateOf("")
-    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
         Column {
-            Header(onNavigateBack)
+            Header(
+                state = state,
+                onStateUpdate = onStateUpdate,
+                onNavigateBack = onNavigateBack
+            )
 
             BookPager(
                 modifier = Modifier
                 ,
                 state = state,
-                onCoverChange = { cover ->
-                    bookCoverPath.value = cover
-                }
+                onStateUpdate = onStateUpdate,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            InputFields(state)
+            InputFields(
+                state = state,
+                onStateUpdate = onStateUpdate
+            )
         }
 
         Button(
@@ -112,13 +119,7 @@ private fun AddBookScreenPrivate(
             ),
             shape = RoundedCornerShape(8.dp),
             onClick = {
-                onSaveBookAction(
-//                    bookNameState.text.toString(),
-//                    bookAuthorState.text.toString(),
-                    "book name",
-                    "boko author",
-                    bookCoverPath.value
-                )
+                onSaveBookAction()
             },
         ) {
             Text("Save book")
@@ -128,8 +129,12 @@ private fun AddBookScreenPrivate(
 
 @Composable
 private fun Header(
+    state: AddBookState,
+    onStateUpdate: (AddBookState) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -170,13 +175,77 @@ private fun Header(
             color = BlueMain,
             fontWeight = FontWeight.Bold
         )
+
+        if (state.bookCoverPath != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+            ) {
+                Button(
+                    modifier = Modifier
+                        .size(32.dp)
+                    ,
+                    colors = ButtonColors(
+                        containerColor = BlueMain,
+                        contentColor = Color.White,
+                        disabledContainerColor = Color.Gray,
+                        disabledContentColor = Color.White
+                    ),
+                    contentPadding = PaddingValues(0.dp),
+                    onClick = { showMenu = true }
+                ) {
+                    Icon(
+                        modifier = Modifier
+                            .size(16.dp)
+                        ,
+                        imageVector = Icons.Filled.MoreVert,
+                        tint = Color.White,
+                        contentDescription = null
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Clear cover") },
+                        onClick = {
+                            showMenu = false
+                            onStateUpdate(state.copy(bookCoverPath = null))
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun InputFields(state: AddBookState) {
-    val bookNameState = rememberTextFieldState("")
-    val bookAuthorState = rememberTextFieldState("")
+private fun InputFields(
+    state: AddBookState,
+    onStateUpdate: (AddBookState) -> Unit,
+) {
+    val bookNameState = rememberTextFieldState(state.bookName)
+    val bookAuthorState = rememberTextFieldState(state.bookAuthor)
+
+    LaunchedEffect(bookNameState) {
+        snapshotFlow { bookNameState.text.toString() }
+            .collect { newName ->
+                if (newName != state.bookName) {
+                    onStateUpdate(state.copy(bookName = newName))
+                }
+            }
+    }
+
+    LaunchedEffect(bookAuthorState) {
+        snapshotFlow { bookAuthorState.text.toString() }
+            .collect { newAuthor ->
+                if (newAuthor != state.bookAuthor) {
+                    onStateUpdate(state.copy(bookAuthor = newAuthor))
+                }
+            }
+    }
 
     Box(
         modifier = Modifier
@@ -288,11 +357,8 @@ private fun AddBookScreenPreview() {
             isBookCoverLoading = false,
             bookCoverError = null
         ),
-        onSaveBookAction = { name, author, cover ->
-
-        },
-        onNavigateBack = {
-
-        }
+        onSaveBookAction = {},
+        onStateUpdate = {},
+        onNavigateBack = {}
     )
 }

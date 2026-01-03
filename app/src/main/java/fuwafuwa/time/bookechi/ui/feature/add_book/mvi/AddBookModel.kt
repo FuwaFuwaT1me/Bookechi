@@ -13,21 +13,22 @@ class AddBookModel(
 
     override fun onAction(action: AddBookAction) {
         when (action) {
-            is AddBookAction.SaveBook -> saveBook(action)
+            is AddBookAction.SaveBook -> saveBook()
             is AddBookAction.LoadBookCover -> loadBookCover()
+            is AddBookAction.UpdateBookDetails -> updateAddBookState(action.state)
         }
     }
 
-    private fun saveBook(action: AddBookAction.SaveBook) {
+    private fun saveBook() {
         updateState {
             copy(isBookCoverLoading = true, bookCoverError = null)
         }
 
         val book = with(state.value) {
             Book(
-                name = action.bookName,
-                author = action.bookAuthor,
-                coverPath = action.bookCoverPath,
+                name = state.value.bookName,
+                author = state.value.bookAuthor,
+                coverPath = state.value.bookCoverPath,
                 pages = bookPages,
                 currentPage = bookCurrentPage
             )
@@ -53,5 +54,9 @@ class AddBookModel(
 
     private fun loadBookCover() {
         // TODO: Implement book cover loading logic
+    }
+
+    private fun updateAddBookState(newState: AddBookState) {
+        updateState { newState }
     }
 }

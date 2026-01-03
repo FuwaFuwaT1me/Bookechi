@@ -1,9 +1,11 @@
 package fuwafuwa.time.bookechi.ui.feature.add_book.ui
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -27,12 +29,9 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +46,7 @@ import fuwafuwa.time.bookechi.ui.theme.SuperLightGray
 @Composable
 fun BookPager(
     state: AddBookState,
-    onCoverChange: (String) -> Unit,
+    onStateUpdate: (AddBookState) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -59,7 +58,7 @@ fun BookPager(
     ) {
         CoverPager(
             state = state,
-            onCoverChange = onCoverChange,
+            onStateUpdate = onStateUpdate
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -71,17 +70,22 @@ fun BookPager(
 @Composable
 private fun CoverPager(
     state: AddBookState,
-    onCoverChange: (String) -> Unit,
+    onStateUpdate: (AddBookState) -> Unit,
 ) {
-    var imageUri by remember { mutableStateOf(state.bookCoverPath.toUri()) }
-    val pagerState = PagerState(currentPage = 1) { 2 }
+    val pagerState = PagerState(currentPage = 0) { 2 }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
-            imageUri = uri
-            onCoverChange(imageUri.toString())
+            onStateUpdate(state.copy(bookCoverPath = uri.toString()))
+            Log.d("ANIME", "${uri.toString()}, ${uri.toString().toUri()}")
+        } else {
+            onStateUpdate(
+                state.copy(
+                    bookCoverError = "Cannot upload image"
+                )
+            )
         }
     }
 
@@ -91,12 +95,11 @@ private fun CoverPager(
             .fillMaxWidth()
         ,
         state = pagerState,
+        userScrollEnabled = false,
+
     ) { page ->
         when (page) {
             0 -> {
-
-            }
-            1 -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -106,10 +109,8 @@ private fun CoverPager(
                         modifier = Modifier
                             .align(Alignment.Center)
                             .size(200.dp)
-                            .background(
-                                color = SuperLightGray,
-                                shape = CircleShape,
-                            )
+                            .clip(CircleShape)
+                            .background(color = SuperLightGray)
                             .border(
                                 width = 1.dp,
                                 color = SuperLightGray,
@@ -120,6 +121,9 @@ private fun CoverPager(
                                 color = Color.White,
                                 shape = CircleShape
                             )
+                            .clickable {
+                                galleryLauncher.launch("image/*")
+                            }
                         ,
                     ) {
                         Box(
@@ -142,40 +146,42 @@ private fun CoverPager(
                                     .height(140.dp)
                                     .width(100.dp)
                                 ,
-                                imageUri = imageUri,
-                                onClick = {
-                                    galleryLauncher.launch("image/*")
-                                }
+                                imageUri = state.bookCoverPath?.toUri(),
                             )
                         }
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(190.dp)
-                            .background(
-                                color = Color.Gray.copy(alpha = 0.5f),
-                                shape = CircleShape,
-                            )
-                        ,
-                    ) {
-                        Icon(
+                    if (state.bookCoverPath == null) {
+                        Box(
                             modifier = Modifier
                                 .align(Alignment.Center)
-                                .drawBehind {
-                                    drawCircle(
-                                        color = Color.LightGray,
-                                        radius = 10.dp.toPx(),
-                                    )
-                                }
+                                .size(190.dp)
+                                .background(
+                                    color = Color.Gray.copy(alpha = 0.5f),
+                                    shape = CircleShape,
+                                )
                             ,
-                            tint = Color.DarkGray,
-                            imageVector = Icons.Outlined.Add,
-                            contentDescription = null,
-                        )
+                        ) {
+                            Icon(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .drawBehind {
+                                        drawCircle(
+                                            color = Color.LightGray,
+                                            radius = 10.dp.toPx(),
+                                        )
+                                    }
+                                ,
+                                tint = Color.DarkGray,
+                                imageVector = Icons.Outlined.Add,
+                                contentDescription = null,
+                            )
+                        }
                     }
                 }
+            }
+            1 -> {
+
             }
         }
     }
@@ -259,6 +265,23 @@ private fun BookPagerPreview() {
             isBookCoverLoading = false,
             bookCoverError = null
         ),
-        onCoverChange = {}
+        onStateUpdate = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BookPagerWithoutCoverPreview() {
+    BookPager(
+        state = AddBookState(
+            bookName = "Хроники заводной птицы",
+            bookAuthor = "Харуки Мураками",
+            bookCoverPath = null,
+            bookPages = 1052,
+            bookCurrentPage = 448,
+            isBookCoverLoading = false,
+            bookCoverError = null
+        ),
+        onStateUpdate = {}
     )
 }

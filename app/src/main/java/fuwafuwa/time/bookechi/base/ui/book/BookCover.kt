@@ -22,12 +22,13 @@ import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import fuwafuwa.time.bookechi.R
+import fuwafuwa.time.bookechi.base.ui.util.optionalClickable
 
 @Composable
 fun BookCover(
-    imageUri: Uri,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    imageUri: Uri?,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
 
@@ -37,9 +38,7 @@ fun BookCover(
         modifier = modifier
             .aspectRatio(0.7f)
             .clip(RoundedCornerShape(4.dp))
-            .clickable {
-                onClick()
-            }
+            .optionalClickable(onClick)
             .drawWithContent {
                 val startOffsetX = size.width * 0.015f
                 val strokeWidth = startOffsetX.dp.toPx()

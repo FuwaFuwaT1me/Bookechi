@@ -31,7 +31,7 @@ fun BookItem(
     book: Book,
     modifier: Modifier = Modifier
 ) {
-    var imageUri by remember { mutableStateOf(book.coverPath.toUri()) }
+    var imageUri by remember { mutableStateOf(book.coverPath?.toUri()) }
 
     Box(
         modifier = modifier

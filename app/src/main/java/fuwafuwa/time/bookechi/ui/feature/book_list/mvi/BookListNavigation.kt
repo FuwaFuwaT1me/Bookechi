@@ -5,7 +5,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import fuwafuwa.time.bookechi.mvi.ui.BaseScreen
-import fuwafuwa.time.bookechi.ui.feature.book_list.BookListScreen
+import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.bookListNavRoot(

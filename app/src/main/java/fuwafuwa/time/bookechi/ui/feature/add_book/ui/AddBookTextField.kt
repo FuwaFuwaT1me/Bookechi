@@ -7,8 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import fuwafuwa.time.bookechi.base.ui.BaseTextFieldColors
-import fuwafuwa.time.bookechi.base.ui.SimpleTextField
+import fuwafuwa.time.bookechi.base.ui.textfield.BaseTextFieldColors
+import fuwafuwa.time.bookechi.base.ui.textfield.SimpleTextField
 
 @Composable
 fun AddBookTextField(
@@ -18,7 +18,7 @@ fun AddBookTextField(
 ) {
     SimpleTextField(
         modifier = modifier
-            .height(48.dp),
+            .height(42.dp),
         state = state,
         hint = hint,
         textFieldColors = BaseTextFieldColors(

@@ -1,4 +1,4 @@
-package fuwafuwa.time.bookechi.base.ui
+package fuwafuwa.time.bookechi.base.ui.textfield
 
 import androidx.compose.ui.graphics.Color
 

@@ -11,11 +11,6 @@ import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.add_book.ui.AddBookScreen
 import org.koin.compose.viewmodel.koinViewModel
 
-data class NavigateToAddBook(
-    override val screen: Screen = AddBookScreen,
-    override val dataBundle: DataBundle = object : DataBundle {}
-) : BaseNavigationEvent.NavigateTo
-
 fun NavGraphBuilder.addBookNavRoot(
     navController: NavController
 ) {
@@ -34,3 +29,8 @@ fun NavGraphBuilder.addBookNavRoot(
         }
     }
 }
+
+data class NavigateToAddBook(
+    override val screen: Screen = AddBookScreen,
+    override val dataBundle: DataBundle = object : DataBundle {}
+) : BaseNavigationEvent.NavigateTo

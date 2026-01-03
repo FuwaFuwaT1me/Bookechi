@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.add_book.ui
 
+import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -46,7 +47,7 @@ import fuwafuwa.time.bookechi.ui.theme.SuperLightGray
 @Composable
 fun BookPager(
     state: AddBookState,
-    onStateUpdate: (AddBookState) -> Unit,
+    onAddBookCover: (Uri?) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -58,7 +59,7 @@ fun BookPager(
     ) {
         CoverPager(
             state = state,
-            onStateUpdate = onStateUpdate
+            onAddBookCover = onAddBookCover
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -70,23 +71,14 @@ fun BookPager(
 @Composable
 private fun CoverPager(
     state: AddBookState,
-    onStateUpdate: (AddBookState) -> Unit,
+    onAddBookCover: (Uri?) -> Unit
 ) {
     val pagerState = PagerState(currentPage = 0) { 2 }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        if (uri != null) {
-            onStateUpdate(state.copy(bookCoverPath = uri.toString()))
-            Log.d("ANIME", "${uri.toString()}, ${uri.toString().toUri()}")
-        } else {
-            onStateUpdate(
-                state.copy(
-                    bookCoverError = "Cannot upload image"
-                )
-            )
-        }
+        onAddBookCover(uri)
     }
 
     HorizontalPager(
@@ -265,7 +257,7 @@ private fun BookPagerPreview() {
             isBookCoverLoading = false,
             bookCoverError = null
         ),
-        onStateUpdate = {}
+        onAddBookCover = {}
     )
 }
 
@@ -282,6 +274,6 @@ private fun BookPagerWithoutCoverPreview() {
             isBookCoverLoading = false,
             bookCoverError = null
         ),
-        onStateUpdate = {}
+        onAddBookCover = {}
     )
 }

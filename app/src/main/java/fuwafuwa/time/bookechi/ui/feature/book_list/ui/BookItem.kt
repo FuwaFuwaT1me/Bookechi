@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.book_list.ui
 
+import android.util.Log
 import android.widget.ProgressBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -50,7 +51,8 @@ fun BookItem(
                 }
             )
 
-            if (book.currentPage != 0) {
+            Log.d("ANIME", "BookItem: ${book.currentPage} / ${book.pages}")
+            if (book.currentPage != 0 && book.pages != 0 && book.currentPage < book.pages) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

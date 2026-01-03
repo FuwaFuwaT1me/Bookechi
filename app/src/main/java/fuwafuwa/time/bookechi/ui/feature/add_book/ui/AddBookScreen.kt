@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.add_book.ui
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,12 +60,25 @@ fun AddBookScreen(
     AddBookScreenPrivate(
         state = state,
         onSaveBookAction = {
-            viewModel.sendAction(
-                AddBookAction.SaveBook
-            )
+            viewModel.sendAction(AddBookAction.SaveBook)
         },
-        onStateUpdate = {
-            viewModel.sendAction(AddBookAction.UpdateBookDetails(it))
+        onAddBookCover = { uri ->
+            viewModel.sendAction(AddBookAction.LoadBookCover(uri))
+        },
+        onClearBookCover = {
+            viewModel.sendAction(AddBookAction.ClearBookCover)
+        },
+        onUpdateAuthor = {
+            viewModel.sendAction(AddBookAction.UpdateBookDetails(state.copy(bookAuthor = it)))
+        },
+        onUpdateName = {
+            viewModel.sendAction(AddBookAction.UpdateBookDetails(state.copy(bookName = it)))
+        },
+        onUpdateCurrentPage = {
+            viewModel.sendAction(AddBookAction.UpdateBookDetails(state.copy(bookCurrentPage = it)))
+        },
+        onUpdateAllPages = {
+            viewModel.sendAction(AddBookAction.UpdateBookDetails(state.copy(bookPages = it)))
         },
         onNavigateBack = {
             viewModel.sendNavigationEvent(BaseNavigationEvent.NavigateBack)
@@ -76,7 +90,12 @@ fun AddBookScreen(
 private fun AddBookScreenPrivate(
     state: AddBookState,
     onSaveBookAction: () -> Unit,
-    onStateUpdate: (AddBookState) -> Unit,
+    onAddBookCover: (Uri?) -> Unit,
+    onClearBookCover: () -> Unit,
+    onUpdateName: (String) -> Unit,
+    onUpdateAuthor: (String) -> Unit,
+    onUpdateCurrentPage: (Int) -> Unit,
+    onUpdateAllPages: (Int) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     Box(
@@ -86,7 +105,7 @@ private fun AddBookScreenPrivate(
         Column {
             Header(
                 state = state,
-                onStateUpdate = onStateUpdate,
+                onClearBookCover = onClearBookCover,
                 onNavigateBack = onNavigateBack
             )
 
@@ -94,14 +113,17 @@ private fun AddBookScreenPrivate(
                 modifier = Modifier
                 ,
                 state = state,
-                onStateUpdate = onStateUpdate,
+                onAddBookCover = onAddBookCover,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             InputFields(
                 state = state,
-                onStateUpdate = onStateUpdate
+                onUpdateName = onUpdateName,
+                onUpdateAuthor = onUpdateAuthor,
+                onUpdateCurrentPage = onUpdateCurrentPage,
+                onUpdateAllPages = onUpdateAllPages,
             )
         }
 
@@ -130,7 +152,7 @@ private fun AddBookScreenPrivate(
 @Composable
 private fun Header(
     state: AddBookState,
-    onStateUpdate: (AddBookState) -> Unit,
+    onClearBookCover: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -212,7 +234,7 @@ private fun Header(
                         text = { Text("Clear cover") },
                         onClick = {
                             showMenu = false
-                            onStateUpdate(state.copy(bookCoverPath = null))
+                            onClearBookCover()
                         }
                     )
                 }
@@ -224,7 +246,10 @@ private fun Header(
 @Composable
 private fun InputFields(
     state: AddBookState,
-    onStateUpdate: (AddBookState) -> Unit,
+    onUpdateName: (String) -> Unit,
+    onUpdateAuthor: (String) -> Unit,
+    onUpdateCurrentPage: (Int) -> Unit,
+    onUpdateAllPages: (Int) -> Unit,
 ) {
     val bookNameState = rememberTextFieldState(state.bookName)
     val bookAuthorState = rememberTextFieldState(state.bookAuthor)
@@ -233,7 +258,7 @@ private fun InputFields(
         snapshotFlow { bookNameState.text.toString() }
             .collect { newName ->
                 if (newName != state.bookName) {
-                    onStateUpdate(state.copy(bookName = newName))
+                    onUpdateName(newName)
                 }
             }
     }
@@ -242,7 +267,7 @@ private fun InputFields(
         snapshotFlow { bookAuthorState.text.toString() }
             .collect { newAuthor ->
                 if (newAuthor != state.bookAuthor) {
-                    onStateUpdate(state.copy(bookAuthor = newAuthor))
+                    onUpdateAuthor(newAuthor)
                 }
             }
     }
@@ -274,15 +299,41 @@ private fun InputFields(
 
             Spacer(modifier = Modifier.size(24.dp))
 
-            Pages()
+            Pages(
+                state = state,
+                onUpdateCurrentPage = onUpdateCurrentPage,
+                onUpdateAllPages = onUpdateAllPages,
+            )
         }
     }
 }
 
 @Composable
-private fun Pages() {
+private fun Pages(
+    state: AddBookState,
+    onUpdateCurrentPage: (Int) -> Unit,
+    onUpdateAllPages: (Int) -> Unit,
+) {
     val currentPageState = rememberTextFieldState("")
     val allPagesState = rememberTextFieldState("")
+
+    LaunchedEffect(currentPageState) {
+        snapshotFlow { currentPageState.text.toString().toIntOrNull() }
+            .collect { newCurrentPage ->
+                if (newCurrentPage != null && newCurrentPage != state.bookCurrentPage) {
+                    onUpdateCurrentPage(newCurrentPage)
+                }
+            }
+    }
+
+    LaunchedEffect(allPagesState) {
+        snapshotFlow { allPagesState.text.toString().toIntOrNull() }
+            .collect { newAllPages ->
+                if (newAllPages != null && newAllPages != state.bookPages) {
+                    onUpdateAllPages(newAllPages)
+                }
+            }
+    }
 
     Row {
         Column(
@@ -358,7 +409,12 @@ private fun AddBookScreenPreview() {
             bookCoverError = null
         ),
         onSaveBookAction = {},
-        onStateUpdate = {},
-        onNavigateBack = {}
+        onAddBookCover = {},
+        onClearBookCover = {},
+        onUpdateAuthor = {},
+        onUpdateName = {},
+        onUpdateCurrentPage = {},
+        onUpdateAllPages = {},
+        onNavigateBack = {},
     )
 }

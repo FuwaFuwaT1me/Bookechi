@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.add_book.mvi
 
+import android.net.Uri
 import fuwafuwa.time.bookechi.mvi.api.Action
 
 sealed interface AddBookAction : Action {
@@ -10,5 +11,7 @@ sealed interface AddBookAction : Action {
         val state: AddBookState
     ) : AddBookAction
 
-    data object LoadBookCover : AddBookAction
+    data class LoadBookCover(val uri: Uri?) : AddBookAction
+
+    data object ClearBookCover : AddBookAction
 }

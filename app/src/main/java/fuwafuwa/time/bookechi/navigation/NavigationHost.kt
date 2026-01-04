@@ -7,6 +7,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.addBookNavRoot
+import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.bookDetailsNavRoot
 import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.bookListNavRoot
 
@@ -23,6 +24,7 @@ fun NavigationHost(
     ) {
         bookListScenario(navController)
         addBookScenario(navController)
+        bookDetailsScenario(navController)
     }
 }
 
@@ -32,4 +34,8 @@ private fun NavGraphBuilder.bookListScenario(navController: NavController) {
 
 private fun NavGraphBuilder.addBookScenario(navController: NavController) {
     addBookNavRoot(navController)
+}
+
+private fun NavGraphBuilder.bookDetailsScenario(navController: NavController) {
+    bookDetailsNavRoot(navController)
 }

@@ -4,6 +4,7 @@ import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
 import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.NavigateToAddBook
+import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.NavigateToBookDetails
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -36,6 +37,9 @@ class BookListModel(
                 handleDeleteBook(action.book)
             }
             is BookListAction.NavigateToAddBook -> sendNavigationEvent(NavigateToAddBook())
+            is BookListAction.NavigateToBookDetails -> sendNavigationEvent(
+                NavigateToBookDetails(action.book.id)
+            )
         }
     }
 

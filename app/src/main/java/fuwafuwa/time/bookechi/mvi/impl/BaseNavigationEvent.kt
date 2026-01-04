@@ -9,7 +9,6 @@ sealed interface BaseNavigationEvent : NavigationEvent {
     interface NavigateTo : BaseNavigationEvent {
 
         val screen: Screen
-        val dataBundle: DataBundle
     }
 
     interface NavigateBackTo : BaseNavigationEvent {

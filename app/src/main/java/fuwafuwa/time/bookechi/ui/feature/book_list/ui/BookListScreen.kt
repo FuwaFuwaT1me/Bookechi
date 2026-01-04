@@ -156,7 +156,7 @@ private fun BooksList(
                 ),
                 book = book,
                 onClick = {
-                    // TODO: open book details screen
+                    onAction(BookListAction.NavigateToBookDetails(book))
                 },
                 onDeleteBookClick = {
                     onAction(BookListAction.DeleteBook(book))

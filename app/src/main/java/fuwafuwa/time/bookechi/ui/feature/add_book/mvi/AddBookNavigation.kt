@@ -32,5 +32,4 @@ fun NavGraphBuilder.addBookNavRoot(
 
 data class NavigateToAddBook(
     override val screen: Screen = AddBookScreen,
-    override val dataBundle: DataBundle = object : DataBundle {}
 ) : BaseNavigationEvent.NavigateTo

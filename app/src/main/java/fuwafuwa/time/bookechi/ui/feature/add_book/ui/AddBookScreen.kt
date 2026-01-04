@@ -1,6 +1,8 @@
 package fuwafuwa.time.bookechi.ui.feature.add_book.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +42,9 @@ import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.AddBookAction
 import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.AddBookState
 import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.AddBookViewModel
+import fuwafuwa.time.bookechi.ui.theme.BlackLight
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
+import fuwafuwa.time.bookechi.ui.theme.BlueMainDark
 import fuwafuwa.time.bookechi.ui.theme.SuperLightGray
 import kotlinx.serialization.Serializable
 
@@ -197,7 +203,7 @@ private fun InputFields(
                 onValueChange = { onAction(AddBookAction.UpdateBookAuthor(it)) }
             )
 
-            Spacer(modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.size(12.dp))
 
             Pages(
                 state = state,
@@ -212,34 +218,65 @@ private fun Pages(
     state: AddBookState,
     onAction: (AddBookAction) -> Unit,
 ) {
-    Row {
-        PageField(
-            modifier = Modifier.weight(1f),
-            label = "Current page",
-            onValueChange = { it.toIntOrNull()?.let { page -> onAction(AddBookAction.UpdateCurrentPage(page)) } }
-        )
-
-        Box(
+    Column {
+        Row(
             modifier = Modifier
-                .size(32.dp)
-                .align(Alignment.Bottom)
-                .padding(bottom = 8.dp)
+                .fillMaxWidth()
+                .clickable {
+                    onAction(AddBookAction.UpdateReadingNow(!state.readingNow))
+                }
+                .padding(vertical = 8.dp)
+            ,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            Checkbox(
+                checked = state.readingNow,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = BlueMain,
+                    uncheckedColor = Color.Gray,
+                ),
+                onCheckedChange = null
+            )
+
             Text(
-                modifier = Modifier.align(Alignment.Center),
-                text = "/",
-                color = BlueMain,
-                fontSize = 24.sp
+                text = "Reading now",
+                color = BlackLight,
+                fontSize = 16.sp
             )
         }
 
-        PageField(
-            modifier = Modifier.weight(1f),
-            label = "All pages",
-            onValueChange = { it.toIntOrNull()?.let { pages -> onAction(AddBookAction.UpdateAllPages(pages)) } }
-        )
+        Row {
+            if (state.readingNow) {
+                PageField(
+                    modifier = Modifier.weight(1f),
+                    label = "Current page",
+                    onValueChange = { it.toIntOrNull()?.let { page -> onAction(AddBookAction.UpdateCurrentPage(page)) } }
+                )
 
-        // TODO: снизу \/ вот так чтобы красиво проценты считались по анимации
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .align(Alignment.Bottom)
+                        .padding(bottom = 8.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = "/",
+                        color = BlueMain,
+                        fontSize = 24.sp
+                    )
+                }
+            }
+
+            PageField(
+                modifier = Modifier.weight(1f),
+                label = "All pages",
+                onValueChange = { it.toIntOrNull()?.let { pages -> onAction(AddBookAction.UpdateAllPages(pages)) } }
+            )
+
+            // TODO: снизу \/ вот так чтобы красиво проценты считались по анимации
+        }
     }
 }
 
@@ -269,12 +306,31 @@ private fun PageField(
 
 @Preview(showBackground = true)
 @Composable
-private fun AddBookScreenPreview() {
+private fun AddBookScreenNotReadingNowPreview() {
     AddBookScreenPrivate(
         state = AddBookState(
             bookName = "Хроники заводной птицы",
             bookAuthor = "Харуки Мураками",
             bookCoverPath = "",
+            readingNow = false,
+            bookPages = 1052,
+            bookCurrentPage = 448,
+            isBookCoverLoading = false,
+            bookCoverError = null
+        ),
+        onAction = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AddBookScreenReadingNowPreview() {
+    AddBookScreenPrivate(
+        state = AddBookState(
+            bookName = "Хроники заводной птицы",
+            bookAuthor = "Харуки Мураками",
+            bookCoverPath = "",
+            readingNow = true,
             bookPages = 1052,
             bookCurrentPage = 448,
             isBookCoverLoading = false,

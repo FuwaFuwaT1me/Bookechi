@@ -22,10 +22,11 @@ val addBookModule = module {
             bookName = "",
             bookAuthor = "",
             bookCoverPath = null,
+            readingNow = false,
             bookPages = 0,
             bookCurrentPage = 0,
             isBookCoverLoading = false,
-            bookCoverError = null
+            bookCoverError = null,
         )
     }
 

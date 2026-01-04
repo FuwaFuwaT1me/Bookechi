@@ -5,6 +5,7 @@ import fuwafuwa.time.bookechi.mvi.api.State
 data class AddBookState(
     val bookName: String,
     val bookAuthor: String,
+    val readingNow: Boolean,
     val bookPages: Int,
     val bookCurrentPage: Int,
     val bookCoverPath: String? = null,

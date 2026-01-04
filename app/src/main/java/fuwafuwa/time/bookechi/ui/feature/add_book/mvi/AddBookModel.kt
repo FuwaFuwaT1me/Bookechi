@@ -24,6 +24,7 @@ class AddBookModel(
             is AddBookAction.UpdateBookAuthor -> updateState { copy(bookAuthor = action.author) }
             is AddBookAction.UpdateCurrentPage -> updateState { copy(bookCurrentPage = action.page) }
             is AddBookAction.UpdateAllPages -> updateState { copy(bookPages = action.pages) }
+            is AddBookAction.UpdateReadingNow -> updateState { copy(readingNow = action.readingNow) }
         }
     }
 

@@ -20,4 +20,6 @@ sealed interface AddBookAction : Action {
     data class UpdateCurrentPage(val page: Int) : AddBookAction
 
     data class UpdateAllPages(val pages: Int) : AddBookAction
+
+    data class UpdateReadingNow(val readingNow: Boolean) : AddBookAction
 }

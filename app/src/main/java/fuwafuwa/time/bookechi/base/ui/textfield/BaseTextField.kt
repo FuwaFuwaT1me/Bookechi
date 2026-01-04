@@ -11,14 +11,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -33,8 +40,9 @@ fun SimpleTextField(
         hintColor = Color(0xFFBDBDBD),
         textColor = Color.Black,
         containerColor = Color.White,
-        indicatorColor = Color(0xFF6200EE),
+        focusedBorderColor = Color(0xFF6200EE),
         borderColor = Color.Transparent,
+        indicatorColor = Color.Black,
     ),
     cornerRadius: Dp = 28.dp
 ) {
@@ -50,7 +58,7 @@ fun SimpleTextField(
             )
             .border(
                 width = if (isFocused) 2.dp else 1.dp,
-                color = if (isFocused) textFieldColors.indicatorColor else textFieldColors.borderColor,
+                color = if (isFocused) textFieldColors.focusedBorderColor else textFieldColors.borderColor,
                 shape = shape
             )
             .padding(horizontal = 20.dp),
@@ -63,6 +71,7 @@ fun SimpleTextField(
                 color = textFieldColors.textColor,
                 fontSize = 16.sp
             ),
+            cursorBrush = SolidColor(textFieldColors.indicatorColor),
             lineLimits = TextFieldLineLimits.SingleLine,
             decorator = { innerTextField ->
                 Box(

@@ -9,6 +9,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fuwafuwa.time.bookechi.base.ui.textfield.BaseTextFieldColors
 import fuwafuwa.time.bookechi.base.ui.textfield.SimpleTextField
+import fuwafuwa.time.bookechi.ui.theme.BlackLight
+import fuwafuwa.time.bookechi.ui.theme.BlackLight2
+import fuwafuwa.time.bookechi.ui.theme.BlueMain
+import fuwafuwa.time.bookechi.ui.theme.BlueMainDark
 
 @Composable
 fun AddBookTextField(
@@ -23,10 +27,11 @@ fun AddBookTextField(
         hint = hint,
         textFieldColors = BaseTextFieldColors(
             hintColor = Color(0xFFBDBDBD),
-            textColor = Color.Black,
+            textColor = BlackLight,
             containerColor = Color.White,
-            indicatorColor = Color(0xFF6200EE),
+            focusedBorderColor = BlueMain,
             borderColor = Color.Transparent,
+            indicatorColor = BlueMain,
         ),
         cornerRadius = 8.dp
     )

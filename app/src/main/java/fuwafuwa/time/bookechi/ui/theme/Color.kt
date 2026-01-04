@@ -13,3 +13,6 @@ val Pink40 = Color(0xFF7D5260)
 val SuperLightGray = Color(0xFFF1F1F1)
 val BlueMain = Color(0xFF2F8BE1)
 val BlueMainDark = Color(0xFF1E6FB9)
+
+val BlackLight = Color(0xFF464646)
+val BlackLight2 = Color(0xFF121212)

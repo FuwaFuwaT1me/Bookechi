@@ -15,11 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -159,46 +156,13 @@ private fun Header(
         )
 
         if (state.bookCoverPath != null) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-            ) {
-                Button(
-                    modifier = Modifier
-                        .size(32.dp)
-                    ,
-                    colors = ButtonColors(
-                        containerColor = BlueMain,
-                        contentColor = Color.White,
-                        disabledContainerColor = Color.Gray,
-                        disabledContentColor = Color.White
-                    ),
-                    contentPadding = PaddingValues(0.dp),
-                    onClick = { showMenu = true }
-                ) {
-                    Icon(
-                        modifier = Modifier
-                            .size(16.dp)
-                        ,
-                        imageVector = Icons.Filled.MoreVert,
-                        tint = Color.White,
-                        contentDescription = null
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Clear cover") },
-                        onClick = {
-                            showMenu = false
-                            onAction(AddBookAction.ClearBookCover)
-                        }
-                    )
-                }
-            }
+            AddBookDropdownMenu(
+                showMenu = showMenu,
+                onShowMenuChange = { showMenuChange ->
+                    showMenu = showMenuChange
+                },
+                onAction = onAction,
+            )
         }
     }
 }

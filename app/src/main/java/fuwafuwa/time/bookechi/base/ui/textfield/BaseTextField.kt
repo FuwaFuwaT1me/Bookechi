@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.Text
@@ -22,6 +23,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -42,6 +44,7 @@ fun BaseTextField(
         indicatorColor = Color.Black,
     ),
     cornerRadius: Dp = 28.dp,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
     interactionSource: MutableInteractionSource? = null,
     focusRequester: FocusRequester? = null,
 ) {
@@ -72,6 +75,7 @@ fun BaseTextField(
             ),
             cursorBrush = SolidColor(textFieldColors.indicatorColor),
             lineLimits = TextFieldLineLimits.SingleLine,
+            keyboardOptions = keyboardOptions,
             decorator = { innerTextField ->
                 Box(
                     modifier = Modifier

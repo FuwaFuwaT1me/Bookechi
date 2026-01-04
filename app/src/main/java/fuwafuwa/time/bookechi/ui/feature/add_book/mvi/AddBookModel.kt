@@ -18,8 +18,12 @@ class AddBookModel(
         when (action) {
             is AddBookAction.SaveBook -> saveBook()
             is AddBookAction.LoadBookCover -> loadBookCover(action.uri)
-            is AddBookAction.UpdateBookDetails -> updateAddBookState(action.state)
             is AddBookAction.ClearBookCover -> clearBookCover()
+            is AddBookAction.NavigateBack -> sendNavigationEvent(BaseNavigationEvent.NavigateBack)
+            is AddBookAction.UpdateBookName -> updateState { copy(bookName = action.name) }
+            is AddBookAction.UpdateBookAuthor -> updateState { copy(bookAuthor = action.author) }
+            is AddBookAction.UpdateCurrentPage -> updateState { copy(bookCurrentPage = action.page) }
+            is AddBookAction.UpdateAllPages -> updateState { copy(bookPages = action.pages) }
         }
     }
 
@@ -81,10 +85,6 @@ class AddBookModel(
                 }
             }
         }
-    }
-
-    private fun updateAddBookState(newState: AddBookState) {
-        updateState { newState }
     }
 
     private fun clearBookCover() {

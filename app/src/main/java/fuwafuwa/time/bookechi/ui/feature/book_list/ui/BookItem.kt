@@ -1,7 +1,5 @@
 package fuwafuwa.time.bookechi.ui.feature.book_list.ui
 
-import android.util.Log
-import android.widget.ProgressBar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,9 +27,12 @@ import fuwafuwa.time.bookechi.ui.theme.BlueMainDark
 @Composable
 fun BookItem(
     book: Book,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit,
+    onDeleteBookClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    var imageUri by remember { mutableStateOf(book.coverPath?.toUri()) }
+    var showDropdownMenu by remember { mutableStateOf(false) }
+    var imageUri by remember(book.id) { mutableStateOf(book.coverPath?.toUri()) }
 
     Box(
         modifier = modifier
@@ -46,12 +46,12 @@ fun BookItem(
             BookCover(
                 modifier = Modifier,
                 imageUri = imageUri,
-                onClick = {
-
-                }
+                onClick = onClick,
+                onLongTap = {
+                    showDropdownMenu = true
+                },
             )
 
-            Log.d("ANIME", "BookItem: ${book.currentPage} / ${book.pages}")
             if (book.currentPage != 0 && book.pages != 0 && book.currentPage < book.pages) {
                 Box(
                     modifier = Modifier
@@ -77,6 +77,17 @@ fun BookItem(
 
             // TODO: название/описание, которое можно раскрыть вниз под рядом книг
         }
+
+        BookItemDropdownMenu(
+            showMenu = showDropdownMenu,
+            onDismissRequest = {
+                showDropdownMenu = false
+            },
+            onDeleteBookClick = {
+                showDropdownMenu = false
+                onDeleteBookClick()
+            }
+        )
     }
 }
 
@@ -90,7 +101,9 @@ private fun PreviewBookItem() {
             coverPath = "https://picsum.photos/200/300",
             currentPage = 25,
             pages = 100
-        )
+        ),
+        onClick = {},
+        onDeleteBookClick = {}
     )
 }
 
@@ -104,6 +117,8 @@ private fun PreviewZeroProgressBookItem() {
             coverPath = "https://picsum.photos/200/300",
             currentPage = 0,
             pages = 100
-        )
+        ),
+        onClick = {},
+        onDeleteBookClick = {}
     )
 }

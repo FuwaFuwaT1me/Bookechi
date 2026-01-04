@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.mvi.ui.Screen
-import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.NavigateToAddBook
+import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListAction
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListState
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListViewModel
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
@@ -45,16 +45,14 @@ fun BookListScreen(
 
     BookListScreenPrivate(
         state = state,
-        onAddBookClick = {
-            viewModel.sendNavigationEvent(NavigateToAddBook())
-        }
+        onAction = viewModel::sendAction
     )
 }
 
 @Composable
 private fun BookListScreenPrivate(
     state: BookListState,
-    onAddBookClick: () -> Unit
+    onAction: (BookListAction) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -66,7 +64,7 @@ private fun BookListScreenPrivate(
 
             ScreenState(
                 state = state,
-                onNavigateToAddBook = onAddBookClick
+                onAction = onAction
             )
         }
 
@@ -76,7 +74,7 @@ private fun BookListScreenPrivate(
                 containerColor = BlueMain,
                 contentColor = Color.White,
                 onClick = {
-                    onAddBookClick()
+                    onAction(BookListAction.NavigateToAddBook)
                 }
             ) {
                 Icon(
@@ -91,7 +89,7 @@ private fun BookListScreenPrivate(
 @Composable
 private fun ScreenState(
     state: BookListState,
-    onNavigateToAddBook: () -> Unit
+    onAction: (BookListAction) -> Unit,
 ) {
     when {
         state.isLoading -> {
@@ -102,23 +100,21 @@ private fun ScreenState(
             Text("Something went wrong")
         }
 
-        state.books.isNotEmpty() -> {
-            Content(state)
-        }
-
         state.books.isEmpty() -> {
             EmptyBookList(
                 onAddBookClick = {
-                    onNavigateToAddBook()
+                    onAction(BookListAction.NavigateToAddBook)
                 }
             )
         }
-    }
-}
 
-@Composable
-private fun Content(state: BookListState) {
-    BooksList(state.books)
+        else -> {
+            BooksList(
+                books = state.books,
+                onAction = onAction,
+            )
+        }
+    }
 }
 
 @Composable
@@ -143,15 +139,24 @@ private fun Header() {
 }
 
 @Composable
-private fun BooksList(books: List<Book>) {
+private fun BooksList(
+    books: List<Book>,
+    onAction: (BookListAction) -> Unit,
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        items(books) { book ->
+        items(books, key = { it.id }) { book ->
             BookItem(
-                book
+                book = book,
+                onClick = {
+                    // TODO: open book details screen
+                },
+                onDeleteBookClick = {
+                    onAction(BookListAction.DeleteBook(book))
+                }
             )
         }
     }
@@ -178,6 +183,6 @@ fun BookListScreenPreview() {
                 }
             }
         ),
-        onAddBookClick = {}
+        onAction = {}
     )
 }

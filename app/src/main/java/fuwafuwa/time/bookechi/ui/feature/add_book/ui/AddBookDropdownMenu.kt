@@ -67,7 +67,6 @@ fun BoxScope.AddBookDropdownMenu(
                         color = BlackLight,
                     )
                 },
-
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Outlined.Delete,

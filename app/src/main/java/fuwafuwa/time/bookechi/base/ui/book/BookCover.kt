@@ -1,11 +1,7 @@
 package fuwafuwa.time.bookechi.base.ui.book
 
 import android.net.Uri
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,13 +18,14 @@ import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import fuwafuwa.time.bookechi.R
-import fuwafuwa.time.bookechi.base.ui.util.optionalClickable
+import fuwafuwa.time.bookechi.base.ui.util.optionalDetectTapGestures
 
 @Composable
 fun BookCover(
     imageUri: Uri?,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    onLongTap: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
 
@@ -38,7 +35,7 @@ fun BookCover(
         modifier = modifier
             .aspectRatio(0.7f)
             .clip(RoundedCornerShape(4.dp))
-            .optionalClickable(onClick)
+            .optionalDetectTapGestures(onClick, onLongTap)
             .drawWithContent {
                 val startOffsetX = size.width * 0.015f
                 val strokeWidth = startOffsetX.dp.toPx()
@@ -51,9 +48,7 @@ fun BookCover(
                     strokeWidth = strokeWidth
                 )
             }
-            .background(Color.Red)
         ,
-
         model = ImageRequest.Builder(context)
             .data(imageUri)
             .build(),

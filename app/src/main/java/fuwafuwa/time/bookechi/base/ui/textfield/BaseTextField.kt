@@ -11,28 +11,25 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fuwafuwa.time.bookechi.base.ui.util.optionalFocusRequester
 
 @Composable
-fun SimpleTextField(
+fun BaseTextField(
     state: TextFieldState,
     modifier: Modifier = Modifier,
     hint: String = "",
@@ -44,9 +41,11 @@ fun SimpleTextField(
         borderColor = Color.Transparent,
         indicatorColor = Color.Black,
     ),
-    cornerRadius: Dp = 28.dp
+    cornerRadius: Dp = 28.dp,
+    interactionSource: MutableInteractionSource? = null,
+    focusRequester: FocusRequester? = null,
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val shape = RoundedCornerShape(cornerRadius)
 
@@ -75,7 +74,10 @@ fun SimpleTextField(
             lineLimits = TextFieldLineLimits.SingleLine,
             decorator = { innerTextField ->
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .optionalFocusRequester(focusRequester)
+                    ,
                     contentAlignment = Alignment.CenterStart
                 ) {
                     if (state.text.isEmpty()) {
@@ -95,8 +97,8 @@ fun SimpleTextField(
 
 @Preview
 @Composable
-private fun SimpleTextFieldPreview() {
-    SimpleTextField(
+private fun BaseTextFieldPreview() {
+    BaseTextField(
         state = remember { TextFieldState() },
         modifier = Modifier.padding(16.dp)
     )

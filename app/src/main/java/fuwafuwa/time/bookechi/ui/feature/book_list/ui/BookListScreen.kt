@@ -150,6 +150,10 @@ private fun BooksList(
     ) {
         items(books, key = { it.id }) { book ->
             BookItem(
+                modifier = Modifier.animateItem(
+                    fadeInSpec = null,
+                    fadeOutSpec = null
+                ),
                 book = book,
                 onClick = {
                     // TODO: open book details screen

@@ -10,5 +10,6 @@ data class Book(
     val author: String,
     val coverPath: String?,
     val pages: Int,
-    val currentPage: Int
+    val currentPage: Int,
+    val readingStatus: ReadingStatus = ReadingStatus.None
 )

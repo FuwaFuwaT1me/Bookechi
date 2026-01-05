@@ -74,7 +74,7 @@ fun BookCoverShowcase(
                 )
                 .padding(1.dp)
                 .border(
-                    width = 2.dp,
+                    width = 2.dp * (circleSize / 200.dp),
                     color = Color.White,
                     shape = CircleShape
                 )
@@ -322,5 +322,27 @@ private fun BookCoverWithShadowPreview() {
         imageUri = "".toUri(),
         coverHeight = 140.dp,
         coverWidth = 100.dp
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ProgressBookCoverShowcaseLargePreview() {
+    val book = Book(
+        id = 0,
+        name = "asdf",
+        author = "sadf",
+        coverPath = null,
+        currentPage = 256,
+        pages = 1024
+    )
+
+    ProgressBookCoverShowcase(
+        book = book,
+        imageUri = book.coverPath?.toUri(),
+        progress = 1f * book.currentPage / book.pages,
+        circleSize = 360.dp,
+        coverHeight = 240.dp,
+        coverWidth = 168.dp,
     )
 }

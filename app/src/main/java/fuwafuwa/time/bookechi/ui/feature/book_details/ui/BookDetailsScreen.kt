@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import fuwafuwa.time.bookechi.base.ui.book.ProgressBookCoverShowcase
 import fuwafuwa.time.bookechi.data.model.Book
+import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsAction
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsState
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsViewModel
@@ -80,7 +82,7 @@ private fun BookDetailsScreenPrivate(
             }
 
             state.book != null -> {
-                BookDetailsContent(book = state.book)
+                BookDetailsContent(book = state.book, onAction = onAction)
             }
         }
     }
@@ -114,12 +116,24 @@ private fun Header(
             color = BlueMain,
             fontWeight = FontWeight.Bold
         )
+
+        IconButton(
+            modifier = Modifier.align(Alignment.CenterEnd),
+            onClick = onBackClick
+        ) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = "Back",
+                tint = BlueMain
+            )
+        }
     }
 }
 
 @Composable
 private fun BookDetailsContent(
-    book: Book
+    book: Book,
+    onAction: (BookDetailsAction) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -136,7 +150,7 @@ private fun BookDetailsContent(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        BookInfoSection(book = book)
+        BookInfoSection(book = book, onAction = onAction)
 
         Spacer(modifier = Modifier.height(24.dp))
     }
@@ -144,7 +158,8 @@ private fun BookDetailsContent(
 
 @Composable
 private fun BookInfoSection(
-    book: Book
+    book: Book,
+    onAction: (BookDetailsAction) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -167,6 +182,13 @@ private fun BookInfoSection(
             color = Color.Gray,
             textAlign = TextAlign.Center
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        BookReadingActionButtons(
+            readingStatus = book.readingStatus,
+            onAction = onAction
+        )
     }
 }
 
@@ -181,7 +203,8 @@ private fun BookDetailsScreenPreview() {
                 author = "Харуки Мураками",
                 coverPath = null,
                 pages = 1052,
-                currentPage = 448
+                currentPage = 448,
+                readingStatus = ReadingStatus.Reading
             )
         ),
         onAction = {}
@@ -190,7 +213,7 @@ private fun BookDetailsScreenPreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun BookDetailsScreenWithCoverPreview() {
+private fun BookDetailsScreenPausedPreview() {
     BookDetailsScreenPrivate(
         state = BookDetailsState(
             book = Book(
@@ -199,7 +222,8 @@ private fun BookDetailsScreenWithCoverPreview() {
                 author = "George Orwell",
                 coverPath = "https://example.com/cover.jpg",
                 pages = 328,
-                currentPage = 150
+                currentPage = 150,
+                readingStatus = ReadingStatus.Paused
             )
         ),
         onAction = {}
@@ -217,7 +241,8 @@ private fun BookDetailsScreenNotStartedPreview() {
                 author = "F. Scott Fitzgerald",
                 coverPath = null,
                 pages = 180,
-                currentPage = 0
+                currentPage = 0,
+                readingStatus = ReadingStatus.None
             )
         ),
         onAction = {}
@@ -235,7 +260,8 @@ private fun BookDetailsScreenFinishedPreview() {
                 author = "Лев Толстой",
                 coverPath = null,
                 pages = 1225,
-                currentPage = 1225
+                currentPage = 1225,
+                readingStatus = ReadingStatus.Stopped
             )
         ),
         onAction = {}
@@ -265,5 +291,3 @@ private fun BookDetailsScreenErrorPreview() {
         onAction = {}
     )
 }
-
-// endregion

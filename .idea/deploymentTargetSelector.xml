@@ -17,6 +17,9 @@
       <SelectionState runConfigName="PReviewEmptyBookList">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="ProgressBookCoverShowcasePreview">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

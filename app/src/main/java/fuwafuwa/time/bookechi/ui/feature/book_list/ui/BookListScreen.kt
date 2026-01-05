@@ -144,6 +144,7 @@ private fun BooksList(
     onAction: (BookListAction) -> Unit,
 ) {
     LazyVerticalGrid(
+        modifier = Modifier.fillMaxSize(),
         columns = GridCells.Fixed(3),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.SpaceEvenly

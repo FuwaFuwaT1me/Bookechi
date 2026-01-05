@@ -1,46 +1,37 @@
 package fuwafuwa.time.bookechi.ui.feature.book_details.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import fuwafuwa.time.bookechi.base.ui.book.BookCoverShowcase
+import fuwafuwa.time.bookechi.base.ui.book.ProgressBookCoverShowcase
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsAction
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsState
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsViewModel
 import fuwafuwa.time.bookechi.ui.theme.BlackLight
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
-import fuwafuwa.time.bookechi.ui.theme.BlueMainDark
-import fuwafuwa.time.bookechi.ui.theme.SuperLightGray
 
 @Composable
 fun BookDetailsScreen(
@@ -134,19 +125,20 @@ private fun BookDetailsContent(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        BookCoverShowcase(
-            imageUri = book.coverPath?.toUri()
+        ProgressBookCoverShowcase(
+            book = book,
+            imageUri = book.coverPath?.toUri(),
+            progress = 1f * book.currentPage / book.pages,
+            circleSize = 360.dp,
+            coverHeight = 240.dp,
+            coverWidth = 168.dp,
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Book info
         BookInfoSection(book = book)
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        // Reading progress
-        ReadingProgressSection(book = book)
     }
 }
 
@@ -177,72 +169,6 @@ private fun BookInfoSection(
         )
     }
 }
-
-@Composable
-private fun ReadingProgressSection(
-    book: Book
-) {
-    val progress = if (book.pages > 0) {
-        1f * book.currentPage / book.pages
-    } else {
-        0f
-    }
-
-    val progressPercent = (progress * 100).toInt()
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                color = SuperLightGray,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .padding(20.dp)
-    ) {
-        Text(
-            text = "Reading Progress",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = BlackLight
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        LinearProgressIndicator(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)),
-            progress = { progress },
-            color = BlueMainDark,
-            trackColor = Color.White,
-            strokeCap = StrokeCap.Round,
-            drawStopIndicator = {}
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "$progressPercent% completed",
-                fontSize = 14.sp,
-                color = BlueMainDark,
-                fontWeight = FontWeight.Medium
-            )
-
-            Text(
-                text = "${book.currentPage} / ${book.pages} pages",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-        }
-    }
-}
-
-// region Previews
 
 @Preview(showBackground = true)
 @Composable

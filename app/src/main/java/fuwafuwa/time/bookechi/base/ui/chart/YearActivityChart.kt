@@ -171,6 +171,16 @@ private fun ZoomedYearChart(
  * 3. Сортируем сегменты так, чтобы конец одного совпадал с началом следующего
  * 4. Рисуем непрерывную линию
  */
+private data class GridPoint(
+    val col: Int,
+    val row: Int,
+)
+
+private data class GridSegment(
+    val start: GridPoint,
+    val end: GridPoint
+)
+
 private fun buildBoundaryPathInGaps(
     monthGrid: Array<IntArray>,
     columnsCount: Int,
@@ -181,33 +191,17 @@ private fun buildBoundaryPathInGaps(
     val step = cellSizePx + cellSpacingPx
     val halfSpacing = cellSpacingPx / 2
     
-    // Конвертирует точку сетки в пиксели
-    fun toPixel(col: Int, row: Int): Pair<Float, Float> {
-        return (col * step - halfSpacing) to (row * step - halfSpacing)
+    fun toPixel(point: GridPoint): Pair<Float, Float> {
+        return (point.col * step - halfSpacing) to (point.row * step - halfSpacing)
     }
 
     // Для каждой пары соседних месяцев
     for (month in 2..12) {
-        val prevMonth = month - 1
-        
-        // Собираем все сегменты границы
-        val segments = mutableListOf<Pair<Pair<Int, Int>, Pair<Int, Int>>>()
-        
-        for (row in 0 until 7) {
-            for (col in 0 until columnsCount) {
-                val current = monthGrid[row][col]
-                
-                // Вертикальный сегмент: новый месяц справа от старого
-                if (col > 0 && current == month && monthGrid[row][col - 1] == prevMonth) {
-                    segments.add((col to row) to (col to row + 1))
-                }
-                
-                // Горизонтальный сегмент: новый месяц под старым
-                if (row > 0 && current == month && monthGrid[row - 1][col] == prevMonth) {
-                    segments.add((col to row) to (col + 1 to row))
-                }
-            }
-        }
+        val segments = collectMonthBoundarySegments(
+            monthGrid = monthGrid,
+            columnsCount = columnsCount,
+            month = month,
+        )
         
         if (segments.isEmpty()) continue
         
@@ -217,10 +211,10 @@ private fun buildBoundaryPathInGaps(
         // Рисуем каждую цепочку
         for (chain in chains) {
             if (chain.size < 2) continue
-            val (x0, y0) = toPixel(chain[0].first, chain[0].second)
+            val (x0, y0) = toPixel(chain[0])
             path.moveTo(x0, y0)
             for (i in 1 until chain.size) {
-                val (x, y) = toPixel(chain[i].first, chain[i].second)
+                val (x, y) = toPixel(chain[i])
                 path.lineTo(x, y)
             }
         }
@@ -229,48 +223,107 @@ private fun buildBoundaryPathInGaps(
     return path
 }
 
+private fun collectMonthBoundarySegments(
+    monthGrid: Array<IntArray>,
+    columnsCount: Int,
+    month: Int
+): List<GridSegment> {
+    val prevMonth = month - 1
+    val segments = mutableListOf<GridSegment>()
+
+    for (row in 0 until 7) {
+        for (col in 0 until columnsCount) {
+            val current = monthGrid[row][col]
+
+            if (isVerticalBoundary(monthGrid, col, row, current, prevMonth)) {
+                segments.add(
+                    GridSegment(
+                        start = GridPoint(col, row),
+                        end = GridPoint(col, row + 1)
+                    )
+                )
+            }
+
+            if (isHorizontalBoundary(monthGrid, col, row, current, prevMonth)) {
+                segments.add(
+                    GridSegment(
+                        start = GridPoint(col, row),
+                        end = GridPoint(col + 1, row)
+                    )
+                )
+            }
+        }
+    }
+
+    return segments
+}
+
+private fun isVerticalBoundary(
+    monthGrid: Array<IntArray>,
+    col: Int,
+    row: Int,
+    currentMonth: Int,
+    prevMonth: Int
+): Boolean {
+    return col > 0 &&
+            currentMonth == prevMonth + 1 &&
+            monthGrid[row][col - 1] == prevMonth
+}
+
+private fun isHorizontalBoundary(
+    monthGrid: Array<IntArray>,
+    col: Int,
+    row: Int,
+    currentMonth: Int,
+    prevMonth: Int,
+): Boolean {
+    return row > 0 &&
+            currentMonth == prevMonth + 1 &&
+            monthGrid[row - 1][col] == prevMonth
+}
+
 /**
  * Соединяет сегменты в цепочки точек.
  * Если конец одного сегмента совпадает с началом другого — они соединяются.
  */
 private fun buildChains(
-    segments: List<Pair<Pair<Int, Int>, Pair<Int, Int>>>
-): List<List<Pair<Int, Int>>> {
+    segments: List<GridSegment>,
+): List<List<GridPoint>> {
     if (segments.isEmpty()) return emptyList()
     
     val remaining = segments.toMutableList()
-    val chains = mutableListOf<MutableList<Pair<Int, Int>>>()
-    
+    val chains = mutableListOf<MutableList<GridPoint>>()
+
     while (remaining.isNotEmpty()) {
         // Начинаем новую цепочку
-        val (start, end) = remaining.removeAt(0)
-        val chain = mutableListOf(start, end)
-        
+        val segment = remaining.removeAt(0)
+        val chain = mutableListOf(segment.start, segment.end)
+
         // Пытаемся продолжить цепочку
         var extended = true
         while (extended) {
             extended = false
-            
+
             // Ищем сегмент, начинающийся с конца цепочки
             val last = chain.last()
-            val nextIdx = remaining.indexOfFirst { it.first == last }
+            val nextIdx = remaining.indexOfFirst { it.start == last }
             if (nextIdx >= 0) {
-                chain.add(remaining[nextIdx].second)
+                chain.add(remaining[nextIdx].end)
                 remaining.removeAt(nextIdx)
                 extended = true
                 continue
             }
-            
+
             // Ищем сегмент, заканчивающийся в начале цепочки
             val first = chain.first()
-            val prevIdx = remaining.indexOfFirst { it.second == first }
+            val prevIdx = remaining.indexOfFirst { it.end == first }
             if (prevIdx >= 0) {
-                chain.add(0, remaining[prevIdx].first)
+                chain.add(0, remaining[prevIdx].start)
                 remaining.removeAt(prevIdx)
                 extended = true
             }
         }
-        
+
         chains.add(chain)
     }
     

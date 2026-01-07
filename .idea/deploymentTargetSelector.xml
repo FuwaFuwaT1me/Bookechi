@@ -5,19 +5,19 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="AddBookScreenPreview">
+      <SelectionState runConfigName="MonthQuadActivityChartPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="SimpleTextFieldPreview">
+      <SelectionState runConfigName="YearQuadActivityChartPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="BookListScreenPreview">
+      <SelectionState runConfigName="ZoomedYearChartPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="PReviewEmptyBookList">
+      <SelectionState runConfigName="YearChartGitHubStylePreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="ProgressBookCoverShowcasePreview">
+      <SelectionState runConfigName="MonthChartPreview">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

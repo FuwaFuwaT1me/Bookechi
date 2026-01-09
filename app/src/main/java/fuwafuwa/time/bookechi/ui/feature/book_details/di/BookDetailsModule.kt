@@ -22,3 +22,4 @@ val bookDetailsModule = module {
     }
 }
 
+

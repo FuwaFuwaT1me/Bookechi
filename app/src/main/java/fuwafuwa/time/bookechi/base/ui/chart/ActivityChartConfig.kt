@@ -26,3 +26,4 @@ enum class SeparatorStyle {
     Dashed,
     Dotted
 }
+

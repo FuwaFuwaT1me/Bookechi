@@ -8,3 +8,4 @@ data class ChartCellData(
     val intensity: ActivityIntensity = ActivityIntensity.NONE,
     val pagesRead: Int = 0
 )
+

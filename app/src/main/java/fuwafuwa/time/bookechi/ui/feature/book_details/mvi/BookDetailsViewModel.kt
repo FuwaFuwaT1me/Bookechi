@@ -6,3 +6,4 @@ class BookDetailsViewModel(
     override val model: BookDetailsModel
 ) : BaseViewModel<BookDetailsAction, BookDetailsState>()
 
+

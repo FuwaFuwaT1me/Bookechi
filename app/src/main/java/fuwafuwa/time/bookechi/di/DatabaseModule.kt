@@ -4,6 +4,7 @@ import fuwafuwa.time.bookechi.data.local.AppDatabase
 import fuwafuwa.time.bookechi.data.local.BookDao
 import fuwafuwa.time.bookechi.data.local.DatabaseHelper
 import fuwafuwa.time.bookechi.data.local.ReadingSessionDao
+import fuwafuwa.time.bookechi.data.preferences.AppPreferences
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import org.koin.android.ext.koin.androidContext
@@ -36,5 +37,9 @@ val databaseModule = module {
         ReadingSessionRepository(
             readingSessionDao = get<ReadingSessionDao>()
         )
+    }
+    
+    single {
+        AppPreferences(androidContext())
     }
 }

@@ -40,6 +40,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
+import fuwafuwa.time.bookechi.base.ui.chart.ActivityColorScheme
+import fuwafuwa.time.bookechi.base.ui.chart.YearQuadActivityChart
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.reading_stats.mvi.ReadingStatsState
 import fuwafuwa.time.bookechi.ui.feature.reading_stats.mvi.ReadingStatsViewModel
@@ -136,6 +139,11 @@ private fun ReadingStatsScreenContent(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
+                // Year Activity Chart Section
+                YearActivitySection(state)
+
+                Spacer(modifier = Modifier.height(24.dp))
+
                 // Monthly Activity Section
                 MonthlyActivitySection(state)
 
@@ -203,6 +211,105 @@ private fun StatCard(
 }
 
 @Composable
+private fun YearActivitySection(state: ReadingStatsState) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "📅 ${state.currentYear} Activity",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF1E293B)
+                )
+                
+                // Legend
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Less",
+                        fontSize = 10.sp,
+                        color = Color(0xFF94A3B8)
+                    )
+                    LegendSquare(color = Color(0xFFEBEDF0))
+                    LegendSquare(color = Color(0xFF9BE9A8))
+                    LegendSquare(color = Color(0xFF40C463))
+                    LegendSquare(color = Color(0xFF30A14E))
+                    LegendSquare(color = Color(0xFF216E39))
+                    Text(
+                        text = "More",
+                        fontSize = 10.sp,
+                        color = Color(0xFF94A3B8)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            YearQuadActivityChart(
+                year = state.currentYear,
+                readingData = state.yearlyReadingData,
+                config = ActivityChartConfig(
+                    zoomMode = true,
+                    showPadding = true,
+                    showMonthSeparators = true,
+                    zoomedItemSize = 14.dp,
+                    cellSpacing = 3.dp,
+                    cornerRadius = 3.dp,
+                    colorScheme = ActivityColorScheme.Activity,
+                    monthSeparatorColor = Color(0xFF94A3B8).copy(alpha = 0.4f),
+                    separatorWidth = 1.dp
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            val totalDaysRead = state.yearlyReadingData.count { it.value > 0 }
+            val totalPagesThisYear = state.yearlyReadingData.values.sum()
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "$totalDaysRead days of reading",
+                    fontSize = 12.sp,
+                    color = Color(0xFF64748B)
+                )
+                Text(
+                    text = "${formatNumber(totalPagesThisYear)} pages this year",
+                    fontSize = 12.sp,
+                    color = Color(0xFF64748B)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LegendSquare(color: Color) {
+    Box(
+        modifier = Modifier
+            .size(10.dp)
+            .clip(RoundedCornerShape(2.dp))
+            .background(color)
+    )
+}
+
+@Composable
 private fun MonthlyActivitySection(state: ReadingStatsState) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -214,7 +321,7 @@ private fun MonthlyActivitySection(state: ReadingStatsState) {
             modifier = Modifier.padding(20.dp)
         ) {
             Text(
-                text = "This Month's Activity",
+                text = "📈 This Month's Activity",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color(0xFF1E293B)
@@ -329,7 +436,20 @@ private fun ReadingStatsScreenPreview() {
             totalBooksRead = 12,
             totalPagesRead = 4523,
             currentStreak = 7,
-            averagePagesPerDay = 23.5f
+            averagePagesPerDay = 23.5f,
+            currentYear = 2026,
+            yearlyReadingData = mapOf(
+                "2026-01-05" to 15,
+                "2026-01-10" to 25,
+                "2026-01-15" to 40,
+                "2026-01-20" to 30,
+                "2026-01-25" to 55,
+                "2026-02-03" to 20,
+                "2026-02-10" to 35,
+                "2026-02-20" to 45,
+                "2026-03-05" to 25,
+                "2026-03-10" to 60
+            )
         )
     )
 }

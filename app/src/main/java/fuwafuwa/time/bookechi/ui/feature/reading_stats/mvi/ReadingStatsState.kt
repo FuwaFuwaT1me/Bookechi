@@ -13,6 +13,8 @@ data class ReadingStatsState(
     val averagePagesPerDay: Float = 0f,
     val thisMonthStats: List<DailyReadingStats> = emptyList(),
     val selectedPeriod: StatsPeriod = StatsPeriod.THIS_MONTH,
+    val currentYear: Int = LocalDate.now().year,
+    val yearlyReadingData: Map<String, Int> = emptyMap(),
     val error: String? = null
 ) : State
 
@@ -22,4 +24,3 @@ enum class StatsPeriod {
     THIS_YEAR,
     ALL_TIME
 }
-

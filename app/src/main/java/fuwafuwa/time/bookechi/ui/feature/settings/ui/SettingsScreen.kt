@@ -1,6 +1,7 @@
 package fuwafuwa.time.bookechi.ui.feature.settings.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,20 +19,26 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -49,8 +56,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fuwafuwa.time.bookechi.data.preferences.BookListViewType
 import fuwafuwa.time.bookechi.mvi.ui.Screen
-import fuwafuwa.time.bookechi.ui.feature.settings.mvi.AppLanguage
 import fuwafuwa.time.bookechi.ui.feature.settings.mvi.SettingsAction
 import fuwafuwa.time.bookechi.ui.feature.settings.mvi.SettingsState
 import fuwafuwa.time.bookechi.ui.feature.settings.mvi.SettingsViewModel
@@ -135,6 +142,44 @@ private fun SettingsScreenContent(
                     CircularProgressIndicator(color = BlueMain)
                 }
             } else {
+                // Design Section
+                SettingsSection(title = "🎨 Design") {
+                    SettingsToggleItem(
+                        icon = Icons.Filled.Palette,
+                        iconColor = Color(0xFF8B5CF6),
+                        title = "Modern Design",
+                        subtitle = if (state.useModernDesign) "Using new design" else "Using classic design",
+                        isChecked = state.useModernDesign,
+                        onCheckedChange = { onAction(SettingsAction.SetUseModernDesign(it)) }
+                    )
+                    
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 56.dp),
+                        color = Color(0xFFE2E8F0)
+                    )
+                    
+                    // View Type Selector
+                    ViewTypeSelector(
+                        currentViewType = state.bookListViewType,
+                        onViewTypeChange = { onAction(SettingsAction.SetBookListViewType(it)) }
+                    )
+                    
+                    // Grid Columns Selector (only shown when grid view is selected)
+                    if (state.bookListViewType == BookListViewType.GRID) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 56.dp),
+                            color = Color(0xFFE2E8F0)
+                        )
+                        
+                        GridColumnsSelector(
+                            currentColumns = state.gridColumns,
+                            onColumnsChange = { onAction(SettingsAction.SetGridColumns(it)) }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // Appearance Section
                 SettingsSection(title = "Appearance") {
                     SettingsToggleItem(
@@ -268,6 +313,195 @@ private fun SettingsScreenContent(
                     }
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun ViewTypeSelector(
+    currentViewType: BookListViewType,
+    onViewTypeChange: (BookListViewType) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0xFF3B82F6).copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.GridView,
+                contentDescription = null,
+                tint = Color(0xFF3B82F6),
+                modifier = Modifier.size(22.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Book List View",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF1E293B)
+            )
+            Text(
+                text = "Choose how books are displayed",
+                fontSize = 13.sp,
+                color = Color(0xFF94A3B8)
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ViewTypeChip(
+                    icon = Icons.Filled.ViewList,
+                    label = "List",
+                    isSelected = currentViewType == BookListViewType.LIST,
+                    onClick = { onViewTypeChange(BookListViewType.LIST) }
+                )
+                ViewTypeChip(
+                    icon = Icons.Filled.GridView,
+                    label = "Grid",
+                    isSelected = currentViewType == BookListViewType.GRID,
+                    onClick = { onViewTypeChange(BookListViewType.GRID) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ViewTypeChip(
+    icon: ImageVector,
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(
+                if (isSelected) BlueMain else Color.Transparent
+            )
+            .border(
+                width = 1.dp,
+                color = if (isSelected) BlueMain else Color(0xFFE2E8F0),
+                shape = RoundedCornerShape(10.dp)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isSelected) Color.White else Color(0xFF64748B),
+                modifier = Modifier.size(18.dp)
+            )
+            Text(
+                text = label,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (isSelected) Color.White else Color(0xFF64748B)
+            )
+        }
+    }
+}
+
+@Composable
+private fun GridColumnsSelector(
+    currentColumns: Int,
+    onColumnsChange: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0xFF10B981).copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "$currentColumns",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF10B981)
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Grid Columns",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF1E293B)
+            )
+            Text(
+                text = "Books per row: $currentColumns",
+                fontSize = 13.sp,
+                color = Color(0xFF94A3B8)
+            )
+        }
+        
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = { onColumnsChange(currentColumns - 1) },
+                enabled = currentColumns > 2,
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (currentColumns > 2) Color(0xFFF1F5F9) else Color(0xFFF8FAFC)
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Remove,
+                    contentDescription = "Decrease",
+                    tint = if (currentColumns > 2) Color(0xFF64748B) else Color(0xFFCBD5E1),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            
+            IconButton(
+                onClick = { onColumnsChange(currentColumns + 1) },
+                enabled = currentColumns < 5,
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (currentColumns < 5) Color(0xFFF1F5F9) else Color(0xFFF8FAFC)
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Increase",
+                    tint = if (currentColumns < 5) Color(0xFF64748B) else Color(0xFFCBD5E1),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
@@ -468,8 +702,23 @@ private fun SettingsScreenPreview() {
         state = SettingsState(
             totalBooks = 15,
             isDarkMode = false,
-            notificationsEnabled = true
+            notificationsEnabled = true,
+            useModernDesign = true,
+            bookListViewType = BookListViewType.LIST,
+            gridColumns = 3
         )
     )
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun SettingsScreenGridPreview() {
+    SettingsScreenContent(
+        state = SettingsState(
+            totalBooks = 15,
+            useModernDesign = true,
+            bookListViewType = BookListViewType.GRID,
+            gridColumns = 4
+        )
+    )
+}

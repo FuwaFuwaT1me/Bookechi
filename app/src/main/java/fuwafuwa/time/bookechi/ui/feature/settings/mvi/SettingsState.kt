@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.settings.mvi
 
+import fuwafuwa.time.bookechi.data.preferences.BookListViewType
 import fuwafuwa.time.bookechi.mvi.api.State
 
 data class SettingsState(
@@ -12,6 +13,10 @@ data class SettingsState(
     val totalBooks: Int = 0,
     val totalReadingSessions: Int = 0,
     val showClearDataDialog: Boolean = false,
+    // Design preferences
+    val useModernDesign: Boolean = true,
+    val bookListViewType: BookListViewType = BookListViewType.LIST,
+    val gridColumns: Int = 3,
     val error: String? = null
 ) : State
 
@@ -20,4 +25,3 @@ enum class AppLanguage(val displayName: String, val code: String) {
     RUSSIAN("Русский", "ru"),
     JAPANESE("日本語", "ja")
 }
-

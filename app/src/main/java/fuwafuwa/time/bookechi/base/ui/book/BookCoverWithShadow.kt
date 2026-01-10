@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,6 +34,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -45,6 +48,7 @@ import androidx.core.net.toUri
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
 import fuwafuwa.time.bookechi.ui.theme.SuperLightGray
+import kotlin.math.asin
 
 @Composable
 fun BookCoverShowcase(
@@ -111,10 +115,9 @@ fun ProgressBookCoverShowcase(
     onContainerClick: (() -> Unit)? = null,
     onCoverClick: (() -> Unit)? = null,
     onCoverLongTap: (() -> Unit)? = null,
+    onAddPageClick: (() -> Unit)? = null,
 ) {
-    var animationPlayed by remember {
-        mutableStateOf(false)
-    }
+    var animationPlayed by remember { mutableStateOf(false) }
 
     val animatedProgress by animateFloatAsState(
         targetValue = if (animationPlayed) progress else 0f,
@@ -123,11 +126,44 @@ fun ProgressBookCoverShowcase(
             delay = 300,
             easing = FastOutSlowInEasing
         ),
+        label = "progress"
     )
 
     LaunchedEffect(true) {
         animationPlayed = true
     }
+
+    val density = LocalDensity.current
+    val circleSizePx = with(density) { circleSize.toPx() }
+    val arcStrokeWidth = 2.dp * (circleSize / 200.dp)
+    val arcStrokeWidthPx = with(density) { arcStrokeWidth.toPx() }
+    
+    // Радиус арки (с учётом толщины линии)
+    val arcRadius = (circleSizePx - arcStrokeWidthPx * 2) / 2f
+    
+    // Ширина бейджа измеряется динамически
+    var badgeWidthPx by remember { mutableFloatStateOf(0f) }
+    
+    // Рассчитываем угол на основе ширины бейджа
+    // Формула: угол = 2 * arcsin(ширина / (2 * радиус))
+    // Добавляем небольшой отступ для красоты
+    val gapPadding = with(density) { 6.dp.toPx() }
+    val totalBadgeWidth = badgeWidthPx + gapPadding * 2
+    
+    val gapAngleDegrees = remember(badgeWidthPx, arcRadius) {
+        if (arcRadius > 0 && badgeWidthPx > 0) {
+            // Ограничиваем значение для arcsin в диапазоне [-1, 1]
+            val sinValue = (totalBadgeWidth / 2f / arcRadius).coerceIn(-1f, 1f)
+            val halfAngleRad = asin(sinValue)
+            val fullAngleDeg = Math.toDegrees(halfAngleRad.toDouble()).toFloat() * 2f
+            fullAngleDeg
+        } else {
+            44f // Дефолтное значение пока не измерили
+        }
+    }
+    
+    val startGapAngleDegrees = -90f + (gapAngleDegrees / 2f)
+    val maxSweepAngle = 360f - gapAngleDegrees
 
     val topPadding = 12.dp * (circleSize / 200.dp)
 
@@ -149,10 +185,6 @@ fun ProgressBookCoverShowcase(
         )
 
         Box {
-            val startGapAngleDegrees = -90f + 22f
-            val maxSweepAngle = 320f
-            val arcStrokeWidth = 2.dp * (circleSize / 200.dp)
-
             Canvas(
                 modifier = modifier
                     .size(circleSize)
@@ -185,6 +217,9 @@ fun ProgressBookCoverShowcase(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .offset(y = badgeOffsetY)
+                    .onGloballyPositioned { coordinates ->
+                        badgeWidthPx = coordinates.size.width.toFloat()
+                    }
             ) {
                 Text(
                     modifier = Modifier
@@ -229,7 +264,7 @@ fun ProgressBookCoverShowcase(
                             .size(buttonInnerSize)
                             .clip(CircleShape)
                             .background(color = BlueMain)
-                            .clickable { },
+                            .clickable { onAddPageClick?.invoke() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -317,6 +352,23 @@ private fun ProgressBookCoverShowcasePreview() {
 
 @Preview(showBackground = true)
 @Composable
+private fun ProgressBookCoverShowcaseSmallNumbersPreview() {
+    ProgressBookCoverShowcase(
+        book = Book(
+            id = 0,
+            name = "asdf",
+            author = "sadf",
+            coverPath = null,
+            currentPage = 12,
+            pages = 48
+        ),
+        imageUri = null,
+        progress = 0.25f
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
 private fun BookCoverWithShadowPreview() {
     BookCoverWithShadow(
         imageUri = "".toUri(),
@@ -335,6 +387,28 @@ private fun ProgressBookCoverShowcaseLargePreview() {
         coverPath = null,
         currentPage = 256,
         pages = 1024
+    )
+
+    ProgressBookCoverShowcase(
+        book = book,
+        imageUri = book.coverPath?.toUri(),
+        progress = 1f * book.currentPage / book.pages,
+        circleSize = 360.dp,
+        coverHeight = 240.dp,
+        coverWidth = 168.dp,
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ProgressBookCoverShowcaseLargeSmallNumbersPreview() {
+    val book = Book(
+        id = 0,
+        name = "asdf",
+        author = "sadf",
+        coverPath = null,
+        currentPage = 5,
+        pages = 20
     )
 
     ProgressBookCoverShowcase(

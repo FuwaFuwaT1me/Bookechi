@@ -36,11 +36,18 @@ class ReadingStatsModel(
                 val totalPagesRead = books.sumOf { it.currentPage }
 
                 val today = LocalDate.now()
+                val currentYear = today.year
                 val yearMonth = YearMonth.now()
+                
+                // Load monthly stats
                 val monthStats = readingSessionRepository.getDailyStatsForMonth(
                     yearMonth.year,
                     yearMonth.monthValue
                 ).first()
+
+                // Load yearly stats for the activity chart
+                val yearStats = readingSessionRepository.getDailyStatsForYear(currentYear).first()
+                val yearlyReadingData = yearStats.associate { it.date to it.totalPagesRead }
 
                 val streak = calculateCurrentStreak(monthStats.map { LocalDate.parse(it.date) })
                 val avgPages = if (monthStats.isNotEmpty()) {
@@ -55,6 +62,8 @@ class ReadingStatsModel(
                         currentStreak = streak,
                         averagePagesPerDay = avgPages,
                         thisMonthStats = monthStats,
+                        currentYear = currentYear,
+                        yearlyReadingData = yearlyReadingData,
                         error = null
                     )
                 }
@@ -95,4 +104,3 @@ class ReadingStatsModel(
         return streak
     }
 }
-

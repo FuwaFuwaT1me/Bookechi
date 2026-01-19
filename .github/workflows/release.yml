@@ -1,0 +1,103 @@
+name: 🚀 Auto Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    name: Build APK & Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: ☕ Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+      
+      - name: 🔧 Grant execute permission for gradlew
+        run: chmod +x gradlew
+      
+      - name: 🔨 Build Release APK
+        run: ./gradlew assembleRelease --no-daemon
+      
+      - name: 🏷️ Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+      - name: 📝 Generate Changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREV_TAG" ]; then
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges -20)
+          else
+            CHANGELOG=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          fi
+          
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          
+          echo "## 🚀 What's New in ${VERSION}" > release_notes.md
+          echo "" >> release_notes.md
+          
+          FEATURES=$(echo "$CHANGELOG" | grep -iE "^- (feat|add|new)" || true)
+          if [ -n "$FEATURES" ]; then
+            echo "### ✨ New Features" >> release_notes.md
+            echo "$FEATURES" >> release_notes.md
+            echo "" >> release_notes.md
+          fi
+          
+          FIXES=$(echo "$CHANGELOG" | grep -iE "^- (fix|bug|patch)" || true)
+          if [ -n "$FIXES" ]; then
+            echo "### 🐛 Bug Fixes" >> release_notes.md
+            echo "$FIXES" >> release_notes.md
+            echo "" >> release_notes.md
+          fi
+          
+          OTHER=$(echo "$CHANGELOG" | grep -viE "^- (feat|add|new|fix|bug|patch)" || true)
+          if [ -n "$OTHER" ]; then
+            echo "### 📦 Other Changes" >> release_notes.md
+            echo "$OTHER" >> release_notes.md
+          fi
+          
+          echo "" >> release_notes.md
+          echo "---" >> release_notes.md
+          echo "_Built automatically by GitHub Actions_ 🤖" >> release_notes.md
+          
+          echo "=== Generated Release Notes ==="
+          cat release_notes.md
+      
+      - name: 📱 Find APK
+        id: find_apk
+        run: |
+          APK_PATH=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
+          echo "APK_PATH=$APK_PATH" >> $GITHUB_OUTPUT
+          echo "Found APK: $APK_PATH"
+      
+      - name: 🏷️ Rename APK with version
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          APK_PATH=${{ steps.find_apk.outputs.APK_PATH }}
+          cp "$APK_PATH" "Bookechi-${VERSION}.apk"
+          echo "APK_NAME=Bookechi-${VERSION}.apk" >> $GITHUB_ENV
+          ls -la *.apk
+      
+      - name: 🎉 Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "📚 Bookechi ${{ steps.get_version.outputs.VERSION }}"
+          body_path: release_notes.md
+          files: ${{ env.APK_NAME }}
+          draft: false
+          prerelease: ${{ contains(steps.get_version.outputs.VERSION, 'alpha') || contains(steps.get_version.outputs.VERSION, 'beta') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

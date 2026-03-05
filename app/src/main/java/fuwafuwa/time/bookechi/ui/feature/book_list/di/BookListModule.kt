@@ -17,6 +17,7 @@ val bookListModule = module {
     factory {
         BookListState(
             books = emptyList(),
+            gridColumnCount = 1,
             isLoading = false,
             error = null
         )

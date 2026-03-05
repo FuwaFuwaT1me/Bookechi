@@ -660,7 +660,8 @@ private fun BookItemGridView(
 private fun BookListScreenV2ListPreview() {
     BookListScreenV2Content(
         state = BookListState(
-            books = sampleBooks
+            books = sampleBooks,
+            gridColumnCount = 1
         ),
         designPrefs = DesignPreferences(
             bookListViewType = BookListViewType.LIST
@@ -674,7 +675,8 @@ private fun BookListScreenV2ListPreview() {
 private fun BookListScreenV2GridPreview() {
     BookListScreenV2Content(
         state = BookListState(
-            books = sampleBooks
+            books = sampleBooks,
+            gridColumnCount = 1
         ),
         designPrefs = DesignPreferences(
             bookListViewType = BookListViewType.GRID,
@@ -688,7 +690,7 @@ private fun BookListScreenV2GridPreview() {
 @Composable
 private fun BookListScreenV2EmptyPreview() {
     BookListScreenV2Content(
-        state = BookListState(books = emptyList()),
+        state = BookListState(books = emptyList(), gridColumnCount = 1),
         designPrefs = DesignPreferences(),
         onAction = {}
     )

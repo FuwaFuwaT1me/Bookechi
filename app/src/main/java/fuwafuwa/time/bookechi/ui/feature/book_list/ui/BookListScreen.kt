@@ -3,8 +3,10 @@ package fuwafuwa.time.bookechi.ui.feature.book_list.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -32,6 +34,8 @@ import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListAction
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListState
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListViewModel
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
+import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
+import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -110,7 +114,7 @@ private fun ScreenState(
 
         else -> {
             BooksList(
-                books = state.books,
+                state = state,
                 onAction = onAction,
             )
         }
@@ -119,7 +123,7 @@ private fun ScreenState(
 
 @Composable
 private fun Header() {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
@@ -127,12 +131,23 @@ private fun Header() {
     ) {
         Text(
             modifier = Modifier
-                .align(Alignment.Center)
+                .align(Alignment.Start)
             ,
-            textAlign = TextAlign.Center,
-            text = "All books",
-            fontSize = 24.sp,
-            color = BlueMain,
+            text = "Доброе утро, Иван!",
+            fontSize = 16.sp,
+            color = FigmaSubtitle,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            modifier = Modifier
+                .align(Alignment.Start)
+            ,
+            text = "Ты уже читал сегодня?",
+            fontSize = 30.sp,
+            color = FigmaTitle,
             fontWeight = FontWeight.Bold
         )
     }
@@ -140,29 +155,41 @@ private fun Header() {
 
 @Composable
 private fun BooksList(
-    books: List<Book>,
+    state: BookListState,
     onAction: (BookListAction) -> Unit,
 ) {
-    LazyVerticalGrid(
-        modifier = Modifier.fillMaxSize(),
-        columns = GridCells.Fixed(3),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        items(books, key = { it.id }) { book ->
-            NewBookItem(
-                modifier = Modifier.animateItem(
-                    fadeInSpec = null,
-                    fadeOutSpec = null
-                ),
-                book = book,
-                onClick = {
-                    onAction(BookListAction.NavigateToBookDetails(book))
-                },
-                onDeleteBookClick = {
-                    onAction(BookListAction.DeleteBook(book))
-                }
-            )
+    Column {
+
+        Text(
+            text = "Сейчас читаете",
+            color = FigmaTitle,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LazyVerticalGrid(
+            modifier = Modifier.fillMaxSize(),
+            columns = GridCells.Fixed(state.gridColumnCount),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            items(state.books, key = { it.id }) { book ->
+                NewBookItem(
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = null,
+                        fadeOutSpec = null
+                    ),
+                    book = book,
+                    onClick = {
+                        onAction(BookListAction.NavigateToBookDetails(book))
+                    },
+                    onDeleteBookClick = {
+                        onAction(BookListAction.DeleteBook(book))
+                    }
+                )
+            }
         }
     }
 }
@@ -173,11 +200,13 @@ private fun BookListScreenPreview() {
     BookListScreenPrivate(
         state = BookListState(
             isLoading = false,
+            gridColumnCount = 1,
             error = null,
             books = buildList {
                 repeat(10) {
                     add(
                         Book(
+                            id = it.toLong(),
                             name = "Book 1",
                             author = "Author 1",
                             coverPath = "https://picsum.photos/200/300",

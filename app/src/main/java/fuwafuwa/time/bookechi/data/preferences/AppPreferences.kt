@@ -6,20 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * Настройки дизайна приложения
- */
-data class DesignPreferences(
-    val useModernDesign: Boolean = true,
-    val bookListViewType: BookListViewType = BookListViewType.LIST,
-    val gridColumns: Int = 3
-)
-
-enum class BookListViewType {
-    LIST,
-    GRID
-}
-
 class AppPreferences(context: Context) {
     
     private val prefs: SharedPreferences = context.getSharedPreferences(

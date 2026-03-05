@@ -145,7 +145,7 @@ fun NewBookItem(
 
     Card(
         modifier = modifier
-            .height(215.dp)
+            .height(160.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(FigmaBackgroundStroke)
             .padding(1.dp)

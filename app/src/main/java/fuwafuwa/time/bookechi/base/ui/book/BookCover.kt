@@ -9,6 +9,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -19,6 +20,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.util.optionalDetectTapGestures
+import fuwafuwa.time.bookechi.ui.theme.FigmaBookCover
 
 @Composable
 fun BookCover(
@@ -54,6 +56,31 @@ fun BookCover(
             .build(),
         placeholder = painterResource(R.drawable.book_sample_cover),
         error = painterResource(R.drawable.book_sample_cover),
+        contentDescription = "Выбранное изображение",
+        contentScale = ContentScale.FillBounds,
+    )
+}
+
+@Composable
+fun NewBookCover(
+    imageUri: Uri?,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    onLongTap: (() -> Unit)? = null,
+) {
+    val context = LocalContext.current
+
+    AsyncImage(
+        modifier = modifier
+            .aspectRatio(0.7f)
+            .clip(RoundedCornerShape(8.dp))
+            .optionalDetectTapGestures(onClick, onLongTap)
+        ,
+        model = ImageRequest.Builder(context)
+            .data(imageUri)
+            .build(),
+        placeholder = ColorPainter(FigmaBookCover),
+        error = ColorPainter(FigmaBookCover),
         contentDescription = "Выбранное изображение",
         contentScale = ContentScale.FillBounds,
     )

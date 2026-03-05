@@ -16,3 +16,13 @@ val BlueMainDark = Color(0xFF1E6FB9)
 
 val BlackLight = Color(0xFF464646)
 val BlackLight2 = Color(0xFF121212)
+
+//----
+
+val FigmaBackground = Color(0xFFF6EEEB)
+val FigmaBackgroundStroke = Color(0xFFE7DBD5)
+val FigmaGrey = Color(0xFF2F1909)
+val FigmaLightGrey = Color(0xFFD6C6C4)
+val FigmaTitle = Color(0xFF2F1909)
+val FigmaSubtitle = Color(0xFF937D75)
+val FigmaBookCover = Color(0xFF8C7770)

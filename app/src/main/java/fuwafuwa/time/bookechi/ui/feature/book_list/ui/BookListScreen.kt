@@ -150,7 +150,7 @@ private fun BooksList(
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         items(books, key = { it.id }) { book ->
-            BookItem(
+            NewBookItem(
                 modifier = Modifier.animateItem(
                     fadeInSpec = null,
                     fadeOutSpec = null
@@ -169,7 +169,7 @@ private fun BooksList(
 
 @Preview(showBackground = true)
 @Composable
-fun BookListScreenPreview() {
+private fun BookListScreenPreview() {
     BookListScreenPrivate(
         state = BookListState(
             isLoading = false,

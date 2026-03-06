@@ -1,4 +1,4 @@
-package fuwafuwa.time.bookechi.base.ui.chart
+package fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +16,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
+import fuwafuwa.time.bookechi.base.ui.chart.ActivityColorScheme
+import fuwafuwa.time.bookechi.base.ui.chart.ChartCellData
 import fuwafuwa.time.bookechi.data.model.ActivityIntensity
 
 @Composable
@@ -85,4 +88,3 @@ private fun ColorSchemesPreview() {
         }
     }
 }
-

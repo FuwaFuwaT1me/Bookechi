@@ -64,7 +64,7 @@ private fun BookListScreenPrivate(
             .fillMaxSize()
     ) {
         Column {
-            Header()
+            Header(state)
 
             ScreenState(
                 state = state,
@@ -122,7 +122,7 @@ private fun ScreenState(
 }
 
 @Composable
-private fun Header() {
+private fun Header(state: BookListState) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,6 +150,10 @@ private fun Header() {
             color = FigmaTitle,
             fontWeight = FontWeight.Bold
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        StreakPanel(state)
     }
 }
 

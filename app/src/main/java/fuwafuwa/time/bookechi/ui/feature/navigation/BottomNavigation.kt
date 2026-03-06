@@ -16,45 +16,46 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
+import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityScreen
 import fuwafuwa.time.bookechi.ui.feature.reading_goals.ui.ReadingGoalsScreenRoute
 import fuwafuwa.time.bookechi.ui.feature.reading_stats.ui.ReadingStatsScreenRoute
 import fuwafuwa.time.bookechi.ui.feature.settings.ui.SettingsScreenRoute
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
+import fuwafuwa.time.bookechi.ui.theme.FigmaBottomNavSelectedTab
+import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
+import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 
 data class BottomNavItem(
     val label: String,
-    val icon: ImageVector,
+    val resId: Int,
     val route: Screen,
 )
 
 val BottomNavItems = listOf(
     BottomNavItem(
-        label = "Bookshelf",
-        icon = Icons.AutoMirrored.Filled.MenuBook,
+        label = "Активность",
+        resId = R.drawable.feather,
         route = BookListScreen
     ),
     BottomNavItem(
-        label = "Stats",
-        icon = Icons.Filled.BarChart,
-        route = ReadingStatsScreenRoute
+        label = "Продуктивность",
+        resId = R.drawable.bar_chart,
+        route = ProductivityScreen
     ),
     BottomNavItem(
-        label = "Goals",
-        icon = Icons.Filled.EmojiEvents,
-        route = ReadingGoalsScreenRoute
-    ),
-    BottomNavItem(
-        label = "Settings",
-        icon = Icons.Filled.Settings,
-        route = SettingsScreenRoute
+        label = "Библиотека",
+        resId = R.drawable.book_open,
+        route = ProductivityScreen
     ),
 )
 
@@ -84,7 +85,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                                 if (isSelected) 32.dp else 24.dp
                             )
                         ,
-                        imageVector = navItem.icon,
+                        painter = painterResource(navItem.resId),
                         contentDescription = navItem.label,
                     )
                 },
@@ -96,10 +97,10 @@ fun BottomNavigationBar(navController: NavHostController) {
                 },
                 alwaysShowLabel = true,
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = BlueMain,
-                    selectedTextColor = BlueMain,
-                    unselectedIconColor = Color.LightGray,
-                    unselectedTextColor = Color.LightGray,
+                    selectedIconColor = FigmaBottomNavSelectedTab,
+                    selectedTextColor = FigmaTitle,
+                    unselectedIconColor = FigmaSubtitle,
+                    unselectedTextColor = FigmaSubtitle,
                     indicatorColor = Color.Transparent,
                 )
             )

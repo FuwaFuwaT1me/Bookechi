@@ -27,6 +27,7 @@ import fuwafuwa.time.bookechi.base.time.Date
 import fuwafuwa.time.bookechi.base.time.getDaysInYear
 import fuwafuwa.time.bookechi.base.time.getWeeksInYear
 import fuwafuwa.time.bookechi.data.model.getRelativeActivityIntensity
+import fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart.ActivityChartCell
 
 @Composable
 fun YearQuadActivityChart(

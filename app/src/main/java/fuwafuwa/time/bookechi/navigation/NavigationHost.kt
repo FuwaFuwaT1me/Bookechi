@@ -8,11 +8,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.addBookNavRoot
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.bookDetailsNavRoot
-import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.bookListNavRoot
-import fuwafuwa.time.bookechi.ui.feature.reading_goals.mvi.readingGoalsNavRoot
-import fuwafuwa.time.bookechi.ui.feature.reading_stats.mvi.readingStatsNavRoot
-import fuwafuwa.time.bookechi.ui.feature.settings.mvi.settingsNavRoot
+import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
+import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.productivityNavRoot
 
 @Composable
 fun NavigationHost(
@@ -27,9 +25,8 @@ fun NavigationHost(
         bookListScenario(navController)
         addBookScenario(navController)
         bookDetailsScenario(navController)
-        readingStatsScenario(navController)
-        readingGoalsScenario(navController)
-        settingsScenario(navController)
+
+        productivityScenario(navController)
     }
 }
 
@@ -45,14 +42,6 @@ private fun NavGraphBuilder.bookDetailsScenario(navController: NavController) {
     bookDetailsNavRoot(navController)
 }
 
-private fun NavGraphBuilder.readingStatsScenario(navController: NavController) {
-    readingStatsNavRoot(navController)
-}
-
-private fun NavGraphBuilder.readingGoalsScenario(navController: NavController) {
-    readingGoalsNavRoot(navController)
-}
-
-private fun NavGraphBuilder.settingsScenario(navController: NavController) {
-    settingsNavRoot(navController)
+private fun NavGraphBuilder.productivityScenario(navController: NavController) {
+    productivityNavRoot(navController)
 }

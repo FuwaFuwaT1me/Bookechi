@@ -1,13 +1,11 @@
-package fuwafuwa.time.bookechi.base.ui.chart
+package fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -16,10 +14,13 @@ import androidx.compose.ui.unit.dp
 import fuwafuwa.time.bookechi.base.time.Date
 import fuwafuwa.time.bookechi.base.time.getDaysInMonth
 import fuwafuwa.time.bookechi.base.time.getWeeksInMonth
+import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
+import fuwafuwa.time.bookechi.base.ui.chart.ActivityColorScheme
+import fuwafuwa.time.bookechi.base.ui.chart.ChartCellData
 import fuwafuwa.time.bookechi.data.model.getRelativeActivityIntensity
 
 @Composable
-fun MonthQuadActivityChart(
+fun MonthActivityChart(
     year: Int,
     month: Int,
     modifier: Modifier = Modifier,
@@ -33,25 +34,16 @@ fun MonthQuadActivityChart(
         prepareCellsDataForMonth(daysInMonth, weeksInMonth, readingData)
     }
 
-    if (config.zoomMode) {
-        ZoomedMonthChart(
-            weeksInMonth = weeksInMonth,
-            cellsData = cellsData,
-            config = config,
-            modifier = modifier
-        )
-    } else {
-        CompactMonthChart(
-            weeksInMonth = weeksInMonth,
-            cellsData = cellsData,
-            config = config,
-            modifier = modifier
-        )
-    }
+    VerticalMonthChart(
+        weeksInMonth = weeksInMonth,
+        cellsData = cellsData,
+        config = config,
+        modifier = modifier
+    )
 }
 
 @Composable
-private fun CompactMonthChart(
+private fun VerticalMonthChart(
     weeksInMonth: Int,
     cellsData: List<ChartCellData>,
     config: ActivityChartConfig,
@@ -61,7 +53,7 @@ private fun CompactMonthChart(
         val cellSize = maxWidth / weeksInMonth
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            for (row in 0 until 7) {
+            for (row in 0 until 10) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     for (col in 0 until weeksInMonth) {
                         val cellIndex = row * weeksInMonth + col
@@ -79,36 +71,7 @@ private fun CompactMonthChart(
     }
 }
 
-@Composable
-private fun ZoomedMonthChart(
-    weeksInMonth: Int,
-    cellsData: List<ChartCellData>,
-    config: ActivityChartConfig,
-    modifier: Modifier = Modifier
-) {
-    val scrollState = rememberScrollState()
-
-    Row(
-        modifier = modifier.horizontalScroll(scrollState)
-    ) {
-        for (col in 0 until weeksInMonth) {
-            Column {
-                for (row in 0 until 7) {
-                    val cellIndex = row * weeksInMonth + col
-                    val cellData = cellsData.getOrNull(cellIndex)
-
-                    ActivityChartCell(
-                        cellData = cellData,
-                        config = config,
-                        modifier = Modifier.size(config.zoomedItemSize)
-                    )
-                }
-            }
-        }
-    }
-}
-
-internal fun prepareCellsDataForMonth(
+private fun prepareCellsDataForMonth(
     daysInMonth: List<Date>,
     weeksInMonth: Int,
     readingData: Map<String, Int>
@@ -144,7 +107,7 @@ internal fun prepareCellsDataForMonth(
 @Composable
 private fun MonthChartPreview() {
     Column(modifier = Modifier.padding(8.dp)) {
-        MonthQuadActivityChart(
+        MonthActivityChart(
             year = 2026,
             month = 1,
             config = ActivityChartConfig(
@@ -168,4 +131,3 @@ private fun MonthChartPreview() {
         )
     }
 }
-

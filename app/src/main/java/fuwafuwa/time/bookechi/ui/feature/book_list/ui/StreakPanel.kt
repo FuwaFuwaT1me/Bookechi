@@ -18,15 +18,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
@@ -38,8 +35,8 @@ import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListState
 import fuwafuwa.time.bookechi.ui.theme.FigmaFire
 import fuwafuwa.time.bookechi.ui.theme.FigmaRedTitle
-import fuwafuwa.time.bookechi.ui.theme.FigmaStreakBackground
-import fuwafuwa.time.bookechi.ui.theme.FigmaStreakBackgroundLight
+import fuwafuwa.time.bookechi.ui.theme.FigmaStreakBackgroundEnd
+import fuwafuwa.time.bookechi.ui.theme.FigmaStreakBackgroundStart
 import fuwafuwa.time.bookechi.ui.theme.FigmaStreakCurrentDayBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
@@ -56,13 +53,13 @@ fun StreakPanel(
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color.White,
-                        FigmaStreakBackground
+                        FigmaStreakBackgroundStart,
+                        FigmaStreakBackgroundEnd
                     ),
                     start = Offset.Zero,
                     end = Offset.Infinite
-                )
-//                color = FigmaStreakBackground
+                ),
+                shape = RoundedCornerShape(12.dp)
             )
             .padding(16.dp)
     ) {

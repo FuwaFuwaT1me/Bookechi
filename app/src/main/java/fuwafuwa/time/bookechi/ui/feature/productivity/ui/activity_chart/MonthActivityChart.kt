@@ -1,8 +1,10 @@
 package fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,6 +25,7 @@ import fuwafuwa.time.bookechi.data.model.getRelativeActivityIntensity
 fun MonthActivityChart(
     year: Int,
     month: Int,
+    isHorizontal: Boolean,
     modifier: Modifier = Modifier,
     config: ActivityChartConfig = ActivityChartConfig(),
     readingData: Map<String, Int> = emptyMap(),
@@ -34,12 +37,55 @@ fun MonthActivityChart(
         prepareCellsDataForMonth(daysInMonth, weeksInMonth, readingData)
     }
 
-    VerticalMonthChart(
-        weeksInMonth = weeksInMonth,
-        cellsData = cellsData,
-        config = config,
-        modifier = modifier
-    )
+    if (isHorizontal) {
+        HorizontalMonthChart(
+            cellsData = cellsData,
+            config = config,
+            modifier = modifier
+        )
+    } else {
+        VerticalMonthChart(
+            weeksInMonth = weeksInMonth,
+            cellsData = cellsData,
+            config = config,
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+private fun HorizontalMonthChart(
+    cellsData: List<ChartCellData>,
+    config: ActivityChartConfig,
+    modifier: Modifier = Modifier
+) {
+    val verticalSpacing = if (config.showSpacing) config.itemVerticalSpacing else 0.dp
+    val horizontalSpacing = if (config.showSpacing) config.itemHorizontalSpacing else 0.dp
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(verticalSpacing)
+    ) {
+        for (row in 0 until 3) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)
+            ) {
+                for (col in 0 until 10) {
+                    val day = row * 10 + col + 1
+                    val cellData = cellsData.find { it.date?.dayOfMonth == day }
+
+                    ActivityChartCell(
+                        cellData = cellData,
+                        config = config,
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1f)
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -53,7 +99,7 @@ private fun VerticalMonthChart(
         val cellSize = maxWidth / weeksInMonth
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            for (row in 0 until 10) {
+            for (row in 0 until 7) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     for (col in 0 until weeksInMonth) {
                         val cellIndex = row * weeksInMonth + col
@@ -105,16 +151,45 @@ private fun prepareCellsDataForMonth(
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
 @Composable
-private fun MonthChartPreview() {
+private fun VerticalMonthChartPreview() {
     Column(modifier = Modifier.padding(8.dp)) {
         MonthActivityChart(
             year = 2026,
             month = 1,
+            isHorizontal = false,
             config = ActivityChartConfig(
-                zoomMode = true,
-                showPadding = true,
-                zoomedItemSize = 18.dp,
-                colorScheme = ActivityColorScheme.Activity
+                showSpacing = true,
+                colorScheme = ActivityColorScheme.OrangeActivity,
+                cornerRadius = 4.dp
+            ),
+            readingData = mapOf(
+                "2026-01-05" to 5,
+                "2026-01-06" to 12,
+                "2026-01-07" to 8,
+                "2026-01-10" to 25,
+                "2026-01-12" to 30,
+                "2026-01-15" to 50,
+                "2026-01-18" to 20,
+                "2026-01-20" to 80,
+                "2026-01-22" to 45,
+                "2026-01-25" to 60
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun HorizontalMonthChartPreview() {
+    Column(modifier = Modifier.padding(8.dp)) {
+        MonthActivityChart(
+            year = 2026,
+            month = 1,
+            isHorizontal = true,
+            config = ActivityChartConfig(
+                showSpacing = true,
+                colorScheme = ActivityColorScheme.OrangeActivity,
+                cornerRadius = 4.dp
             ),
             readingData = mapOf(
                 "2026-01-05" to 5,

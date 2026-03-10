@@ -64,7 +64,8 @@ data class ReadingActivityData(
  */
 enum class ActivityIntensity {
     NONE,      // Не читал
-    LOW,       // 1-10 страниц
+    VERY_LOW,  // 1-10 страниц
+    LOW,       // 10-30 страниц
     MEDIUM,    // 11-30 страниц
     HIGH,      // 31-60 страниц
     VERY_HIGH  // 60+ страниц
@@ -76,9 +77,10 @@ enum class ActivityIntensity {
 fun getActivityIntensity(pagesRead: Int): ActivityIntensity {
     return when {
         pagesRead <= 0 -> ActivityIntensity.NONE
-        pagesRead <= 10 -> ActivityIntensity.LOW
-        pagesRead <= 30 -> ActivityIntensity.MEDIUM
-        pagesRead <= 60 -> ActivityIntensity.HIGH
+        pagesRead <= 10 -> ActivityIntensity.VERY_LOW
+        pagesRead <= 20 -> ActivityIntensity.LOW
+        pagesRead <= 35 -> ActivityIntensity.MEDIUM
+        pagesRead <= 50 -> ActivityIntensity.HIGH
         else -> ActivityIntensity.VERY_HIGH
     }
 }
@@ -94,10 +96,10 @@ fun getRelativeActivityIntensity(pagesRead: Int, maxPages: Int): ActivityIntensi
     val percentage = (pagesRead.toFloat() / maxPages.toFloat() * 100).toInt()
     
     return when {
+        percentage <= 10 -> ActivityIntensity.VERY_LOW
         percentage <= 25 -> ActivityIntensity.LOW
         percentage <= 50 -> ActivityIntensity.MEDIUM
         percentage <= 75 -> ActivityIntensity.HIGH
         else -> ActivityIntensity.VERY_HIGH
     }
 }
-

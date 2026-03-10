@@ -1,6 +1,7 @@
 package fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,8 @@ import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityColorScheme
 import fuwafuwa.time.bookechi.base.ui.chart.ChartCellData
 import fuwafuwa.time.bookechi.data.model.ActivityIntensity
+import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellZeroActivity
+import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellZeroActivityStroke
 
 @Composable
 fun ActivityChartCell(
@@ -28,23 +31,30 @@ fun ActivityChartCell(
     modifier: Modifier = Modifier
 ) {
     val color = getCellColor(cellData, config)
-    val padding = if (config.showPadding) config.itemPadding else 0.dp
+    val shape = RoundedCornerShape(config.cornerRadius)
 
-    Box(modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .clip(RoundedCornerShape(config.cornerRadius))
-                .background(color)
-        )
-    }
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .background(color)
+            .then(
+                if (cellData?.intensity == ActivityIntensity.NONE) {
+                    Modifier.border(
+                        width = 1.dp,
+                        color = FigmaActivityCellZeroActivityStroke,
+                        shape = shape
+                    )
+                } else {
+                    Modifier
+                }
+            )
+    )
 }
 
 @Composable
 fun ActivityChartLegend(
-    config: ActivityChartConfig = ActivityChartConfig(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    config: ActivityChartConfig = ActivityChartConfig()
 ) {
     Row(
         modifier = modifier,
@@ -55,8 +65,25 @@ fun ActivityChartLegend(
             Box(
                 modifier = Modifier
                     .size(12.dp)
-                    .clip(RoundedCornerShape(2.dp))
+                    .clip(
+                        if (intensity == ActivityIntensity.NONE) {
+                            RoundedCornerShape(4.dp)
+                        } else {
+                            RoundedCornerShape(config.cornerRadius)
+                        }
+                    )
                     .background(config.colorScheme.getColor(intensity))
+                    .then(
+                        if (intensity == ActivityIntensity.NONE) {
+                            Modifier.border(
+                                width = 1.dp,
+                                color = FigmaActivityCellZeroActivityStroke,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                        } else {
+                            Modifier
+                        }
+                    )
             )
         }
     }
@@ -77,10 +104,7 @@ private fun ColorSchemesPreview() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         listOf(
-            ActivityColorScheme.Activity to "Activity",
-            ActivityColorScheme.Orange to "Orange",
-            ActivityColorScheme.Blue to "Blue",
-            ActivityColorScheme.Purple to "Purple"
+            ActivityColorScheme.OrangeActivity to "OrangeActivity",
         ).forEach { (scheme, _) ->
             ActivityChartLegend(
                 config = ActivityChartConfig(colorScheme = scheme)

@@ -27,9 +27,6 @@ import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityScreen
-import fuwafuwa.time.bookechi.ui.feature.reading_goals.ui.ReadingGoalsScreenRoute
-import fuwafuwa.time.bookechi.ui.feature.reading_stats.ui.ReadingStatsScreenRoute
-import fuwafuwa.time.bookechi.ui.feature.settings.ui.SettingsScreenRoute
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
 import fuwafuwa.time.bookechi.ui.theme.FigmaBottomNavSelectedTab
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle

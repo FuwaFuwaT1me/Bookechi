@@ -7,4 +7,5 @@ data class ProductivityState(
     val pagesRead: Int,
     val dayStreak: Int,
     val averagePages: Float,
+    val readingData: Map<String, Int> = mapOf()
 ) : State

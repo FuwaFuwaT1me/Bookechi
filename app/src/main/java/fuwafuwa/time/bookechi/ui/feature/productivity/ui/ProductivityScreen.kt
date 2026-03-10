@@ -11,9 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,16 +27,12 @@ import androidx.compose.ui.unit.sp
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityState
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityViewModel
+import fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart.ActivityPanel
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 import kotlinx.serialization.Serializable
 
 @Serializable
 data object ProductivityScreen : Screen
-
-private data class ProductivityHeaderItem(
-    val numberValue: Number,
-    val subtitle: String,
-)
 
 @Composable
 fun ProductivityScreen(
@@ -59,10 +54,14 @@ private fun ProductivityScreenPrivate(
             .fillMaxSize()
             .background(Color.White)
             .padding(16.dp)
-        ,
+            .verticalScroll(rememberScrollState()),
     ) {
 
         Header(state)
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        ActivityPanel(state)
     }
 }
 
@@ -70,8 +69,6 @@ private fun ProductivityScreenPrivate(
 private fun Header(
     state: ProductivityState
 ) {
-    val headerItems = remember { buildHeaderItems(state) }
-
     Column {
         Text(
             text = "Моя продуктивность",
@@ -134,27 +131,6 @@ private fun Header(
     }
 }
 
-private fun buildHeaderItems(state: ProductivityState): List<ProductivityHeaderItem> {
-    return listOf(
-        ProductivityHeaderItem(
-            numberValue = state.booksRead,
-            subtitle = "книг прочитано"
-        ),
-        ProductivityHeaderItem(
-            numberValue = state.pagesRead,
-            subtitle = "страниц прочитано"
-        ),
-        ProductivityHeaderItem(
-            numberValue = state.dayStreak,
-            subtitle = "дней подряд"
-        ),
-        ProductivityHeaderItem(
-            numberValue = state.averagePages,
-            subtitle = "страниц/день в среднем"
-        )
-    )
-}
-
 @Preview
 @Composable
 private fun PreviewProductivityScreen() {
@@ -164,6 +140,18 @@ private fun PreviewProductivityScreen() {
             pagesRead = 18574,
             dayStreak = 280,
             averagePages = 12.5f,
+            readingData = mapOf(
+                "2026-01-05" to 5,
+                "2026-01-06" to 12,
+                "2026-01-07" to 8,
+                "2026-01-10" to 25,
+                "2026-01-12" to 30,
+                "2026-01-15" to 50,
+                "2026-01-18" to 20,
+                "2026-01-20" to 80,
+                "2026-01-22" to 45,
+                "2026-01-25" to 60
+            )
         )
     )
 }

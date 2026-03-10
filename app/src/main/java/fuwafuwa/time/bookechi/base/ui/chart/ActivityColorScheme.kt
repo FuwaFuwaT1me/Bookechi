@@ -1,7 +1,6 @@
 package fuwafuwa.time.bookechi.base.ui.chart
 
 import androidx.compose.ui.graphics.Color
-import fuwafuwa.time.bookechi.data.model.ActivityIntensity
 import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellFiveActivity
 import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellFourActivity
 import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellOneActivity

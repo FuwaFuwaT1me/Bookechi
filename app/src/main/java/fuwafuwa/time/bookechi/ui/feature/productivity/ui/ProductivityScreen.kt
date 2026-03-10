@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -17,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -140,18 +138,7 @@ private fun PreviewProductivityScreen() {
             pagesRead = 18574,
             dayStreak = 280,
             averagePages = 12.5f,
-            readingData = mapOf(
-                "2026-01-05" to 5,
-                "2026-01-06" to 12,
-                "2026-01-07" to 8,
-                "2026-01-10" to 25,
-                "2026-01-12" to 30,
-                "2026-01-15" to 50,
-                "2026-01-18" to 20,
-                "2026-01-20" to 80,
-                "2026-01-22" to 45,
-                "2026-01-25" to 60
-            )
+            sessions = ProductivityPreviewData.generateMonthData()
         )
     )
 }

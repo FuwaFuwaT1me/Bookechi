@@ -80,7 +80,7 @@ fun EmptyBookList(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun PReviewEmptyBookList() {
     EmptyBookList(

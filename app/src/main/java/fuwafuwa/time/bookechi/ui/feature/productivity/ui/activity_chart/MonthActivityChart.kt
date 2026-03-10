@@ -19,7 +19,9 @@ import fuwafuwa.time.bookechi.base.time.getWeeksInMonth
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityColorScheme
 import fuwafuwa.time.bookechi.base.ui.chart.ChartCellData
-import fuwafuwa.time.bookechi.data.model.getRelativeActivityIntensity
+import fuwafuwa.time.bookechi.base.ui.chart.getRelativeActivityIntensity
+import fuwafuwa.time.bookechi.data.model.DailyReadingStats
+import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityPreviewData
 
 @Composable
 fun MonthActivityChart(
@@ -28,13 +30,13 @@ fun MonthActivityChart(
     isHorizontal: Boolean,
     modifier: Modifier = Modifier,
     config: ActivityChartConfig = ActivityChartConfig(),
-    readingData: Map<String, Int> = emptyMap(),
+    sessions: List<DailyReadingStats> = emptyList(),
 ) {
     val weeksInMonth = remember(year, month) { getWeeksInMonth(year, month) }
     val daysInMonth = remember(year, month) { getDaysInMonth(year, month) }
 
-    val cellsData = remember(year, month, readingData) {
-        prepareCellsDataForMonth(daysInMonth, weeksInMonth, readingData)
+    val cellsData = remember(year, month, sessions) {
+        prepareCellsDataForMonth(daysInMonth, weeksInMonth, sessions)
     }
 
     if (isHorizontal) {
@@ -120,9 +122,9 @@ private fun VerticalMonthChart(
 private fun prepareCellsDataForMonth(
     daysInMonth: List<Date>,
     weeksInMonth: Int,
-    readingData: Map<String, Int>
+    sessions: List<DailyReadingStats>
 ): List<ChartCellData> {
-    val maxPages = readingData.values.maxOrNull() ?: 0
+    val maxPages = sessions.maxByOrNull { it.totalPagesRead }?.totalPagesRead ?: 0
     val cells = mutableListOf<ChartCellData>()
 
     for (row in 0 until 7) {
@@ -134,7 +136,12 @@ private fun prepareCellsDataForMonth(
                 it.dayOfWeek.value == dayOfWeek && it.weekOfMonth == weekOfMonth
             }
 
-            val pagesRead = day?.let { readingData[it.dateKey] } ?: 0
+            val session = day?.let {
+                sessions.find { session ->
+                    session.date == day.dateKey
+                }
+            }
+            val pagesRead = session?.totalPagesRead ?: 0
 
             cells.add(
                 ChartCellData(
@@ -162,18 +169,7 @@ private fun VerticalMonthChartPreview() {
                 colorScheme = ActivityColorScheme.OrangeActivity,
                 cornerRadius = 4.dp
             ),
-            readingData = mapOf(
-                "2026-01-05" to 5,
-                "2026-01-06" to 12,
-                "2026-01-07" to 8,
-                "2026-01-10" to 25,
-                "2026-01-12" to 30,
-                "2026-01-15" to 50,
-                "2026-01-18" to 20,
-                "2026-01-20" to 80,
-                "2026-01-22" to 45,
-                "2026-01-25" to 60
-            )
+            sessions = ProductivityPreviewData.generateMonthData()
         )
     }
 }
@@ -191,18 +187,7 @@ private fun HorizontalMonthChartPreview() {
                 colorScheme = ActivityColorScheme.OrangeActivity,
                 cornerRadius = 4.dp
             ),
-            readingData = mapOf(
-                "2026-01-05" to 5,
-                "2026-01-06" to 12,
-                "2026-01-07" to 8,
-                "2026-01-10" to 25,
-                "2026-01-12" to 30,
-                "2026-01-15" to 50,
-                "2026-01-18" to 20,
-                "2026-01-20" to 80,
-                "2026-01-22" to 45,
-                "2026-01-25" to 60
-            )
+            sessions = ProductivityPreviewData.generateMonthData()
         )
     }
 }

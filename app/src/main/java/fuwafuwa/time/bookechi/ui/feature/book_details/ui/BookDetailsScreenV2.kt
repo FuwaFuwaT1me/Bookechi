@@ -262,6 +262,7 @@ private fun BookDetailsContent(
                     ReadingStatus.Paused -> Color(0xFFF59E0B) to "⏸️ Paused"
                     ReadingStatus.Stopped -> Color(0xFF6366F1) to "✅ Finished"
                     ReadingStatus.None -> Color(0xFF94A3B8) to "📚 Not Started"
+                    ReadingStatus.Completed -> Color.Green to "Completed"
                 }
 
                 Box(
@@ -398,6 +399,8 @@ private fun ActionButtonsV2(
                 modifier = modifier
             )
         }
+
+        ReadingStatus.Completed -> {}
     }
 }
 
@@ -516,4 +519,3 @@ private fun BookDetailsScreenV2FinishedPreview() {
         onAction = {}
     )
 }
-

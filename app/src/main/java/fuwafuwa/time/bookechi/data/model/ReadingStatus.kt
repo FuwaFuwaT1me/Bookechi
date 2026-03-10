@@ -4,7 +4,6 @@ enum class ReadingStatus {
     None,
     Reading,
     Paused,
-    Stopped
+    Stopped,
+    Completed
 }
-
-

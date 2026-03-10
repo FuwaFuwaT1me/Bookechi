@@ -19,9 +19,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityColorScheme
+import fuwafuwa.time.bookechi.base.ui.chart.ActivityIntensity
 import fuwafuwa.time.bookechi.base.ui.chart.ChartCellData
-import fuwafuwa.time.bookechi.data.model.ActivityIntensity
-import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellZeroActivity
 import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellZeroActivityStroke
 
 @Composable

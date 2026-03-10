@@ -61,6 +61,8 @@ fun BookReadingActionButtons(
                 modifier = modifier
             )
         }
+        
+        ReadingStatus.Completed -> {}
     }
 }
 

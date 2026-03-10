@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -34,6 +35,7 @@ import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListAction
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListState
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListViewModel
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
+import fuwafuwa.time.bookechi.ui.theme.FigmaAddBookBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 import kotlinx.serialization.Serializable
@@ -74,8 +76,11 @@ private fun BookListScreenPrivate(
 
         if (state.books.isNotEmpty()) {
             FloatingActionButton(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                containerColor = BlueMain,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 8.dp, y = 8.dp)
+                ,
+                containerColor = FigmaAddBookBackground,
                 contentColor = Color.White,
                 onClick = {
                     onAction(BookListAction.NavigateToAddBook)
@@ -220,6 +225,20 @@ private fun BookListScreenPreview() {
                     )
                 }
             }
+        ),
+        onAction = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun EmptyBookListScreenPreview() {
+    BookListScreenPrivate(
+        state = BookListState(
+            isLoading = false,
+            gridColumnCount = 1,
+            error = null,
+            books = emptyList()
         ),
         onAction = {}
     )

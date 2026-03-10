@@ -1,22 +1,40 @@
 package fuwafuwa.time.bookechi.base.time
 
+import java.time.Clock
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.WeekFields
 
 data class Date(
-    val year: Int,
-    val month: Int,
-    val dayOfWeek: DayOfWeek,
-    val dayOfMonth: Int,
-    val dayOfYear: Int,
-    val weekOfYear: Int,
-    val weekOfMonth: Int,
-    val dateKey: String, // "YYYY-MM-DD"
-    val isFirstDayOfMonth: Boolean = false,
-    val isLastDayOfMonth: Boolean = false,
-)
+    val localDate: LocalDate,
+    val firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
+) {
+    val year: Int get() = localDate.year
+    val month: Int get() = localDate.monthValue
+    val dayOfWeek: DayOfWeek get() = localDate.dayOfWeek
+    val dayOfMonth: Int get() = localDate.dayOfMonth
+    val dayOfYear: Int get() = localDate.dayOfYear
+    val weekOfYear: Int get() = getWeekOfYear(localDate, firstDayOfWeek)
+    val weekOfMonth: Int get() = localDate.get(WeekFields.of(firstDayOfWeek, 1).weekOfMonth())
+    val dateKey: String get() = localDate.toString() // "YYYY-MM-DD"
+    val isFirstDayOfMonth: Boolean get() = localDate.dayOfMonth == 1
+    val isLastDayOfMonth: Boolean get() = localDate.dayOfMonth == localDate.lengthOfMonth()
+
+    companion object {
+        fun from(date: LocalDate, firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY): Date {
+            return Date(localDate = date, firstDayOfWeek = firstDayOfWeek)
+        }
+
+        fun of(year: Int, month: Int, dayOfMonth: Int, firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY): Date {
+            return Date(localDate = LocalDate.of(year, month, dayOfMonth), firstDayOfWeek = firstDayOfWeek)
+        }
+
+        fun today(clock: Clock = Clock.systemDefaultZone(), firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY): Date {
+            return Date(localDate = LocalDate.now(clock), firstDayOfWeek = firstDayOfWeek)
+        }
+    }
+}
 
 fun getWeeksInYear(year: Int): Int {
     val firstDay = YearMonth.of(year, 1).atDay(1)
@@ -39,7 +57,7 @@ fun getWeeksInMonth(year: Int, month: Int, firstDayOfWeek: DayOfWeek = DayOfWeek
     return lastWeek - firstWeek + 1
 }
 
-fun getDaysInMonth(year: Int, month: Int): List<Date> {
+fun getDaysInMonth(year: Int, month: Int, firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY): List<Date> {
     val days = mutableListOf<Date>()
     val yearMonth = YearMonth.of(year, month)
     val firstDay = yearMonth.atDay(1)
@@ -47,30 +65,15 @@ fun getDaysInMonth(year: Int, month: Int): List<Date> {
 
     for (i in 0 until lastDay.dayOfMonth) {
         val day = firstDay.plusDays(i.toLong())
-        val week = day.get(
-            WeekFields.of(DayOfWeek.MONDAY, 1).weekOfMonth()
-        )
-
         days.add(
-            Date(
-                year = year,
-                month = month,
-                dayOfWeek = day.dayOfWeek,
-                dayOfMonth = day.dayOfMonth,
-                dayOfYear = day.dayOfYear,
-                weekOfYear = getWeekOfYear(day, DayOfWeek.MONDAY),
-                weekOfMonth = week,
-                dateKey = day.toString(), // ISO format: YYYY-MM-DD
-                isFirstDayOfMonth = i == 0,
-                isLastDayOfMonth = day == lastDay,
-            )
+            Date.from(date = day, firstDayOfWeek = firstDayOfWeek)
         )
     }
     return days
 }
 
 
-fun getDaysInYear(year: Int): List<Date> {
+fun getDaysInYear(year: Int, firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY): List<Date> {
     val days = mutableListOf<Date>()
     (1..12).forEach { month ->
         val yearMonth = YearMonth.of(year, month)
@@ -79,23 +82,8 @@ fun getDaysInYear(year: Int): List<Date> {
 
         for (i in 0 until lastDay.dayOfMonth) {
             val day = firstDay.plusDays(i.toLong())
-            val week = day.get(
-                WeekFields.of(DayOfWeek.MONDAY, 1).weekOfMonth()
-            )
-
             days.add(
-                Date(
-                    year = year,
-                    month = month,
-                    dayOfWeek = day.dayOfWeek,
-                    dayOfMonth = day.dayOfMonth,
-                    dayOfYear = day.dayOfYear,
-                    weekOfYear = getWeekOfYear(day, DayOfWeek.MONDAY),
-                    weekOfMonth = week,
-                    dateKey = day.toString(), // ISO format: YYYY-MM-DD
-                    isFirstDayOfMonth = i == 0,
-                    isLastDayOfMonth = day == lastDay,
-                )
+                Date.from(date = day, firstDayOfWeek = firstDayOfWeek)
             )
         }
     }

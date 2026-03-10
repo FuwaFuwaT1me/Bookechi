@@ -22,6 +22,7 @@ import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityColorScheme
 import fuwafuwa.time.bookechi.base.ui.util.AnimatedPeriodSwitcher
 import fuwafuwa.time.bookechi.base.ui.util.AnimatedPeriodSwitcherConfig
+import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityPreviewData
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityState
 import fuwafuwa.time.bookechi.ui.theme.FigmaBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaPeriodSwitcherBackground
@@ -105,7 +106,7 @@ private fun ActivityPart(
             year = 2026,
             month = 1,
             isHorizontal = true,
-            readingData = state.readingData,
+            sessions = state.sessions,
             config = ActivityChartConfig(
                 showSpacing = true,
                 itemHorizontalSpacing = 10.dp,
@@ -188,18 +189,7 @@ private fun PreviewActivityPanel() {
             pagesRead = 1000,
             dayStreak = 100,
             averagePages = 12.5f,
-            readingData = mapOf(
-                "2026-01-05" to 5,
-                "2026-01-06" to 12,
-                "2026-01-07" to 8,
-                "2026-01-10" to 25,
-                "2026-01-12" to 30,
-                "2026-01-15" to 50,
-                "2026-01-18" to 20,
-                "2026-01-20" to 80,
-                "2026-01-22" to 45,
-                "2026-01-25" to 60
-            )
+            sessions = ProductivityPreviewData.generateMonthData()
         )
     )
 }

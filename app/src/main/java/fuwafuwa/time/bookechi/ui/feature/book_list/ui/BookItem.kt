@@ -2,6 +2,7 @@ package fuwafuwa.time.bookechi.ui.feature.book_list.ui
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -150,6 +151,12 @@ fun NewBookItem(
             .clip(RoundedCornerShape(12.dp))
             .background(FigmaBackgroundStroke)
             .padding(1.dp)
+            .optionalDetectTapGestures(
+                onClick = onClick,
+                onLongTap = {
+                    showDropdownMenu = true
+                }
+            )
         ,
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
@@ -164,7 +171,7 @@ fun NewBookItem(
             NewBookCover(
                 modifier = Modifier,
                 imageUri = imageUri,
-                onClick = onClick,
+                onClick = {},
                 onLongTap = {
                     showDropdownMenu = true
                 }

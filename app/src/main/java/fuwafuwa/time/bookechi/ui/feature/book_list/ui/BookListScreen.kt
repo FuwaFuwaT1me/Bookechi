@@ -3,6 +3,7 @@ package fuwafuwa.time.bookechi.ui.feature.book_list.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -25,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,7 +36,6 @@ import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListAction
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListState
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListViewModel
-import fuwafuwa.time.bookechi.ui.theme.BlueMain
 import fuwafuwa.time.bookechi.ui.theme.FigmaAddBookBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
@@ -62,23 +63,19 @@ private fun BookListScreenPrivate(
 ) {
     Box(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 32.dp)
+            .padding(horizontal = 16.dp)
             .fillMaxSize()
     ) {
-        Column {
-            Header(state)
-
-            ScreenState(
-                state = state,
-                onAction = onAction
-            )
-        }
+        BookListContent(
+            state = state,
+            onAction = onAction
+        )
 
         if (state.books.isNotEmpty()) {
             FloatingActionButton(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .offset(x = 8.dp, y = 8.dp)
+                    .offset(x = 8.dp, y = (-8).dp)
                 ,
                 containerColor = FigmaAddBookBackground,
                 contentColor = Color.White,
@@ -96,32 +93,88 @@ private fun BookListScreenPrivate(
 }
 
 @Composable
-private fun ScreenState(
+private fun BookListContent(
     state: BookListState,
-    onAction: (BookListAction) -> Unit,
+    onAction: (BookListAction) -> Unit
+) {
+    LazyVerticalGrid(
+        modifier = Modifier.fillMaxSize(),
+        columns = GridCells.Fixed(state.gridColumnCount),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        contentPadding = PaddingValues(bottom = 16.dp)
+    ) {
+        bookListHeader(state)
+        bookListBody(state, onAction)
+    }
+}
+
+private fun LazyGridScope.bookListHeader(state: BookListState) {
+    item(span = { GridItemSpan(maxLineSpan) }) {
+        Spacer(modifier = Modifier.height(4.dp))
+    }
+    item(span = { GridItemSpan(maxLineSpan) }) {
+        Header(state)
+    }
+}
+
+private fun LazyGridScope.bookListBody(
+    state: BookListState,
+    onAction: (BookListAction) -> Unit
 ) {
     when {
         state.isLoading -> {
-            CircularProgressIndicator()
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
 
         state.error != null -> {
-            Text("Something went wrong")
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Text("Something went wrong")
+            }
         }
 
         state.books.isEmpty() -> {
-            EmptyBookList(
-                onAddBookClick = {
-                    onAction(BookListAction.NavigateToAddBook)
-                }
-            )
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                EmptyBookList(
+                    onAddBookClick = {
+                        onAction(BookListAction.NavigateToAddBook)
+                    }
+                )
+            }
         }
 
         else -> {
-            BooksList(
-                state = state,
-                onAction = onAction,
-            )
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Text(
+                    text = "Сейчас читаете",
+                    color = FigmaTitle,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            items(state.books, key = { it.id }) { book ->
+                NewBookItem(
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = null,
+                        fadeOutSpec = null
+                    ),
+                    book = book,
+                    onClick = {
+                        onAction(BookListAction.NavigateToBookDetails(book))
+                    },
+                    onDeleteBookClick = {
+                        onAction(BookListAction.DeleteBook(book))
+                    }
+                )
+            }
         }
     }
 }
@@ -159,47 +212,6 @@ private fun Header(state: BookListState) {
         Spacer(modifier = Modifier.height(12.dp))
 
         StreakPanel(state)
-    }
-}
-
-@Composable
-private fun BooksList(
-    state: BookListState,
-    onAction: (BookListAction) -> Unit,
-) {
-    Column {
-
-        Text(
-            text = "Сейчас читаете",
-            color = FigmaTitle,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        LazyVerticalGrid(
-            modifier = Modifier.fillMaxSize(),
-            columns = GridCells.Fixed(state.gridColumnCount),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            items(state.books, key = { it.id }) { book ->
-                NewBookItem(
-                    modifier = Modifier.animateItem(
-                        fadeInSpec = null,
-                        fadeOutSpec = null
-                    ),
-                    book = book,
-                    onClick = {
-                        onAction(BookListAction.NavigateToBookDetails(book))
-                    },
-                    onDeleteBookClick = {
-                        onAction(BookListAction.DeleteBook(book))
-                    }
-                )
-            }
-        }
     }
 }
 

@@ -45,7 +45,7 @@ fun ActivityPanel(
             .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 20.dp)
         ,
     ) {
-        PeriodSwitcher(onToggleActivityChartSwitch)
+        PeriodSwitcher(state, onToggleActivityChartSwitch)
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -59,6 +59,7 @@ fun ActivityPanel(
 
 @Composable
 private fun PeriodSwitcher(
+    state: ProductivityState,
     onSwitch: (Int) -> Unit
 ) {
     AnimatedPeriodSwitcher(
@@ -78,6 +79,7 @@ private fun PeriodSwitcher(
             activeTextColor = FigmaTitle,
             inactiveTextColor = FigmaTitle.copy(alpha = 0.4f)
         ),
+        selectedIndex = state.activityChartTab.ordinal,
         onSwitch = { index ->
             onSwitch(index)
         }
@@ -179,6 +181,11 @@ private fun ActivityLegend() {
 private fun ReadPagesOverview(
     state: ProductivityState
 ) {
+    val periodName = when (state.activityChartTab) {
+        ActivityChartTab.MONTH -> "месяц"
+        ActivityChartTab.YEAR -> "год"
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -198,7 +205,7 @@ private fun ReadPagesOverview(
         Spacer(modifier = Modifier.height(22.dp))
 
         Text(
-            text = "страниц прочитано за месяц",
+            text = "страниц прочитано за $periodName",
             color = Color.White,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium

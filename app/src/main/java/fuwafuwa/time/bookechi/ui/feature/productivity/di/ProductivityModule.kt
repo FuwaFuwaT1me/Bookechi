@@ -3,6 +3,7 @@ package fuwafuwa.time.bookechi.ui.feature.productivity.di
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityModel
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityState
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityViewModel
+import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityPreviewData
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -15,10 +16,11 @@ val productivityModule = module {
 
     factory {
         ProductivityState(
-            booksRead = 0,
-            pagesRead = 0,
-            dayStreak = 0,
-            averagePages = 0f,
+            booksRead = 6,
+            pagesRead = 18574,
+            dayStreak = 280,
+            averagePages = 12.5f,
+            sessions = ProductivityPreviewData.generateYearData()
         )
     }
 

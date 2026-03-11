@@ -32,7 +32,7 @@ fun AnimatedPeriodSwitcher(
     modifier: Modifier = Modifier
         .height(72.dp)
     ,
-    initialSelectedIndex: Int = 0,
+    selectedIndex: Int = 0,
     innerCornerRadius: Dp = 20.dp,
     outerCornerRadius: Dp = 20.dp,
     horizontalSpacing: Dp = 8.dp,
@@ -41,7 +41,6 @@ fun AnimatedPeriodSwitcher(
     onSwitch: (Int) -> Unit,
     config: AnimatedPeriodSwitcherConfig = AnimatedPeriodSwitcherConfig(),
 ) {
-    var selectedIndex by remember { mutableIntStateOf(initialSelectedIndex) }
     var rowSize by remember { mutableStateOf(IntSize.Zero) }
 
     val density = LocalDensity.current
@@ -85,7 +84,7 @@ fun AnimatedPeriodSwitcher(
                         .weight(1f)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(innerCornerRadius))
-                        .clickable { selectedIndex = index },
+                        .clickable { onSwitch(index) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

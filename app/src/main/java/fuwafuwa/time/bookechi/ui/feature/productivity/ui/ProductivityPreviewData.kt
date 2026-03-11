@@ -10,7 +10,7 @@ object ProductivityPreviewData {
         return buildList {
             val daysInMonth = YearMonth.of(year, month).lengthOfMonth()
             (1..daysInMonth).forEach { day ->
-                val pages = if (day % 3 == 0) 0 else (0..100).random()
+                val pages = if (day % 8 == 0) 0 else (0..100).random()
                 val date = LocalDate.of(year, month, day)
 
                 add(

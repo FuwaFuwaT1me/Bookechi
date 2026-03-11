@@ -47,7 +47,7 @@ fun YearActivityChart(
     val daysInYear = remember(year) { getDaysInYear(year) }
 
     val (weekGridCells, linearCells) = remember(year, sessions) {
-        val maxPages = sessions.maxOf { it.totalPagesRead }
+        val maxPages = sessions.maxOfOrNull { it.totalPagesRead } ?: 0
         val weekGrid = buildWeekGridCells(
             daysInYear = daysInYear,
             weeksInYear = weeksInYear,

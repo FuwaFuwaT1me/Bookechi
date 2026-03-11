@@ -63,6 +63,10 @@ class ReadingSessionRepository(
         readingSessionDao.deleteSessionsForBook(bookId)
     }
 
+    suspend fun deleteAllSessions() = withContext(Dispatchers.IO) {
+        readingSessionDao.deleteAllSessions()
+    }
+
     /**
      * Логирует прочтение страниц за сегодня
      */
@@ -111,5 +115,4 @@ class ReadingSessionRepository(
         endPage = endPage
     )
 }
-
 

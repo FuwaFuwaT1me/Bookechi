@@ -23,6 +23,9 @@ import fuwafuwa.time.bookechi.base.ui.chart.getRelativeActivityIntensity
 import fuwafuwa.time.bookechi.data.model.DailyReadingStats
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityPreviewData
 
+private const val DAYS_IN_WEEK = 7
+private const val COMPACT_HORIZONTAL_MONTH_COLUMNS = 10
+
 @Composable
 fun MonthActivityChart(
     year: Int,
@@ -35,20 +38,32 @@ fun MonthActivityChart(
     val weeksInMonth = remember(year, month) { getWeeksInMonth(year, month) }
     val daysInMonth = remember(year, month) { getDaysInMonth(year, month) }
 
-    val cellsData = remember(year, month, sessions) {
-        prepareCellsDataForMonth(daysInMonth, weeksInMonth, sessions)
+    val (weekGridCells, linearCells) = remember(year, month, sessions) {
+        val maxPages = sessions.maxByOrNull { it.totalPagesRead }?.totalPagesRead ?: 0
+        val weekGrid = buildWeekGridCellsForMonth(
+            daysInMonth = daysInMonth,
+            weeksInMonth = weeksInMonth,
+            sessions = sessions,
+            maxPages = maxPages
+        )
+        val linear = buildLinearMonthCells(
+            daysInMonth = daysInMonth,
+            sessions = sessions,
+            maxPages = maxPages
+        )
+        weekGrid to linear
     }
 
     if (isHorizontal) {
         HorizontalMonthChart(
-            cellsData = cellsData,
+            cellsData = linearCells,
             config = config,
             modifier = modifier
         )
     } else {
         VerticalMonthChart(
             weeksInMonth = weeksInMonth,
-            cellsData = cellsData,
+            cellsData = weekGridCells,
             config = config,
             modifier = modifier
         )
@@ -63,19 +78,21 @@ private fun HorizontalMonthChart(
 ) {
     val verticalSpacing = if (config.showSpacing) config.itemVerticalSpacing else 0.dp
     val horizontalSpacing = if (config.showSpacing) config.itemHorizontalSpacing else 0.dp
+    val rows =
+        (cellsData.size + COMPACT_HORIZONTAL_MONTH_COLUMNS - 1) / COMPACT_HORIZONTAL_MONTH_COLUMNS
 
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(verticalSpacing)
     ) {
-        for (row in 0 until 3) {
+        for (row in 0 until rows) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)
             ) {
-                for (col in 0 until 10) {
-                    val day = row * 10 + col + 1
-                    val cellData = cellsData.find { it.date?.dayOfMonth == day }
+                for (col in 0 until COMPACT_HORIZONTAL_MONTH_COLUMNS) {
+                    val cellIndex = row * COMPACT_HORIZONTAL_MONTH_COLUMNS + col
+                    val cellData = cellsData.getOrNull(cellIndex)
 
                     ActivityChartCell(
                         cellData = cellData,
@@ -101,7 +118,7 @@ private fun VerticalMonthChart(
         val cellSize = maxWidth / weeksInMonth
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            for (row in 0 until 7) {
+            for (row in 0 until DAYS_IN_WEEK) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     for (col in 0 until weeksInMonth) {
                         val cellIndex = row * weeksInMonth + col
@@ -119,29 +136,23 @@ private fun VerticalMonthChart(
     }
 }
 
-private fun prepareCellsDataForMonth(
+private fun buildWeekGridCellsForMonth(
     daysInMonth: List<Date>,
     weeksInMonth: Int,
-    sessions: List<DailyReadingStats>
+    sessions: List<DailyReadingStats>,
+    maxPages: Int
 ): List<ChartCellData> {
-    val maxPages = sessions.maxByOrNull { it.totalPagesRead }?.totalPagesRead ?: 0
-    val cells = mutableListOf<ChartCellData>()
+    val sessionByDate = sessions.associateBy { it.date }
+    val dayByGridKey = daysInMonth.associateBy { gridKey(it.weekOfMonth, it.dayOfWeek.value) }
+    val cells = ArrayList<ChartCellData>(weeksInMonth * DAYS_IN_WEEK)
 
-    for (row in 0 until 7) {
+    for (row in 0 until DAYS_IN_WEEK) {
         for (col in 0 until weeksInMonth) {
             val dayOfWeek = row + 1
             val weekOfMonth = col + 1
 
-            val day = daysInMonth.find {
-                it.dayOfWeek.value == dayOfWeek && it.weekOfMonth == weekOfMonth
-            }
-
-            val session = day?.let {
-                sessions.find { session ->
-                    session.date == day.dateKey
-                }
-            }
-            val pagesRead = session?.totalPagesRead ?: 0
+            val day = dayByGridKey[gridKey(weekOfMonth, dayOfWeek)]
+            val pagesRead = day?.let { sessionByDate[it.dateKey]?.totalPagesRead } ?: 0
 
             cells.add(
                 ChartCellData(
@@ -154,6 +165,26 @@ private fun prepareCellsDataForMonth(
     }
 
     return cells
+}
+
+private fun buildLinearMonthCells(
+    daysInMonth: List<Date>,
+    sessions: List<DailyReadingStats>,
+    maxPages: Int
+): List<ChartCellData> {
+    val sessionByDate = sessions.associateBy { it.date }
+    return daysInMonth.map { day ->
+        val pagesRead = sessionByDate[day.dateKey]?.totalPagesRead ?: 0
+        ChartCellData(
+            date = day,
+            intensity = getRelativeActivityIntensity(pagesRead, maxPages),
+            pagesRead = pagesRead
+        )
+    }
+}
+
+private fun gridKey(weekOfMonth: Int, dayOfWeek: Int): Int {
+    return weekOfMonth * 100 + dayOfWeek
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)

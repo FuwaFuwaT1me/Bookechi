@@ -5,6 +5,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 object ProductivityPreviewData {
+
     fun generateMonthData(year: Int = 2026, month: Int = 1): List<DailyReadingStats> {
         return buildList {
             val daysInMonth = YearMonth.of(year, month).lengthOfMonth()
@@ -20,6 +21,14 @@ object ProductivityPreviewData {
                         booksRead = 1
                     )
                 )
+            }
+        }
+    }
+
+    fun generateYearData(year: Int = 2026): List<DailyReadingStats> {
+        return buildList {
+            (1..12).forEach { month ->
+                addAll(generateMonthData(year, month))
             }
         }
     }

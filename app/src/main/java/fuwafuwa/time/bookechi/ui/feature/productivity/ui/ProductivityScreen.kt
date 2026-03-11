@@ -23,6 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fuwafuwa.time.bookechi.mvi.ui.Screen
+import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ActivityChartTab
+import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityAction
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityState
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityViewModel
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart.ActivityPanel
@@ -40,12 +42,20 @@ fun ProductivityScreen(
 
     ProductivityScreenPrivate(
         state = state,
+        onToggleActivityChartSwitch = { tab ->
+            ActivityChartTab.fromIndex(tab)?.let {
+                viewModel.sendAction(
+                    ProductivityAction.ToggleActivityChartTab(it)
+                )
+            }
+        }
     )
 }
 
 @Composable
 private fun ProductivityScreenPrivate(
-    state: ProductivityState
+    state: ProductivityState,
+    onToggleActivityChartSwitch: (Int) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -59,7 +69,7 @@ private fun ProductivityScreenPrivate(
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        ActivityPanel(state)
+        ActivityPanel(state, onToggleActivityChartSwitch)
     }
 }
 
@@ -131,7 +141,7 @@ private fun Header(
 
 @Preview
 @Composable
-private fun PreviewProductivityScreen() {
+private fun PreviewProductivityScreenMonth() {
     ProductivityScreenPrivate(
         state = ProductivityState(
             booksRead = 6,
@@ -139,6 +149,23 @@ private fun PreviewProductivityScreen() {
             dayStreak = 280,
             averagePages = 12.5f,
             sessions = ProductivityPreviewData.generateMonthData()
-        )
+        ),
+        onToggleActivityChartSwitch = {}
+    )
+}
+
+@Preview
+@Composable
+private fun PreviewProductivityScreenYear() {
+    ProductivityScreenPrivate(
+        state = ProductivityState(
+            booksRead = 6,
+            pagesRead = 18574,
+            dayStreak = 280,
+            averagePages = 12.5f,
+            sessions = ProductivityPreviewData.generateYearData(),
+            activityChartTab = ActivityChartTab.YEAR
+        ),
+        onToggleActivityChartSwitch = {}
     )
 }

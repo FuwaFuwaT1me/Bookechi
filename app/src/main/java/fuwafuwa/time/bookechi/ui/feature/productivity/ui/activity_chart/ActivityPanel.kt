@@ -22,6 +22,7 @@ import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityColorScheme
 import fuwafuwa.time.bookechi.base.ui.util.AnimatedPeriodSwitcher
 import fuwafuwa.time.bookechi.base.ui.util.AnimatedPeriodSwitcherConfig
+import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ActivityChartTab
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityPreviewData
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityState
 import fuwafuwa.time.bookechi.ui.theme.FigmaBackground
@@ -32,6 +33,7 @@ import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 @Composable
 fun ActivityPanel(
     state: ProductivityState,
+    onToggleActivityChartSwitch: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -43,7 +45,7 @@ fun ActivityPanel(
             .padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 20.dp)
         ,
     ) {
-        PeriodSwitcher()
+        PeriodSwitcher(onToggleActivityChartSwitch)
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -56,7 +58,9 @@ fun ActivityPanel(
 }
 
 @Composable
-private fun PeriodSwitcher() {
+private fun PeriodSwitcher(
+    onSwitch: (Int) -> Unit
+) {
     AnimatedPeriodSwitcher(
         modifier = Modifier
             .fillMaxWidth()
@@ -73,7 +77,10 @@ private fun PeriodSwitcher() {
             selectedColor = Color.White,
             activeTextColor = FigmaTitle,
             inactiveTextColor = FigmaTitle.copy(alpha = 0.4f)
-        )
+        ),
+        onSwitch = { index ->
+            onSwitch(index)
+        }
     )
 }
 
@@ -103,19 +110,37 @@ private fun ActivityPart(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        MonthActivityChart(
-            year = 2026,
-            month = 1,
-            isHorizontal = true,
-            sessions = state.sessions,
-            config = ActivityChartConfig(
-                showSpacing = true,
-                itemHorizontalSpacing = 10.dp,
-                itemVerticalSpacing = 8.dp,
-                cornerRadius = 4.dp,
-                colorScheme = ActivityColorScheme.OrangeActivity
-            )
-        )
+        when (state.activityChartTab) {
+            ActivityChartTab.MONTH -> {
+                MonthActivityChart(
+                    year = 2026,
+                    month = 1,
+                    isHorizontal = true,
+                    sessions = state.sessions,
+                    config = ActivityChartConfig(
+                        showSpacing = true,
+                        itemHorizontalSpacing = 10.dp,
+                        itemVerticalSpacing = 8.dp,
+                        cornerRadius = 4.dp,
+                        colorScheme = ActivityColorScheme.OrangeActivity
+                    )
+                )
+            }
+            ActivityChartTab.YEAR -> {
+                YearActivityChart(
+                    year = 2026,
+                    isHorizontal = true,
+                    sessions = state.sessions,
+                    config = ActivityChartConfig(
+                        showSpacing = true,
+                        itemHorizontalSpacing = 3.dp,
+                        itemVerticalSpacing = 3.dp,
+                        cornerRadius = 3.dp,
+                        colorScheme = ActivityColorScheme.OrangeActivity
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -183,7 +208,7 @@ private fun ReadPagesOverview(
 
 @Preview
 @Composable
-private fun PreviewActivityPanel() {
+private fun PreviewActivityPanelMonth() {
     ActivityPanel(
         state = ProductivityState(
             booksRead = 100,
@@ -191,6 +216,23 @@ private fun PreviewActivityPanel() {
             dayStreak = 100,
             averagePages = 12.5f,
             sessions = ProductivityPreviewData.generateMonthData()
-        )
+        ),
+        onToggleActivityChartSwitch = {}
+    )
+}
+
+@Preview
+@Composable
+private fun PreviewActivityPanelYear() {
+    ActivityPanel(
+        state = ProductivityState(
+            booksRead = 100,
+            pagesRead = 1000,
+            dayStreak = 100,
+            averagePages = 12.5f,
+            sessions = ProductivityPreviewData.generateYearData(),
+            activityChartTab = ActivityChartTab.YEAR
+        ),
+        onToggleActivityChartSwitch = {}
     )
 }

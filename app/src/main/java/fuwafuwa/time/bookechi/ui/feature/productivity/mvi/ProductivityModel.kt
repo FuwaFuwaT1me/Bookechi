@@ -45,6 +45,14 @@ class ProductivityModel(
     }
 
     override fun onAction(action: ProductivityAction) {
-
+        when (action) {
+            is ProductivityAction.ToggleActivityChartTab -> {
+                updateState {
+                    copy(
+                        activityChartTab = action.tab
+                    )
+                }
+            }
+        }
     }
 }

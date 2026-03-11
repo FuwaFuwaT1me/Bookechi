@@ -38,6 +38,7 @@ fun AnimatedPeriodSwitcher(
     horizontalSpacing: Dp = 8.dp,
     verticalSpacing: Dp = 8.dp,
     itemSpacing: Dp = 8.dp,
+    onSwitch: (Int) -> Unit,
     config: AnimatedPeriodSwitcherConfig = AnimatedPeriodSwitcherConfig(),
 ) {
     var selectedIndex by remember { mutableIntStateOf(initialSelectedIndex) }
@@ -102,7 +103,8 @@ fun AnimatedPeriodSwitcher(
 @Composable
 private fun PreviewAnimatedPeriodSwitcher() {
     AnimatedPeriodSwitcher(
-        values = listOf("День", "Неделя", "Месяц", "Год")
+        values = listOf("День", "Неделя", "Месяц", "Год"),
+        onSwitch = {}
     )
 }
 
@@ -110,6 +112,7 @@ private fun PreviewAnimatedPeriodSwitcher() {
 @Composable
 private fun PreviewAnimatedPeriodSwitcher_2() {
     AnimatedPeriodSwitcher(
-        values = listOf("Месяц", "Год")
+        values = listOf("Месяц", "Год"),
+        onSwitch = {}
     )
 }

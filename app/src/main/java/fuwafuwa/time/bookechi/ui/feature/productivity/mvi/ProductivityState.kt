@@ -8,5 +8,16 @@ data class ProductivityState(
     val pagesRead: Int,
     val dayStreak: Int,
     val averagePages: Float,
-    val sessions: List<DailyReadingStats> = emptyList()
+    val sessions: List<DailyReadingStats> = emptyList(),
+    val activityChartTab: ActivityChartTab = ActivityChartTab.MONTH
 ) : State
+
+enum class ActivityChartTab {
+    MONTH,
+    YEAR;
+
+    companion object {
+
+        fun fromIndex(index: Int) = entries.getOrNull(index)
+    }
+}

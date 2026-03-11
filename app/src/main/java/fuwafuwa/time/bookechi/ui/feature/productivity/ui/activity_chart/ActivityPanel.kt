@@ -67,6 +67,7 @@ private fun PeriodSwitcher() {
         outerCornerRadius = 12.dp,
         horizontalSpacing = 4.dp,
         verticalSpacing = 4.dp,
+        itemSpacing = 8.dp,
         config = AnimatedPeriodSwitcherConfig(
             containerColor = FigmaPeriodSwitcherBackground,
             selectedColor = Color.White,

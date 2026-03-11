@@ -10,3 +10,11 @@ data class ActivityChartConfig(
     val cornerRadius: Dp = 2.dp,
     val colorScheme: ActivityColorScheme = ActivityColorScheme.OrangeActivity
 )
+
+data class YearActivityChartConfig(
+    val zoomMode: Boolean = false,
+    val zoomedItemSize: Dp = 12.dp,
+    val cellSpacing: Dp = 8.dp,
+    val separatorWidth: Dp = 4.dp,
+    val showMonthSeparators: Boolean = false
+)

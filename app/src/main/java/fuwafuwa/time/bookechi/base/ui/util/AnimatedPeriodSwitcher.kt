@@ -37,16 +37,16 @@ fun AnimatedPeriodSwitcher(
     outerCornerRadius: Dp = 20.dp,
     horizontalSpacing: Dp = 8.dp,
     verticalSpacing: Dp = 8.dp,
+    itemSpacing: Dp = 8.dp,
     config: AnimatedPeriodSwitcherConfig = AnimatedPeriodSwitcherConfig(),
 ) {
     var selectedIndex by remember { mutableIntStateOf(initialSelectedIndex) }
     var rowSize by remember { mutableStateOf(IntSize.Zero) }
 
     val density = LocalDensity.current
-    val itemSpacing = 8.dp
 
     val itemWidth = with(density) {
-        ((rowSize.width.toDp() - horizontalSpacing * 2 - itemSpacing) / values.size)
+        ((rowSize.width.toDp() - itemSpacing * (values.size - 1)) / values.size)
     }
 
     val indicatorOffset by animateDpAsState(
@@ -103,5 +103,13 @@ fun AnimatedPeriodSwitcher(
 private fun PreviewAnimatedPeriodSwitcher() {
     AnimatedPeriodSwitcher(
         values = listOf("День", "Неделя", "Месяц", "Год")
+    )
+}
+
+@Preview
+@Composable
+private fun PreviewAnimatedPeriodSwitcher_2() {
+    AnimatedPeriodSwitcher(
+        values = listOf("Месяц", "Год")
     )
 }

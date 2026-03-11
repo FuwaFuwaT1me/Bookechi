@@ -70,25 +70,6 @@ private fun BookListScreenPrivate(
             state = state,
             onAction = onAction
         )
-
-        if (state.books.isNotEmpty()) {
-            FloatingActionButton(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset(x = 8.dp, y = (-8).dp)
-                ,
-                containerColor = FigmaAddBookBackground,
-                contentColor = Color.White,
-                onClick = {
-                    onAction(BookListAction.NavigateToAddBook)
-                }
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    ""
-                )
-            }
-        }
     }
 }
 

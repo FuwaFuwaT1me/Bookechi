@@ -2,17 +2,22 @@ package fuwafuwa.time.bookechi.ui.feature.book_list.mvi
 
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.data.repository.BookRepository
+import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
 import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.NavigateToAddBook
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.NavigateToBookDetails
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 class BookListModel(
     defaultState: BookListState,
     private val bookRepository: BookRepository,
+    private val readingSessionRepository: ReadingSessionRepository,
 ) : BaseModel<BookListState, BookListAction>(defaultState) {
 
     init {
@@ -26,6 +31,23 @@ class BookListModel(
                     )
                 }
             }
+        }
+
+        scope.launch {
+            readingSessionRepository
+                .getDailyStatsForCurrentWeek()
+                .combine(readingSessionRepository.getCurrentStreakDays()) { weekSessions, streakDays ->
+                    weekSessions to streakDays
+                }
+                .collect { (weekSessions, streakDays) ->
+                    val today = LocalDate.now()
+                    updateState {
+                        copy(
+                            weekDayStreaks = buildWeekDayStreaks(weekSessions, today),
+                            totalDaysWithStreak = streakDays
+                        )
+                    }
+                }
         }
     }
 
@@ -74,6 +96,24 @@ class BookListModel(
 
         updateState {
             copy(isLoading = false)
+        }
+    }
+
+    private fun buildWeekDayStreaks(
+        weekSessions: List<fuwafuwa.time.bookechi.data.model.DailyReadingStats>,
+        today: LocalDate,
+        firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY
+    ): List<DayStreak> {
+        val startOfWeek = today.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
+        val sessionsByDate = weekSessions.associateBy { it.localDate }
+
+        return (0..6).map { offset ->
+            val date = startOfWeek.plusDays(offset.toLong())
+            val session = sessionsByDate[date]
+            DayStreak(
+                isStreakDay = (session?.totalPagesRead ?: 0) > 0,
+                isToday = date == today
+            )
         }
     }
 }

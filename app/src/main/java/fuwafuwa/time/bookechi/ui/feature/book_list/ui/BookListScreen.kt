@@ -36,6 +36,7 @@ import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListAction
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListState
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListViewModel
+import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.DayStreak
 import fuwafuwa.time.bookechi.ui.theme.FigmaAddBookBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
@@ -217,7 +218,17 @@ private fun BookListScreenPreview() {
                         )
                     )
                 }
-            }
+            },
+            totalDaysWithStreak = 10,
+            weekDayStreaks = listOf(
+                DayStreak(true, false),
+                DayStreak(false, false),
+                DayStreak(false, false),
+                DayStreak(false, true),
+                DayStreak(false, false),
+                DayStreak(false, false),
+                DayStreak(false, false),
+            )
         ),
         onAction = {}
     )
@@ -231,7 +242,17 @@ private fun EmptyBookListScreenPreview() {
             isLoading = false,
             gridColumnCount = 1,
             error = null,
-            books = emptyList()
+            books = emptyList(),
+            totalDaysWithStreak = 10,
+            weekDayStreaks = listOf(
+                DayStreak(true, false),
+                DayStreak(false, false),
+                DayStreak(false, false),
+                DayStreak(false, true),
+                DayStreak(false, false),
+                DayStreak(false, false),
+                DayStreak(false, false),
+            )
         ),
         onAction = {}
     )

@@ -56,6 +56,14 @@ interface ReadingSessionDao {
     """)
     fun getDailyStatsForYear(year: String): Flow<List<DailyReadingStats>>
 
+    @Query("""
+        SELECT DISTINCT date
+        FROM ReadingSession
+        WHERE date <= :endDate
+        ORDER BY date DESC
+    """)
+    fun getSessionDatesUpTo(endDate: String): Flow<List<String>>
+
     @Query("SELECT SUM(pagesRead) FROM ReadingSession WHERE bookId = :bookId")
     suspend fun getTotalPagesReadForBook(bookId: Long): Int?
 
@@ -109,5 +117,4 @@ interface ReadingSessionDao {
         }
     }
 }
-
 

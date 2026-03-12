@@ -8,6 +8,11 @@ data class BookListState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val gridColumnCount: Int = 1,
-    val streakDays: Int = 0,
-    val currentWeekStreakDays: Int = 0,
+    val totalDaysWithStreak: Int = 0,
+    val weekDayStreaks: List<DayStreak>,
 ) : State
+
+data class DayStreak(
+    val isStreakDay: Boolean,
+    val isToday: Boolean,
+)

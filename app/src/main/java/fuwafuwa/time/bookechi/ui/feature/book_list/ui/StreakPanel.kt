@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListState
+import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.DayStreak
 import fuwafuwa.time.bookechi.ui.theme.FigmaFire
 import fuwafuwa.time.bookechi.ui.theme.FigmaRedTitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaStreakBackgroundEnd
@@ -74,7 +75,7 @@ fun StreakPanel(
         Spacer(modifier = Modifier.size(4.dp))
 
         Text(
-            text = "${state.streakDays} дней подряд",
+            text = "${state.totalDaysWithStreak} дней подряд",
             color = FigmaTitle,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold
@@ -86,13 +87,9 @@ fun StreakPanel(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            StreakDay(1, true, false)
-            StreakDay(2, true, false)
-            StreakDay(3, true, false)
-            StreakDay(4, false, true)
-            StreakDay(5, false, false)
-            StreakDay(6, false, false)
-            StreakDay(7, false, false)
+            state.weekDayStreaks.forEachIndexed { index, day ->
+                StreakDay(index + 1, day.isStreakDay, day.isToday)
+            }
         }
     }
 }
@@ -115,11 +112,6 @@ private fun StreakDay(
                 },
                 shape = RoundedCornerShape(40.dp),
             )
-//            .graphicsLayer {
-//                shadowElevation = 1.dp.toPx()
-//                shape = RoundedCornerShape(40.dp)
-//                clip = false
-//            }
             .padding(vertical = 5.dp, horizontal = 9.dp)
         ,
     ) {
@@ -230,8 +222,16 @@ private fun PreviewStreakPanel() {
     StreakPanel(
         state = BookListState(
             books = emptyList(),
-            streakDays = 10,
-            currentWeekStreakDays = 3
+            totalDaysWithStreak = 10,
+            weekDayStreaks = listOf(
+                DayStreak(true, false),
+                DayStreak(false, false),
+                DayStreak(false, false),
+                DayStreak(false, true),
+                DayStreak(false, false),
+                DayStreak(false, false),
+                DayStreak(false, false),
+            )
         )
     )
 }

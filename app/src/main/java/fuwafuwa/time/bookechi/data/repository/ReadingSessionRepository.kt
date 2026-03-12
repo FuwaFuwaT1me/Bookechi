@@ -5,10 +5,14 @@ import fuwafuwa.time.bookechi.data.model.DailyReadingStats
 import fuwafuwa.time.bookechi.data.model.ReadingSession
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.time.Clock
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
 
 class ReadingSessionRepository(
     private val readingSessionDao: ReadingSessionDao
@@ -34,6 +38,24 @@ class ReadingSessionRepository(
 
     fun getDailyStatsForYear(year: Int): Flow<List<DailyReadingStats>> =
         readingSessionDao.getDailyStatsForYear(year.toString())
+
+    fun getDailyStatsForCurrentWeek(
+        firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
+        clock: Clock = Clock.systemDefaultZone()
+    ): Flow<List<DailyReadingStats>> {
+        val today = LocalDate.now(clock)
+        val startOfWeek = today.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
+        val endOfWeek = startOfWeek.plusDays(6)
+        return getDailyStatsForPeriod(startOfWeek, endOfWeek)
+    }
+
+    fun getCurrentStreakDays(clock: Clock = Clock.systemDefaultZone()): Flow<Int> {
+        val today = LocalDate.now(clock)
+        val todayKey = today.format(dateFormatter)
+        return readingSessionDao.getSessionDatesUpTo(todayKey).map { dates ->
+            calculateCurrentStreak(dates, today)
+        }
+    }
 
     suspend fun getTotalPagesReadForBook(bookId: Long): Int = withContext(Dispatchers.IO) {
         readingSessionDao.getTotalPagesReadForBook(bookId) ?: 0
@@ -114,5 +136,23 @@ class ReadingSessionRepository(
         startPage = startPage,
         endPage = endPage
     )
-}
 
+    private fun calculateCurrentStreak(dates: List<String>, today: LocalDate): Int {
+        if (dates.isEmpty()) return 0
+
+        var streak = 0
+        var expectedDate = today
+
+        for (dateString in dates) {
+            val date = LocalDate.parse(dateString)
+            if (date == expectedDate) {
+                streak++
+                expectedDate = expectedDate.minusDays(1)
+            } else if (date.isBefore(expectedDate)) {
+                break
+            }
+        }
+
+        return streak
+    }
+}

@@ -1,6 +1,7 @@
 package fuwafuwa.time.bookechi.ui.feature.book_list.di
 
 import fuwafuwa.time.bookechi.data.repository.BookRepository
+import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListModel
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListState
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListViewModel
@@ -19,14 +20,16 @@ val bookListModule = module {
             books = emptyList(),
             gridColumnCount = 1,
             isLoading = false,
-            error = null
+            error = null,
+            weekDayStreaks = emptyList()
         )
     }
 
     factory {
         BookListModel(
             defaultState = get<BookListState>(),
-            bookRepository = get<BookRepository>()
+            bookRepository = get<BookRepository>(),
+            readingSessionRepository = get<ReadingSessionRepository>()
         )
     }
 }

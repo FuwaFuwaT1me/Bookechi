@@ -5,10 +5,9 @@ import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
-import fuwafuwa.time.bookechi.ui.feature.productivity.util.getCurrentStreak
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.YearMonth
 
 class ProductivityModel(
@@ -19,21 +18,26 @@ class ProductivityModel(
 
     init {
         scope.launch {
-            val currentYear = LocalDateTime.now().year
-            val daysOfCurrentYear = LocalDateTime.now().dayOfYear
+            val currentYear = LocalDate.now().year
 
-            readingSessionRepository.getDailyStatsForYear(currentYear).collect { sessions ->
-                val totalPagesRead = sessions.sumOf { it.totalPagesRead }
-
-                updateState {
-                    copy(
-                        averagePages = 1f * totalPagesRead / daysOfCurrentYear,
-                        dayStreak = sessions.getCurrentStreak(),
-                        pagesRead = totalPagesRead,
-                        sessions = sessions
-                    )
+            readingSessionRepository
+                .getDailyStatsForYear(currentYear)
+                .combine(readingSessionRepository.getCurrentStreakDays()) { sessions, streakDays ->
+                    sessions to streakDays
                 }
-            }
+                .collect { (sessions, streakDays) ->
+                    val daysOfCurrentYear = LocalDate.now().dayOfYear
+                    val totalPagesRead = sessions.sumOf { it.totalPagesRead }
+
+                    updateState {
+                        copy(
+                            averagePages = 1f * totalPagesRead / daysOfCurrentYear,
+                            dayStreak = streakDays,
+                            pagesRead = totalPagesRead,
+                            sessions = sessions
+                        )
+                    }
+                }
         }
 
         scope.launch {

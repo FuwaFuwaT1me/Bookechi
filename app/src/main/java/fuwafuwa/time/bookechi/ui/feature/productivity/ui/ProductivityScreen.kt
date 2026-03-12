@@ -73,6 +73,11 @@ fun ProductivityScreen(
                         ProductivityAction.DebugOverwriteMonth(year, month, pagesPerDay, booksCount)
                     )
                 },
+                fillRecentWeeks = { pagesPerDay, booksCount ->
+                    viewModel.sendAction(
+                        ProductivityAction.DebugFillRecentWeeks(pagesPerDay, booksCount)
+                    )
+                },
                 clearAll = {
                     viewModel.sendAction(ProductivityAction.DebugClearAll)
                 }
@@ -86,6 +91,7 @@ fun ProductivityScreen(
 private data class ProductivityDebugActions(
     val overwriteYear: (Int, Int, Int) -> Unit,
     val overwriteMonth: (Int, Int, Int, Int) -> Unit,
+    val fillRecentWeeks: (Int, Int) -> Unit,
     val clearAll: () -> Unit
 )
 
@@ -116,6 +122,7 @@ private fun ProductivityScreenPrivate(
             DebugPanel(
                 onOverwriteYear = debugActions.overwriteYear,
                 onOverwriteMonth = debugActions.overwriteMonth,
+                onFillRecentWeeks = debugActions.fillRecentWeeks,
                 onClearAll = debugActions.clearAll
             )
         }
@@ -229,6 +236,7 @@ private fun PreviewProductivityScreenYear() {
 private fun DebugPanel(
     onOverwriteYear: (Int, Int, Int) -> Unit,
     onOverwriteMonth: (Int, Int, Int, Int) -> Unit,
+    onFillRecentWeeks: (Int, Int) -> Unit,
     onClearAll: () -> Unit
 ) {
     val today = remember { LocalDate.now() }
@@ -293,6 +301,10 @@ private fun DebugPanel(
                 Button(onClick = { onOverwriteMonth(year, month, pages, books) }) {
                     Text("Overwrite Month")
                 }
+            }
+
+            Button(onClick = { onFillRecentWeeks(pages, books) }) {
+                Text("Fill Recent 3.5 Weeks")
             }
 
             Button(onClick = onClearAll) {

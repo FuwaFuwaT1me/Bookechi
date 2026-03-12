@@ -100,7 +100,7 @@ private fun ActivityPart(
         ,
     ) {
         Text(
-            text = "Март 2026",
+            text = "Март ${state.currentYear}",
             color = FigmaTitle,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
@@ -115,8 +115,8 @@ private fun ActivityPart(
         when (state.activityChartTab) {
             ActivityChartTab.MONTH -> {
                 MonthActivityChart(
-                    year = 2026,
-                    month = 1,
+                    year = state.currentYear,
+                    month = state.currentMonth,
                     isHorizontal = true,
                     sessions = state.sessions,
                     config = ActivityChartConfig(
@@ -130,7 +130,7 @@ private fun ActivityPart(
             }
             ActivityChartTab.YEAR -> {
                 YearActivityChart(
-                    year = 2026,
+                    year = state.currentYear,
                     isHorizontal = true,
                     sessions = state.sessions,
                     config = ActivityChartConfig(

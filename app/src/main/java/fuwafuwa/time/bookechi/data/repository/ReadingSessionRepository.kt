@@ -140,8 +140,12 @@ class ReadingSessionRepository(
     private fun calculateCurrentStreak(dates: List<String>, today: LocalDate): Int {
         if (dates.isEmpty()) return 0
 
+        val todayKey = today.format(dateFormatter)
+        val hasToday = dates.firstOrNull() == todayKey
+        val startDate = if (hasToday) today else today.minusDays(1)
+
         var streak = 0
-        var expectedDate = today
+        var expectedDate = startDate
 
         for (dateString in dates) {
             val date = LocalDate.parse(dateString)

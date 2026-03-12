@@ -41,9 +41,17 @@ class BookListModel(
                 }
                 .collect { (weekSessions, streakDays) ->
                     val today = LocalDate.now()
+                    val hasSessionToday = weekSessions.any { session ->
+                        session.localDate == today && session.totalPagesRead > 0
+                    }
                     updateState {
                         copy(
-                            weekDayStreaks = buildWeekDayStreaks(weekSessions, today),
+                            weekDayStreaks = buildWeekDayStreaks(
+                                weekSessions = weekSessions,
+                                today = today,
+                                streakDays = streakDays,
+                                hasSessionToday = hasSessionToday
+                            ),
                             totalDaysWithStreak = streakDays
                         )
                     }
@@ -102,16 +110,28 @@ class BookListModel(
     private fun buildWeekDayStreaks(
         weekSessions: List<fuwafuwa.time.bookechi.data.model.DailyReadingStats>,
         today: LocalDate,
+        streakDays: Int,
+        hasSessionToday: Boolean,
         firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY
     ): List<DayStreak> {
         val startOfWeek = today.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
         val sessionsByDate = weekSessions.associateBy { it.localDate }
+        val streakEnd = when {
+            streakDays <= 0 -> null
+            hasSessionToday -> today
+            else -> today.minusDays(1)
+        }
+        val streakStart = streakEnd?.minusDays(streakDays.toLong() - 1)
 
         return (0..6).map { offset ->
             val date = startOfWeek.plusDays(offset.toLong())
             val session = sessionsByDate[date]
             DayStreak(
-                isStreakDay = (session?.totalPagesRead ?: 0) > 0,
+                isStreakDay = session != null &&
+                    streakStart != null &&
+                    streakEnd != null &&
+                    !date.isAfter(streakEnd) &&
+                    !date.isBefore(streakStart),
                 isToday = date == today
             )
         }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlusOne
 import androidx.compose.material3.Button
@@ -265,6 +266,9 @@ fun NewBookItem(
                             Spacer(modifier = Modifier.weight(1f))
 
                             Text(
+                                modifier = Modifier
+                                    .offset(0.dp, 8.dp)
+                                ,
                                 text = "${100 * book.currentPage / book.pages}%",
                                 color = FigmaTitle,
                                 fontSize = 14.sp,
@@ -305,7 +309,7 @@ fun NewBookItem(
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.PlusOne,
+                                imageVector = Icons.Filled.Edit,
                                 contentDescription = "Edit",
                                 tint = Color.White
                             )

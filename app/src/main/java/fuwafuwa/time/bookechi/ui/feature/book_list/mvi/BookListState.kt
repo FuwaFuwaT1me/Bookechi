@@ -10,6 +10,7 @@ data class BookListState(
     val gridColumnCount: Int = 1,
     val totalDaysWithStreak: Int = 0,
     val weekDayStreaks: List<DayStreak>,
+    val isTodayStreak: Boolean
 ) : State
 
 data class DayStreak(

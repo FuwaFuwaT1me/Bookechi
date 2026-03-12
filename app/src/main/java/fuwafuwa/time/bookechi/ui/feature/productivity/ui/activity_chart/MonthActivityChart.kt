@@ -22,6 +22,7 @@ import fuwafuwa.time.bookechi.base.ui.chart.ChartCellData
 import fuwafuwa.time.bookechi.base.ui.chart.getRelativeActivityIntensity
 import fuwafuwa.time.bookechi.data.model.DailyReadingStats
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityPreviewData
+import java.time.LocalDate
 
 private const val DAYS_IN_WEEK = 7
 private const val COMPACT_HORIZONTAL_MONTH_COLUMNS = 10
@@ -37,6 +38,7 @@ fun MonthActivityChart(
 ) {
     val weeksInMonth = remember(year, month) { getWeeksInMonth(year, month) }
     val daysInMonth = remember(year, month) { getDaysInMonth(year, month) }
+    val today = LocalDate.now()
 
     val (weekGridCells, linearCells) = remember(year, month, sessions) {
         val maxPages = sessions.maxByOrNull { it.totalPagesRead }?.totalPagesRead ?: 0
@@ -58,6 +60,7 @@ fun MonthActivityChart(
         HorizontalMonthChart(
             cellsData = linearCells,
             config = config,
+            highlightDate = today,
             modifier = modifier
         )
     } else {
@@ -65,6 +68,7 @@ fun MonthActivityChart(
             weeksInMonth = weeksInMonth,
             cellsData = weekGridCells,
             config = config,
+            highlightDate = today,
             modifier = modifier
         )
     }
@@ -74,6 +78,7 @@ fun MonthActivityChart(
 private fun HorizontalMonthChart(
     cellsData: List<ChartCellData>,
     config: ActivityChartConfig,
+    highlightDate: LocalDate,
     modifier: Modifier = Modifier
 ) {
     val verticalSpacing = if (config.showSpacing) config.itemVerticalSpacing else 0.dp
@@ -97,6 +102,7 @@ private fun HorizontalMonthChart(
                     ActivityChartCell(
                         cellData = cellData,
                         config = config,
+                        highlightDate = highlightDate,
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
@@ -112,6 +118,7 @@ private fun VerticalMonthChart(
     weeksInMonth: Int,
     cellsData: List<ChartCellData>,
     config: ActivityChartConfig,
+    highlightDate: LocalDate,
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier = modifier) {
@@ -127,6 +134,7 @@ private fun VerticalMonthChart(
                         ActivityChartCell(
                             cellData = cellData,
                             config = config,
+                            highlightDate = highlightDate,
                             modifier = Modifier.size(cellSize)
                         )
                     }

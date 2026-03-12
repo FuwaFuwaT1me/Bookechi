@@ -21,7 +21,8 @@ val bookListModule = module {
             gridColumnCount = 1,
             isLoading = false,
             error = null,
-            weekDayStreaks = emptyList()
+            weekDayStreaks = emptyList(),
+            isTodayStreak = false
         )
     }
 

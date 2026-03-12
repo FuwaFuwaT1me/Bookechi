@@ -30,6 +30,7 @@ import fuwafuwa.time.bookechi.base.ui.chart.YearActivityChartConfig
 import fuwafuwa.time.bookechi.base.ui.chart.getRelativeActivityIntensity
 import fuwafuwa.time.bookechi.data.model.DailyReadingStats
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityPreviewData
+import java.time.LocalDate
 
 private const val DAYS_IN_WEEK = 7
 private const val COMPACT_HORIZONTAL_YEAR_COLUMNS = 25
@@ -45,6 +46,7 @@ fun YearActivityChart(
 ) {
     val weeksInYear = remember(year) { getWeeksInYear(year) }
     val daysInYear = remember(year) { getDaysInYear(year) }
+    val today = LocalDate.now()
 
     val (weekGridCells, linearCells) = remember(year, sessions) {
         val maxPages = sessions.maxOfOrNull { it.totalPagesRead } ?: 0
@@ -68,6 +70,7 @@ fun YearActivityChart(
             cellsData = weekGridCells,
             config = config,
             yearConfig = yearConfig,
+            highlightDate = today,
             modifier = modifier,
         )
     } else {
@@ -75,6 +78,7 @@ fun YearActivityChart(
             CompactHorizontalYearChart(
                 cellsData = linearCells,
                 config = config,
+                highlightDate = today,
                 modifier = modifier
             )
         } else {
@@ -82,6 +86,7 @@ fun YearActivityChart(
                 weeksInYear = weeksInYear,
                 cellsData = weekGridCells,
                 config = config,
+                highlightDate = today,
                 modifier = modifier
             )
         }
@@ -93,6 +98,7 @@ private fun CompactVerticalYearChart(
     weeksInYear: Int,
     cellsData: List<ChartCellData>,
     config: ActivityChartConfig,
+    highlightDate: LocalDate,
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier = modifier) {
@@ -108,6 +114,7 @@ private fun CompactVerticalYearChart(
                         ActivityChartCell(
                             cellData = cellData,
                             config = config,
+                            highlightDate = highlightDate,
                             modifier = Modifier.size(cellSize)
                         )
                     }
@@ -121,6 +128,7 @@ private fun CompactVerticalYearChart(
 private fun CompactHorizontalYearChart(
     cellsData: List<ChartCellData>,
     config: ActivityChartConfig,
+    highlightDate: LocalDate,
     modifier: Modifier = Modifier
 ) {
     val verticalSpacing = if (config.showSpacing) config.itemVerticalSpacing else 0.dp
@@ -144,6 +152,7 @@ private fun CompactHorizontalYearChart(
                     ActivityChartCell(
                         cellData = cellData,
                         config = config,
+                        highlightDate = highlightDate,
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
@@ -160,6 +169,7 @@ private fun ZoomedYearChart(
     cellsData: List<ChartCellData>,
     config: ActivityChartConfig,
     yearConfig: YearActivityChartConfig,
+    highlightDate: LocalDate,
     modifier: Modifier = Modifier
 ) {
     val scrollState = rememberScrollState()
@@ -192,6 +202,7 @@ private fun ZoomedYearChart(
                         ActivityChartCell(
                             cellData = cellData,
                             config = config,
+                            highlightDate = highlightDate,
                             modifier = Modifier.size(yearConfig.zoomedItemSize)
                         )
                     }

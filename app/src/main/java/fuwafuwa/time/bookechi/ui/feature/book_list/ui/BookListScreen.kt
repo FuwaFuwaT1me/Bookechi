@@ -185,7 +185,11 @@ private fun Header(state: BookListState) {
             modifier = Modifier
                 .align(Alignment.Start)
             ,
-            text = "Ты уже читал сегодня?",
+            text = if (state.isTodayStreak) {
+                "Стрик продлен, так держать!"
+            } else {
+                "Ты уже читал сегодня?"
+            },
             fontSize = 30.sp,
             color = FigmaTitle,
             fontWeight = FontWeight.Bold
@@ -220,6 +224,7 @@ private fun BookListScreenPreview() {
                 }
             },
             totalDaysWithStreak = 10,
+            isTodayStreak = false,
             weekDayStreaks = listOf(
                 DayStreak(true, false),
                 DayStreak(false, false),
@@ -244,6 +249,7 @@ private fun EmptyBookListScreenPreview() {
             error = null,
             books = emptyList(),
             totalDaysWithStreak = 10,
+            isTodayStreak = false,
             weekDayStreaks = listOf(
                 DayStreak(true, false),
                 DayStreak(false, false),

@@ -19,5 +19,10 @@ sealed interface ProductivityAction : Action {
         val booksCount: Int
     ) : ProductivityAction
 
+    data class DebugFillRecentWeeks(
+        val pagesPerDay: Int,
+        val booksCount: Int
+    ) : ProductivityAction
+
     data object DebugClearAll : ProductivityAction
 }

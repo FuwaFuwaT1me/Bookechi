@@ -22,22 +22,32 @@ import fuwafuwa.time.bookechi.base.ui.chart.ActivityColorScheme
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityIntensity
 import fuwafuwa.time.bookechi.base.ui.chart.ChartCellData
 import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellZeroActivityStroke
+import fuwafuwa.time.bookechi.ui.theme.FigmaFire
+import java.time.LocalDate
 
 @Composable
 fun ActivityChartCell(
     cellData: ChartCellData?,
     config: ActivityChartConfig,
+    highlightDate: LocalDate? = null,
     modifier: Modifier = Modifier
 ) {
     val color = getCellColor(cellData, config)
     val shape = RoundedCornerShape(config.cornerRadius)
+    val isHighlighted = highlightDate != null && cellData?.date?.localDate == highlightDate
 
     Box(
         modifier = modifier
             .clip(shape)
             .background(color)
             .then(
-                if (cellData?.intensity == ActivityIntensity.NONE) {
+                if (isHighlighted) {
+                    Modifier.border(
+                        width = 1.5.dp,
+                        color = FigmaFire,
+                        shape = shape
+                    )
+                } else if (cellData?.intensity == ActivityIntensity.NONE) {
                     Modifier.border(
                         width = 1.dp,
                         color = FigmaActivityCellZeroActivityStroke,

@@ -88,7 +88,21 @@ fun StreakPanel(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             state.weekDayStreaks.forEachIndexed { index, day ->
-                StreakDay(index + 1, day.isStreakDay, day.isToday)
+                Column {
+                    StreakDay(index + 1, day.isStreakDay, day.isToday)
+
+                    if (day.isToday) {
+                        Spacer(Modifier.size(8.dp))
+
+                        Canvas(
+                            Modifier
+                                .size(8.dp)
+                                .align(Alignment.CenterHorizontally)
+                        ) {
+                            drawCircle(FigmaFire)
+                        }
+                    }
+                }
             }
         }
     }
@@ -223,6 +237,7 @@ private fun PreviewStreakPanel() {
         state = BookListState(
             books = emptyList(),
             totalDaysWithStreak = 10,
+            isTodayStreak = false,
             weekDayStreaks = listOf(
                 DayStreak(true, false),
                 DayStreak(false, false),

@@ -9,7 +9,9 @@ data class ProductivityState(
     val dayStreak: Int,
     val averagePages: Float,
     val sessions: List<DailyReadingStats> = emptyList(),
-    val activityChartTab: ActivityChartTab = ActivityChartTab.MONTH
+    val activityChartTab: ActivityChartTab = ActivityChartTab.MONTH,
+    val currentYear: Int = 0,
+    val currentMonth: Int = 0,
 ) : State
 
 enum class ActivityChartTab {

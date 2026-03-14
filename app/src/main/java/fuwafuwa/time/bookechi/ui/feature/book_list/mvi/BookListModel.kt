@@ -6,6 +6,7 @@ import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
 import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.NavigateToAddBook
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.NavigateToBookDetails
+import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.NavigateToUpdateProgress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -66,9 +67,12 @@ class BookListModel(
             is BookListAction.DeleteBook -> scope.launch {
                 handleDeleteBook(action.book)
             }
+            is BookListAction.NavigateToEditBook -> sendNavigationEvent(
+                NavigateToUpdateProgress(action.book)
+            )
             is BookListAction.NavigateToAddBook -> sendNavigationEvent(NavigateToAddBook())
             is BookListAction.NavigateToBookDetails -> sendNavigationEvent(
-                NavigateToBookDetails(action.book.id)
+                NavigateToBookDetails(action.bookId)
             )
         }
     }

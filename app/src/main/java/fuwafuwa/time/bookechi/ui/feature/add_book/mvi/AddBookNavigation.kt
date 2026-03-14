@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.data.preferences.AppPreferences
 import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent
 import fuwafuwa.time.bookechi.mvi.ui.BaseScreen

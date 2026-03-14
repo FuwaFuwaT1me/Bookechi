@@ -63,6 +63,8 @@ fun BookReadingActionButtons(
         }
         
         ReadingStatus.Completed -> {}
+        ReadingStatus.Planned -> {}
+        ReadingStatus.Favorite -> {}
     }
 }
 

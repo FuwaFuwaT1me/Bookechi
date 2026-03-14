@@ -258,11 +258,13 @@ private fun BookDetailsContent(
 
                 // Status Badge
                 val (statusColor, statusText) = when (book.readingStatus) {
+                    ReadingStatus.None -> Color(0xFF94A3B8) to "📚 Not Started"
+                    ReadingStatus.Planned -> Color(0xFF94A3B8) to "Planned"
                     ReadingStatus.Reading -> Color(0xFF22C55E) to "📖 Reading"
                     ReadingStatus.Paused -> Color(0xFFF59E0B) to "⏸️ Paused"
                     ReadingStatus.Stopped -> Color(0xFF6366F1) to "✅ Finished"
-                    ReadingStatus.None -> Color(0xFF94A3B8) to "📚 Not Started"
                     ReadingStatus.Completed -> Color.Green to "Completed"
+                    ReadingStatus.Favorite -> Color.Red to "Favorite"
                 }
 
                 Box(
@@ -401,6 +403,8 @@ private fun ActionButtonsV2(
         }
 
         ReadingStatus.Completed -> {}
+        ReadingStatus.Planned -> {}
+        ReadingStatus.Favorite -> {}
     }
 }
 

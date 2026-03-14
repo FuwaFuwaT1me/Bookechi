@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
+import fuwafuwa.time.bookechi.ui.feature.library.ui.LibraryScreen
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityScreen
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
 import fuwafuwa.time.bookechi.ui.theme.FigmaBottomNavSelectedTab
@@ -52,7 +53,7 @@ val BottomNavItems = listOf(
     BottomNavItem(
         label = "Библиотека",
         resId = R.drawable.book_open,
-        route = ProductivityScreen
+        route = LibraryScreen
     ),
 )
 

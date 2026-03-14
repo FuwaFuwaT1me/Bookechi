@@ -143,7 +143,7 @@ private fun LazyGridScope.bookListBody(
                     ),
                     book = book,
                     onBookClick = {
-                        onAction(BookListAction.NavigateToBookDetails(book.id))
+                        onAction(BookListAction.NavigateToBookDetails(book))
                     },
                     onEditBookClick = {
                         onAction(BookListAction.NavigateToEditBook(book))

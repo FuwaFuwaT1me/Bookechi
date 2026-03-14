@@ -5,6 +5,7 @@ import fuwafuwa.time.bookechi.di.databaseModule
 import fuwafuwa.time.bookechi.ui.feature.add_book.di.addBookModule
 import fuwafuwa.time.bookechi.ui.feature.book_details.di.bookDetailsModule
 import fuwafuwa.time.bookechi.ui.feature.book_list.di.bookListModule
+import fuwafuwa.time.bookechi.ui.feature.library.di.libraryModule
 import fuwafuwa.time.bookechi.ui.feature.productivity.di.productivityModule
 import fuwafuwa.time.bookechi.ui.feature.reading_goals.di.readingGoalsModule
 import fuwafuwa.time.bookechi.ui.feature.reading_stats.di.readingStatsModule
@@ -27,6 +28,7 @@ class BookechiApplication : Application() {
                 bookDetailsModule,
                 productivityModule,
                 updateProgressModule,
+                libraryModule,
             )
         }
     }

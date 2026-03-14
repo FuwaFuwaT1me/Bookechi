@@ -72,7 +72,7 @@ class BookListModel(
             )
             is BookListAction.NavigateToAddBook -> sendNavigationEvent(NavigateToAddBook())
             is BookListAction.NavigateToBookDetails -> sendNavigationEvent(
-                NavigateToBookDetails(action.bookId)
+                NavigateToBookDetails(action.book)
             )
         }
     }

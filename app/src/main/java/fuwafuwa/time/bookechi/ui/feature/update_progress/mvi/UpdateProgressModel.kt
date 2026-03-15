@@ -19,7 +19,13 @@ class UpdateProgressModel(
             }
             is UpdateProgressAction.UpdatePageInputByPreset -> {
                 updateState {
-                    copy(updatedInputPages = updatedInputPages + action.value)
+                    val updatedPages = updatedInputPages + action.value
+
+                    if (updatedPages <= book.pages) {
+                        copy(updatedInputPages = updatedPages)
+                    } else {
+                        copy(updatedInputPages = book.pages)
+                    }
                 }
             }
         }

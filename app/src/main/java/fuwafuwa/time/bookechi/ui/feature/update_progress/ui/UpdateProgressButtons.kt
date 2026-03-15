@@ -33,7 +33,7 @@ internal fun PageUpdateButtons(
             buttonText = "+5",
             buttonColor = FigmaActivityCellTwoActivity,
             onClick = {
-                onAction(UpdateProgressAction.UpdatePageInput(5))
+                onAction(UpdateProgressAction.UpdatePageInputByPreset(5))
             }
         )
 
@@ -41,7 +41,7 @@ internal fun PageUpdateButtons(
             buttonText = "+10",
             buttonColor = FigmaActivityCellThreeActivity,
             onClick = {
-                onAction(UpdateProgressAction.UpdatePageInput(10))
+                onAction(UpdateProgressAction.UpdatePageInputByPreset(10))
             }
         )
 
@@ -49,7 +49,7 @@ internal fun PageUpdateButtons(
             buttonText = "+20",
             buttonColor = FigmaActivityCellFourActivity,
             onClick = {
-                onAction(UpdateProgressAction.UpdatePageInput(20))
+                onAction(UpdateProgressAction.UpdatePageInputByPreset(20))
             }
         )
     }

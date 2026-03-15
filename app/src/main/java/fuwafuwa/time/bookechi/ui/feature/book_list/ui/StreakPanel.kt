@@ -68,7 +68,7 @@ fun StreakPanel(
         Text(
             text = "Ваш прогресс",
             color = FigmaRedTitle,
-            fontSize = 11.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold
         )
 

@@ -47,6 +47,7 @@ internal fun DrawScope.drawLinearIndicator(
 data class DiffConfig(
     val lastProgress: Float,
     val diffColor: Color,
+    val labelText: String? = null,
     val showPercent: Boolean = true,
     val showingPercentColor: Color = Color.Transparent,
 )
@@ -106,11 +107,13 @@ fun SimpleProgressIndicator(
         if (diffConfig != null && diffConfig.showPercent && barHeight > 0f) {
             val currentProgress = progress.coerceIn(0f, 1f)
             val lastProgress = diffConfig.lastProgress.coerceIn(0f, 1f)
-            val diffPercent = (currentProgress - lastProgress) * 100f
-            val diffText = if (diffPercent >= 0f) {
-                "+${diffPercent.roundToInt()}%"
-            } else {
-                "${diffPercent.roundToInt()}%"
+            val diffText = diffConfig.labelText ?: run {
+                val diffPercent = (currentProgress - lastProgress) * 100f
+                if (diffPercent >= 0f) {
+                    "+${diffPercent.roundToInt()}%"
+                } else {
+                    "${diffPercent.roundToInt()}%"
+                }
             }
 
             val fontSize = (barHeight * 0.6f).toSp()

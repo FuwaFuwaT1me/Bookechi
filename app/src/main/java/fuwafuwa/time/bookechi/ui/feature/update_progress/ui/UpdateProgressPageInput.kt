@@ -1,11 +1,14 @@
 package fuwafuwa.time.bookechi.ui.feature.update_progress.ui
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -39,10 +42,13 @@ internal fun PageInput(
     Column(
         horizontalAlignment = Alignment.Start
     ) {
-        PageNumberField(
-            value = state.startPages.toString(),
-            textColor = FigmaTitle.copy(alpha = 0.3f),
-            onValueChange = {}
+        Text(
+            text = state.startPages.toString(),
+            fontSize = 64.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = FigmaTitle.copy(alpha = 0.3f),
+            lineHeight = 72.sp,
+            textAlign = TextAlign.Start,
         )
 
         HorizontalDivider(
@@ -74,14 +80,15 @@ internal fun PageInput(
         Spacer(Modifier.height(16.dp))
 
         PageNumberField(
-            value = state.updatedInputPages.toString(),
+            state = state,
             textColor = FigmaTitle,
+            enabled = true,
             onValueChange = { newPageString ->
-                val newPageInt = newPageString.toIntOrNull() ?: state.startPages
+                val newPageInt = newPageString.toIntOrNull() ?: 0
 
-                if (newPageInt >= state.startPages) {
-                    onValueChange(newPageInt)
-                }
+                onValueChange(
+                    newPageInt.coerceIn(0, state.book.pages)
+                )
             }
         )
 
@@ -105,38 +112,56 @@ internal fun PageInput(
 
 @Composable
 internal fun PageNumberField(
-    value: String,
+    state: UpdateProgressState,
     textColor: Color,
+    enabled: Boolean,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BasicTextField(
-        modifier = modifier,
-        value = value,
-        onValueChange = onValueChange,
-        textStyle = TextStyle(
-            fontSize = 64.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = textColor,
-            lineHeight = 72.sp,
-            textAlign = TextAlign.Start,
-        ),
-        maxLines = 2,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        cursorBrush = SolidColor(textColor),
-        singleLine = true,
-        enabled = false
-    ) { innerTextField ->
-        if (value.isBlank()) {
-            Text(
-                text = "0",
-                color = FigmaTitle.copy(alpha = 0.3f),
+    val value = state.updatedInputPages.toString()
+
+    Row {
+        BasicTextField(
+            modifier = modifier
+                .weight(1f)
+            ,
+            value = value,
+            onValueChange = onValueChange,
+            textStyle = TextStyle(
                 fontSize = 64.sp,
-                fontWeight = FontWeight.Bold,
-                lineHeight = 72.sp
-            )
+                fontWeight = FontWeight.SemiBold,
+                color = textColor,
+                lineHeight = 72.sp,
+                textAlign = TextAlign.Start,
+            ),
+            maxLines = 2,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            cursorBrush = SolidColor(textColor),
+            singleLine = true,
+            enabled = enabled,
+        ) { innerTextField ->
+            if (value.isBlank()) {
+                Text(
+                    text = "0",
+                    color = FigmaTitle.copy(alpha = 0.3f),
+                    fontSize = 64.sp,
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = 72.sp
+                )
+            }
+            innerTextField()
         }
-        innerTextField()
+
+        Text(
+            modifier = Modifier
+                .align(Alignment.Bottom)
+            ,
+            text = "/${state.book.pages}",
+            color = FigmaTitle.copy(alpha = 0.3f),
+            fontSize = 42.sp,
+            fontWeight = FontWeight.Bold,
+            lineHeight = 42.sp,
+        )
     }
 }
 

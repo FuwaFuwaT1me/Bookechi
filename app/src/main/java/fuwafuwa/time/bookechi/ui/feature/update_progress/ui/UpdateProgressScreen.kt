@@ -42,6 +42,7 @@ import fuwafuwa.time.bookechi.ui.theme.FigmaLightGrey
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 import kotlinx.serialization.Serializable
+import kotlin.math.roundToInt
 
 @Serializable
 data class UpdateProgressScreen(
@@ -117,7 +118,11 @@ private fun UpdateProgressScreenContent(
                         fontWeight = FontWeight.Bold
                     ),
                 ) {
-                    append("+${state.updatedInputPages - state.startPages}")
+                    val sign = if (state.updatedInputPages > state.startPages) {
+                        "+"
+                    } else ""
+
+                    append("$sign${state.updatedInputPages - state.startPages}")
                 }
 
                 append(" страниц")
@@ -136,18 +141,30 @@ private fun UpdateProgressScreenContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        val currentProgress = (1f * state.updatedInputPages / state.book.pages).coerceIn(0f, 1f)
+        val startProgress = (1f * state.startPages / state.book.pages).coerceIn(0f, 1f)
+        val currentPercent = (currentProgress * 100f).roundToInt()
+        val diffPercent = ((currentProgress - startProgress) * 100f).roundToInt()
+        val showDiff = state.updatedInputPages > state.startPages
+        val progressLabel = if (showDiff) {
+            "${currentPercent}% (+${diffPercent}%)"
+        } else {
+            "${currentPercent}%"
+        }
+
         SimpleProgressIndicator(
             modifier = Modifier
                 .height(24.dp)
                 .fillMaxWidth()
             ,
-            progress = 1f * state.updatedInputPages / state.book.pages,
+            progress = currentProgress,
             progressBarColor = FigmaFire,
             cornerRadius = 6.dp,
             trackColor = FigmaLightGrey,
             diffConfig = DiffConfig(
-                lastProgress = 1f * state.startPages / state.book.pages,
+                lastProgress = if (showDiff) startProgress else currentProgress,
                 diffColor = FigmaActivityCellTwoActivity,
+                labelText = progressLabel,
                 showingPercentColor = Color.White,
                 showPercent = true
             )

@@ -41,6 +41,7 @@ fun NavGraphBuilder.addBookNavRoot(
     }
 }
 
-data class NavigateToAddBook(
-    override val screen: Screen = AddBookScreen,
-) : BaseNavigationEvent.NavigateTo
+object NavigateToAddBook : BaseNavigationEvent.NavigateTo {
+
+    override val screen: Screen = AddBookScreen
+}

@@ -3,10 +3,10 @@ package fuwafuwa.time.bookechi.ui.feature.update_progress.mvi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import fuwafuwa.time.bookechi.data.model.Book
+import fuwafuwa.time.bookechi.navigation.BookNavType
 import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent
 import fuwafuwa.time.bookechi.mvi.ui.BaseScreen
 import fuwafuwa.time.bookechi.mvi.ui.Screen
@@ -21,7 +21,7 @@ fun NavGraphBuilder.updateProgressNavRoot(
 ) {
     composable<UpdateProgressScreen>(
         typeMap = mapOf(
-            typeOf<Book>() to NavType.ParcelableType(Book::class.java)
+            typeOf<Book>() to BookNavType
         )
     ) { backStackEntry ->
         val route = backStackEntry.toRoute<UpdateProgressScreen>()

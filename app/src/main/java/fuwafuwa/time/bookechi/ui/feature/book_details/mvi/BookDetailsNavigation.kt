@@ -5,7 +5,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import fuwafuwa.time.bookechi.data.preferences.AppPreferences
@@ -13,6 +12,7 @@ import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent
 import fuwafuwa.time.bookechi.mvi.ui.BaseScreen
 import fuwafuwa.time.bookechi.mvi.ui.Screen
+import fuwafuwa.time.bookechi.navigation.BookNavType
 import fuwafuwa.time.bookechi.ui.feature.book_details.ui.BookDetailsScreen
 import fuwafuwa.time.bookechi.ui.feature.book_details.ui.BookDetailsScreenV2
 import kotlinx.serialization.Serializable
@@ -32,7 +32,7 @@ fun NavGraphBuilder.bookDetailsNavRoot(
 ) {
     composable<BookDetailsScreen>(
         typeMap = mapOf(
-            typeOf<Book>() to NavType.ParcelableType(Book::class.java)
+            typeOf<Book>() to BookNavType
         )
     ) { backStackEntry ->
         val route = backStackEntry.toRoute<BookDetailsScreen>()

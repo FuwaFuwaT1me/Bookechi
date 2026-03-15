@@ -13,9 +13,13 @@ class UpdateProgressModel(
                 sendNavigationEvent(BaseNavigationEvent.NavigateBack)
             }
             is UpdateProgressAction.UpdatePageInput -> {
-                val filteredValue = action.value.filter { it.isDigit() }
                 updateState {
-                    copy(pageInput = filteredValue)
+                    copy(updatedInputPages = action.value)
+                }
+            }
+            is UpdateProgressAction.UpdatePageInputByPreset -> {
+                updateState {
+                    copy(updatedInputPages = updatedInputPages + action.value)
                 }
             }
         }

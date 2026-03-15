@@ -30,7 +30,7 @@ class LibraryModel(
         when (action) {
             is LibraryAction.LoadLibrary -> handleLoadLibrary()
             is LibraryAction.RefreshLibrary -> handleRefreshLibrary()
-            is LibraryAction.NavigateToAddBook -> sendNavigationEvent(NavigateToAddBook())
+            is LibraryAction.NavigateToAddBook -> sendNavigationEvent(NavigateToAddBook)
             is LibraryAction.NavigateToBookDetails -> sendNavigationEvent(
                 NavigateToBookDetails(action.book)
             )

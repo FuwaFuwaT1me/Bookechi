@@ -5,7 +5,8 @@ import fuwafuwa.time.bookechi.mvi.api.State
 
 data class UpdateProgressState(
     val book: Book,
-    val pageInput: String = "",
+    val startPages: Int = 0,
+    val updatedInputPages: Int = 0,
     val isSaving: Boolean = false,
     val error: String? = null
 ) : State

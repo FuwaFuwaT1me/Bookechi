@@ -70,7 +70,7 @@ class BookListModel(
             is BookListAction.NavigateToEditBook -> sendNavigationEvent(
                 NavigateToUpdateProgress(action.book)
             )
-            is BookListAction.NavigateToAddBook -> sendNavigationEvent(NavigateToAddBook())
+            is BookListAction.NavigateToAddBook -> sendNavigationEvent(NavigateToAddBook)
             is BookListAction.NavigateToBookDetails -> sendNavigationEvent(
                 NavigateToBookDetails(action.book)
             )

@@ -11,7 +11,8 @@ val updateProgressModule = module {
     viewModel { (book: Book) ->
         val state = UpdateProgressState(
             book = book,
-            pageInput = book.currentPage.toString()
+            startPages = book.currentPage,
+            updatedInputPages = book.currentPage,
         )
         val model = UpdateProgressModel(
             defaultState = state,

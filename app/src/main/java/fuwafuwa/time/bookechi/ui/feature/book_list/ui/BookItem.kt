@@ -280,9 +280,7 @@ fun NewBookItem(
                                 disabledContainerColor = Color.Transparent,
                                 disabledContentColor = Color.Transparent
                             ),
-                            onClick = {
-
-                            }
+                            onClick = onEditBookClick
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Edit,

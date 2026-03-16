@@ -42,6 +42,7 @@ import fuwafuwa.time.bookechi.ui.theme.FigmaLightGrey
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 import kotlinx.serialization.Serializable
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @Serializable
@@ -112,20 +113,33 @@ private fun UpdateProgressScreenContent(
 
         Text(
             text = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        color = FigmaFire,
-                        fontWeight = FontWeight.Bold
-                    ),
-                ) {
-                    val sign = if (state.updatedInputPages > state.startPages) {
-                        "+"
-                    } else ""
+                if (state.updatedInputPages > state.startPages) {
+                    withStyle(
+                        style = SpanStyle(
+                            color = FigmaFire,
+                            fontWeight = FontWeight.Bold
+                        ),
+                    ) {
+                        append("+${state.updatedInputPages - state.startPages}")
+                    }
 
-                    append("$sign${state.updatedInputPages - state.startPages}")
+                    append(" страниц")
+                } else if (state.updatedInputPages == -1 || state.updatedInputPages == state.startPages) {
+                    // do nothing
+                } else {
+                    append("Вы вернулись на ")
+
+                    withStyle(
+                        style = SpanStyle(
+                            color = FigmaFire,
+                            fontWeight = FontWeight.Bold
+                        ),
+                    ) {
+                        append("${abs(state.startPages - state.updatedInputPages)}")
+                    }
+
+                    append(" страниц")
                 }
-
-                append(" страниц")
             },
             color = FigmaTitle,
             fontSize = 24.sp,

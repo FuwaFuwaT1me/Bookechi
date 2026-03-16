@@ -8,9 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -36,11 +40,15 @@ internal fun DrawScope.drawLinearIndicator(
     topLeftOffset: Offset = Offset.Zero,
     size: Size = drawContext.size,
 ) {
+    val clampedFraction = widthFraction.coerceIn(0f, 1f)
+    val width = size.width * clampedFraction
+    if (width <= 0f || size.height <= 0f) return
+    val radius = cornerRadius.toPx().coerceAtMost(minOf(width, size.height) / 2f)
     drawRoundRect(
         topLeft = topLeftOffset,
         color = color,
-        size = size.copy(width = size.width * widthFraction),
-        cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
+        size = size.copy(width = width),
+        cornerRadius = CornerRadius(radius, radius)
     )
 }
 
@@ -76,32 +84,44 @@ fun SimpleProgressIndicator(
         val innerPaddingPx = innerProgressBarPadding.toPx()
         val axisOffset = innerPaddingPx / 2f
         val barHeight = (size.height - innerPaddingPx).coerceAtLeast(0f)
-        val barSize = size.copy(height = barHeight)
+        val barWidth = (size.width - innerPaddingPx).coerceAtLeast(0f)
+        val barSize = size.copy(width = barWidth, height = barHeight)
 
-        if (diffConfig != null) {
-            drawLinearIndicator(
-                progress,
-                diffConfig.diffColor,
-                cornerRadius,
-                topLeftOffset = Offset(axisOffset, axisOffset),
-                size = barSize
+        val clipPath = Path().apply {
+            addRoundRect(
+                RoundRect(
+                    rect = Rect(Offset.Zero, size),
+                    cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
+                )
             )
+        }
 
-            drawLinearIndicator(
-                diffConfig.lastProgress,
-                progressBarColor,
-                cornerRadius,
-                topLeftOffset = Offset(axisOffset, axisOffset),
-                size = barSize
-            )
-        } else {
-            drawLinearIndicator(
-                progress,
-                progressBarColor,
-                cornerRadius,
-                topLeftOffset = Offset(axisOffset, axisOffset),
-                size = barSize
-            )
+        clipPath(clipPath) {
+            if (diffConfig != null) {
+                drawLinearIndicator(
+                    progress,
+                    diffConfig.diffColor,
+                    cornerRadius,
+                    topLeftOffset = Offset(axisOffset, axisOffset),
+                    size = barSize
+                )
+
+                drawLinearIndicator(
+                    diffConfig.lastProgress,
+                    progressBarColor,
+                    cornerRadius,
+                    topLeftOffset = Offset(axisOffset, axisOffset),
+                    size = barSize
+                )
+            } else {
+                drawLinearIndicator(
+                    progress,
+                    progressBarColor,
+                    cornerRadius,
+                    topLeftOffset = Offset(axisOffset, axisOffset),
+                    size = barSize
+                )
+            }
         }
 
         if (diffConfig != null && diffConfig.showPercent && barHeight > 0f) {
@@ -126,15 +146,15 @@ fun SimpleProgressIndicator(
             val textHeight = textLayout.size.height.toFloat()
             val padding = 4.dp.toPx()
 
-            val greenWidth = size.width * (currentProgress - lastProgress).coerceAtLeast(0f)
-            val redWidth = size.width * lastProgress
+            val greenWidth = barSize.width * (currentProgress - lastProgress).coerceAtLeast(0f)
+            val redWidth = barSize.width * lastProgress
             val fitsGreen = greenWidth >= textWidth + padding * 2 && greenWidth > 0f
             val fitsRed = redWidth >= textWidth + padding * 2 && redWidth > 0f
             val textTop = (axisOffset + (barHeight - textHeight) / 2f).coerceAtLeast(0f)
 
             val (textLeft, textColor) = when {
                 fitsGreen -> {
-                    val start = axisOffset + size.width * lastProgress
+                    val start = axisOffset + barSize.width * lastProgress
                     val left = start + greenWidth - textWidth - padding
                     left to Color.White
                 }
@@ -144,18 +164,19 @@ fun SimpleProgressIndicator(
                     left to Color.White
                 }
                 else -> {
-                    val start = axisOffset + size.width * currentProgress + padding
-                    val left = if (start + textWidth <= size.width) {
+                    val start = axisOffset + barSize.width * currentProgress + padding
+                    val rightEdge = axisOffset + barSize.width
+                    val left = if (start + textWidth <= rightEdge) {
                         start
                     } else {
-                        size.width - textWidth - padding
+                        rightEdge - textWidth - padding
                     }
                     left to Color.Black
                 }
             }
 
-            val maxLeft = (size.width - textWidth).coerceAtLeast(0f)
-            val clampedLeft = textLeft.coerceIn(0f, maxLeft)
+            val maxLeft = (axisOffset + barSize.width - textWidth).coerceAtLeast(axisOffset)
+            val clampedLeft = textLeft.coerceIn(axisOffset, maxLeft)
 
             drawText(
                 textMeasurer = textMeasurer,

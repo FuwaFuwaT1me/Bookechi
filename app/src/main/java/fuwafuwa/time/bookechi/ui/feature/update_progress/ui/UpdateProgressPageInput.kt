@@ -84,11 +84,13 @@ internal fun PageInput(
             textColor = FigmaTitle,
             enabled = true,
             onValueChange = { newPageString ->
-                val newPageInt = newPageString.toIntOrNull() ?: 0
+                val newPageInt = newPageString.toIntOrNull()
 
-                onValueChange(
-                    newPageInt.coerceIn(0, state.book.pages)
-                )
+                newPageInt?.let {
+                    onValueChange(
+                        newPageInt.coerceIn(0, state.book.pages)
+                    )
+                } ?: onValueChange(-1)
             }
         )
 
@@ -118,7 +120,9 @@ internal fun PageNumberField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val value = state.updatedInputPages.toString()
+    val value = state.updatedInputPages.takeIf {
+        it in 0..state.book.pages
+    }?.toString() ?: ""
 
     Row {
         BasicTextField(
@@ -140,9 +144,9 @@ internal fun PageNumberField(
             singleLine = true,
             enabled = enabled,
         ) { innerTextField ->
-            if (value.isBlank()) {
+            if (value == "-1") {
                 Text(
-                    text = "0",
+                    text = "",
                     color = FigmaTitle.copy(alpha = 0.3f),
                     fontSize = 64.sp,
                     fontWeight = FontWeight.Bold,

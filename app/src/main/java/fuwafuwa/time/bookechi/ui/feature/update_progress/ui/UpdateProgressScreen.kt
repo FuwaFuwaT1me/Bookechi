@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -94,7 +95,7 @@ private fun UpdateProgressScreenContent(
             fontWeight = FontWeight.SemiBold
         )
 
-        Spacer(modifier = Modifier.height(52.dp))
+        Spacer(modifier = Modifier.height(36.dp))
 
         PageInput(
             state = state,
@@ -123,7 +124,18 @@ private fun UpdateProgressScreenContent(
                         append("+${state.updatedInputPages - state.startPages}")
                     }
 
-                    append(" страниц")
+                    append(" страниц\n")
+
+                    append("${100 * state.startPages / state.book.pages}% ➞ ")
+
+                    withStyle(
+                        style = SpanStyle(
+                            color = FigmaFire,
+                            fontWeight = FontWeight.Bold
+                        ),
+                    ) {
+                        append("${100 * state.updatedInputPages / state.book.pages}%")
+                    }
                 } else if (state.updatedInputPages == -1 || state.updatedInputPages == state.startPages) {
                     // do nothing
                 } else {
@@ -161,7 +173,7 @@ private fun UpdateProgressScreenContent(
         val diffPercent = ((currentProgress - startProgress) * 100f).roundToInt()
         val showDiff = state.updatedInputPages > state.startPages
         val progressLabel = if (showDiff) {
-            "${currentPercent}% (+${diffPercent}%)"
+            "+${diffPercent}%"
         } else {
             "${currentPercent}%"
         }

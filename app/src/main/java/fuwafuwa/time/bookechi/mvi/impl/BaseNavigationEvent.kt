@@ -13,7 +13,7 @@ sealed interface BaseNavigationEvent : NavigationEvent {
 
     interface NavigateBackTo : BaseNavigationEvent {
 
-        val route: String
+        val screen: Screen
     }
 
     data object NavigateBack : BaseNavigationEvent

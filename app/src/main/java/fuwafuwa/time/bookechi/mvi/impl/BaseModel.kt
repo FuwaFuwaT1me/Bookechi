@@ -32,6 +32,8 @@ abstract class BaseModel<UiState, UiAction> @OptIn(ExperimentalCoroutinesApi::cl
         navigationEventFlow.sendNavigationEvent(navEvent)
     }
 
+    protected fun currentState() = uiStateFlow.currentState()
+
     protected fun updateState(updateState: UiState.() -> UiState): Job {
         return uiStateFlow.updateState(updateState)
     }

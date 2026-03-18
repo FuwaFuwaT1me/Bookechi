@@ -24,6 +24,10 @@ class BaseUiStateFlow<ViewState : State>(
     override val state: StateFlow<ViewState>
         get() = _viewState
 
+    override fun currentState() : ViewState {
+        return _viewState.value
+    }
+
     override fun updateState(updateState: ViewState.() -> ViewState) : Job {
         return scope.launch {
             val newState = updateState(_viewState.value)

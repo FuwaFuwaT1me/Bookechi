@@ -15,6 +15,7 @@ import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.navigation.BookNavType
 import fuwafuwa.time.bookechi.ui.feature.book_details.ui.BookDetailsScreen
 import fuwafuwa.time.bookechi.ui.feature.book_details.ui.BookDetailsScreenV2
+import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -61,4 +62,8 @@ data class NavigateToBookDetails(
     val book: Book
 ) : BaseNavigationEvent.NavigateTo {
     override val screen: Screen = BookDetailsScreen(book)
+}
+
+data object NavigateBackToBookDetails : BaseNavigationEvent.NavigateBackTo {
+    override val screen: Screen = BookListScreen
 }

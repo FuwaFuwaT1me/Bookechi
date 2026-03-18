@@ -8,4 +8,6 @@ sealed interface UpdateProgressAction : Action {
 
     data class UpdatePageInput(val value: Int) : UpdateProgressAction
     data class UpdatePageInputByPreset(val value: Int) : UpdateProgressAction
+
+    data class SaveChanges(val value: Int) : UpdateProgressAction
 }

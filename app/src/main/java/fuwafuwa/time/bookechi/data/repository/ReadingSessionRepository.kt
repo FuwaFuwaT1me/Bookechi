@@ -57,6 +57,14 @@ class ReadingSessionRepository(
         }
     }
 
+    fun getCurrentStreakDaysBesidesToday(clock: Clock = Clock.systemDefaultZone()): Flow<Int> {
+        val yesterday = LocalDate.now(clock).minusDays(1)
+        val yesterdayKey = yesterday.format(dateFormatter)
+        return readingSessionDao.getSessionDatesUpTo(yesterdayKey).map { dates ->
+            calculateCurrentStreak(dates, yesterday)
+        }
+    }
+
     suspend fun getTotalPagesReadForBook(bookId: Long): Int = withContext(Dispatchers.IO) {
         readingSessionDao.getTotalPagesReadForBook(bookId) ?: 0
     }

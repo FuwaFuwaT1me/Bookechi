@@ -9,5 +9,6 @@ interface UiStateFlow<UiState : State> {
 
     val state: StateFlow<UiState>
 
+    fun currentState(): UiState
     fun updateState(updateState: UiState.() -> UiState): Job
 }

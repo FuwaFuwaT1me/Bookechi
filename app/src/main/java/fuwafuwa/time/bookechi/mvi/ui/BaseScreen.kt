@@ -26,7 +26,7 @@ fun BaseScreen(
                     navController.navigate(navEvent.screen)
                 }
                 is BaseNavigationEvent.NavigateBackTo -> {
-                    navController.popBackStack(navEvent.route, false)
+                    navController.popBackStack(navEvent.screen, false)
                 }
                 is BaseNavigationEvent.NavigateBack -> {
                     navController.popBackStack()

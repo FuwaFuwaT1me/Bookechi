@@ -14,6 +14,7 @@ import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.libraryNavRoot
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.productivityNavRoot
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.updateProgressNavRoot
+import fuwafuwa.time.bookechi.ui.feature.update_result.mvi.updateResultNavRoot
 
 @Composable
 fun NavigationHost(
@@ -29,6 +30,7 @@ fun NavigationHost(
         addBookScenario(navController)
         bookDetailsScenario(navController)
         updateProgressScenario(navController)
+        updateResultScenario(navController)
 
         productivityScenario(navController)
 
@@ -54,6 +56,10 @@ private fun NavGraphBuilder.productivityScenario(navController: NavController) {
 
 private fun NavGraphBuilder.updateProgressScenario(navController: NavController) {
     updateProgressNavRoot(navController)
+}
+
+private fun NavGraphBuilder.updateResultScenario(navController: NavController) {
+    updateResultNavRoot(navController)
 }
 
 private fun NavGraphBuilder.libraryScenario(navController: NavController) {

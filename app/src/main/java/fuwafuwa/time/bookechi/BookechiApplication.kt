@@ -11,6 +11,8 @@ import fuwafuwa.time.bookechi.ui.feature.reading_goals.di.readingGoalsModule
 import fuwafuwa.time.bookechi.ui.feature.reading_stats.di.readingStatsModule
 import fuwafuwa.time.bookechi.ui.feature.settings.di.settingsModule
 import fuwafuwa.time.bookechi.ui.feature.update_progress.di.updateProgressModule
+import fuwafuwa.time.bookechi.ui.feature.update_result.di.updateResultModule
+import fuwafuwa.time.bookechi.ui.feature.update_result.di.updateResultModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -28,6 +30,7 @@ class BookechiApplication : Application() {
                 bookDetailsModule,
                 productivityModule,
                 updateProgressModule,
+                updateResultModule,
                 libraryModule,
             )
         }

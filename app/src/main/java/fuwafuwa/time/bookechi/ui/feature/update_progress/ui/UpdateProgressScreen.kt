@@ -2,21 +2,32 @@ package fuwafuwa.time.bookechi.ui.feature.update_progress.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.FactCheck
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -38,8 +49,11 @@ import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellThreeActivity
 import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellTwoActivity
 import fuwafuwa.time.bookechi.ui.theme.FigmaAddBookBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaBackground
+import fuwafuwa.time.bookechi.ui.theme.FigmaBookCover
 import fuwafuwa.time.bookechi.ui.theme.FigmaFire
+import fuwafuwa.time.bookechi.ui.theme.FigmaGrey
 import fuwafuwa.time.bookechi.ui.theme.FigmaLightGrey
+import fuwafuwa.time.bookechi.ui.theme.FigmaStreakBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 import kotlinx.serialization.Serializable
@@ -76,6 +90,8 @@ private fun UpdateProgressScreenContent(
             .padding(top = 36.dp, bottom = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        Header(state, onAction)
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
@@ -104,12 +120,12 @@ private fun UpdateProgressScreenContent(
             }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+//        Spacer(modifier = Modifier.height(12.dp))
 
-        PageUpdateButtons(
-            onAction = onAction
-        )
-
+//        PageUpdateButtons(
+//            onAction = onAction
+//        )
+//
         Spacer(Modifier.height(32.dp))
 
         Text(
@@ -125,17 +141,6 @@ private fun UpdateProgressScreenContent(
                     }
 
                     append(" страниц\n")
-
-                    append("${100 * state.startPages / state.book.pages}% ➞ ")
-
-                    withStyle(
-                        style = SpanStyle(
-                            color = FigmaFire,
-                            fontWeight = FontWeight.Bold
-                        ),
-                    ) {
-                        append("${100 * state.updatedInputPages / state.book.pages}%")
-                    }
                 } else if (state.updatedInputPages == -1 || state.updatedInputPages == state.startPages) {
                     // do nothing
                 } else {
@@ -154,76 +159,74 @@ private fun UpdateProgressScreenContent(
                 }
             },
             color = FigmaTitle,
-            fontSize = 24.sp,
+            fontSize = 32.sp,
             fontWeight = FontWeight.Normal
         )
+    }
+}
 
-        Spacer(modifier = Modifier.height(8.dp))
+@Composable
+private fun Header(
+    state: UpdateProgressState,
+    onAction: (UpdateProgressAction) -> Unit,
+) {
+    Row {
 
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth(),
-            color = FigmaLightGrey
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val currentProgress = (1f * state.updatedInputPages / state.book.pages).coerceIn(0f, 1f)
-        val startProgress = (1f * state.startPages / state.book.pages).coerceIn(0f, 1f)
-        val currentPercent = (currentProgress * 100f).roundToInt()
-        val diffPercent = ((currentProgress - startProgress) * 100f).roundToInt()
-        val showDiff = state.updatedInputPages > state.startPages
-        val progressLabel = if (showDiff) {
-            "+${diffPercent}%"
-        } else {
-            "${currentPercent}%"
-        }
-
-        SimpleProgressIndicator(
+        IconButton(
             modifier = Modifier
-                .height(24.dp)
-                .fillMaxWidth()
+                .align(Alignment.CenterVertically)
             ,
-            progress = currentProgress,
-            progressBarColor = FigmaFire,
-            cornerRadius = 6.dp,
-            trackColor = FigmaLightGrey,
-            diffConfig = DiffConfig(
-                lastProgress = if (showDiff) startProgress else currentProgress,
-                diffColor = FigmaActivityCellTwoActivity,
-                labelText = progressLabel,
-                showingPercentColor = Color.White,
-                showPercent = true
+            colors = IconButtonColors(
+                containerColor = FigmaBookCover,
+                contentColor = Color.White,
+                disabledContentColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent
+            ),
+            shape = CircleShape,
+            onClick = {
+                onAction(UpdateProgressAction.NavigateBack)
+            }
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.White
             )
-        )
+        }
 
         Spacer(Modifier.weight(1f))
 
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-            ,
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonColors(
-                containerColor = FigmaActivityCellThreeActivity,
-                contentColor = Color.White,
-                disabledContainerColor = Color.White,
-                disabledContentColor = FigmaAddBookBackground.copy(alpha = 0.5f),
-            ),
-            onClick = {
+        if (state.updatedInputPages != state.startPages && state.updatedInputPages != -1) {
+            Spacer(Modifier.width(16.dp))
 
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                ,
+                colors = IconButtonColors(
+                    containerColor = FigmaFire,
+                    contentColor = Color.White,
+                    disabledContentColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                ),
+                shape = CircleShape,
+                onClick = {
+                    onAction(UpdateProgressAction.SaveChanges(state.updatedInputPages))
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Apply",
+                    tint = Color.White
+                )
             }
-        ) {
-            Text(
-                text = "Сохранить"
-            )
         }
     }
 }
 
 @Composable
 @Preview
-private fun SmallProgressPreview() {
+private fun PositiveProgressPreview() {
     UpdateProgressScreenContent(
         state = UpdateProgressState(
             startPages = 54,
@@ -242,30 +245,11 @@ private fun SmallProgressPreview() {
 
 @Preview
 @Composable
-private fun LargeProgressPreview() {
+private fun NegativeProgressPreview() {
     UpdateProgressScreenContent(
         state = UpdateProgressState(
             startPages = 54,
-            updatedInputPages = 100,
-            book = Book(
-                name = "Название книги очень длинное",
-                author = "Murakami",
-                coverPath = null,
-                pages = 256,
-                currentPage = 40
-            )
-        ),
-        onAction = {}
-    )
-}
-
-@Preview
-@Composable
-private fun OutsideProgressPreview() {
-    UpdateProgressScreenContent(
-        state = UpdateProgressState(
-            startPages = 5,
-            updatedInputPages = 10,
+            updatedInputPages = 26,
             book = Book(
                 name = "Название книги очень длинное",
                 author = "Murakami",

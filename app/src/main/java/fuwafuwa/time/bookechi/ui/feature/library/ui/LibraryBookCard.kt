@@ -20,8 +20,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -44,6 +48,7 @@ import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 fun LibraryBookCard(
     book: Book,
     onClick: () -> Unit,
+    onEditClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -97,7 +102,7 @@ fun LibraryBookCard(
             if (book.readingStatus == ReadingStatus.Completed) {
                 Box(
                     modifier = Modifier
-                        .align(androidx.compose.ui.Alignment.TopEnd)
+                        .align(Alignment.TopEnd)
                         .padding(8.dp)
                         .size(22.dp)
                         .clip(CircleShape)
@@ -108,7 +113,7 @@ fun LibraryBookCard(
                         contentDescription = null,
                         tint = FigmaTitle,
                         modifier = Modifier
-                            .align(androidx.compose.ui.Alignment.Center)
+                            .align(Alignment.Center)
                             .size(14.dp)
                     )
                 }
@@ -142,12 +147,23 @@ fun LibraryBookCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+
             Spacer(modifier = Modifier.width(6.dp))
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "More",
-                tint = FigmaTitle
-            )
+
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+                IconButton(
+                    modifier = Modifier
+                        .size(24.dp)
+                    ,
+                    onClick = onEditClick
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More",
+                        tint = FigmaTitle
+                    )
+                }
+            }
         }
     }
 }
@@ -166,6 +182,7 @@ private fun bookTag(book: Book): String? = when (book.readingStatus) {
 private fun LibraryBookCardPreview() {
     LibraryBookCard(
         book = LibraryPreviewData.books().first(),
-        onClick = {}
+        onClick = {},
+        onEditClick = {}
     )
 }

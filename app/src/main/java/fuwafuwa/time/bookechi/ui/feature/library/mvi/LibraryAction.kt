@@ -7,6 +7,9 @@ sealed interface LibraryAction : Action {
     data object LoadLibrary : LibraryAction
     data object RefreshLibrary : LibraryAction
 
+    data class EditBook(val book: Book) : LibraryAction
+    data object CancelEditingBook : LibraryAction
+
     data object NavigateToAddBook : LibraryAction
     data class NavigateToBookDetails(val book: Book) : LibraryAction
     data class NavigateToUpdateProgress(val book: Book) : LibraryAction

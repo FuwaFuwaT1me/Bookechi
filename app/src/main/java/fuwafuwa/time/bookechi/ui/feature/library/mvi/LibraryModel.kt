@@ -37,6 +37,20 @@ class LibraryModel(
             is LibraryAction.NavigateToUpdateProgress -> sendNavigationEvent(
                 NavigateToUpdateProgress(action.book)
             )
+            is LibraryAction.EditBook -> {
+                updateState {
+                    copy(
+                        editingBook = action.book
+                    )
+                }
+            }
+            is LibraryAction.CancelEditingBook -> {
+                updateState {
+                    copy(
+                        editingBook = null
+                    )
+                }
+            }
         }
     }
 

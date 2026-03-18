@@ -15,6 +15,7 @@ import fuwafuwa.time.bookechi.data.model.Book
 fun LibraryBooksGrid(
     books: List<Book>,
     onBookClick: (Book) -> Unit,
+    onEditClick: (Book) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -26,7 +27,8 @@ fun LibraryBooksGrid(
         items(books, key = { it.id }) { book ->
             LibraryBookCard(
                 book = book,
-                onClick = { onBookClick(book) }
+                onClick = { onBookClick(book) },
+                onEditClick = { onEditClick(book) }
             )
         }
     }
@@ -37,6 +39,7 @@ fun LibraryBooksGrid(
 private fun LibraryBooksGridPreview() {
     LibraryBooksGrid(
         books = LibraryPreviewData.books(),
-        onBookClick = {}
+        onBookClick = {},
+        onEditClick = {}
     )
 }

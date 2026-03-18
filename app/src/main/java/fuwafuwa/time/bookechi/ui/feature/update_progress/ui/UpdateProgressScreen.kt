@@ -11,19 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.FactCheck
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,32 +31,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import fuwafuwa.time.bookechi.base.ui.util.DiffConfig
-import fuwafuwa.time.bookechi.base.ui.util.SimpleProgressIndicator
+import fuwafuwa.time.bookechi.base.ui.util.AppBottomSheet
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.UpdateProgressAction
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.UpdateProgressState
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.UpdateProgressViewModel
-import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellThreeActivity
-import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellTwoActivity
-import fuwafuwa.time.bookechi.ui.theme.FigmaAddBookBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaBookCover
 import fuwafuwa.time.bookechi.ui.theme.FigmaFire
-import fuwafuwa.time.bookechi.ui.theme.FigmaGrey
-import fuwafuwa.time.bookechi.ui.theme.FigmaLightGrey
-import fuwafuwa.time.bookechi.ui.theme.FigmaStreakBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 @Serializable
 data class UpdateProgressScreen(
@@ -77,13 +66,31 @@ fun UpdateProgressScreen(
     )
 }
 
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//private fun UpdateProgressBottomSheet(
+//    state: UpdateProgressState,
+//    onAction: (UpdateProgressAction) -> Unit
+//) {
+//    ModalBottomSheet(
+//        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+//        onDismissRequest = { onAction(UpdateProgressAction.NavigateBack) },
+//    ) {
+//        UpdateProgressScreenContent(
+//            state = state,
+//            onAction = onAction,
+//        )
+//    }
+//}
+
 @Composable
 private fun UpdateProgressScreenContent(
     state: UpdateProgressState,
-    onAction: (UpdateProgressAction) -> Unit
+    onAction: (UpdateProgressAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(FigmaBackground)
             .padding(horizontal = 24.dp)

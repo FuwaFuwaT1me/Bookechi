@@ -6,5 +6,6 @@ import fuwafuwa.time.bookechi.mvi.api.State
 data class LibraryState(
     val books: List<Book> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val editingBook: Book? = null
 ) : State

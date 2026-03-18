@@ -3,8 +3,10 @@ package fuwafuwa.time.bookechi.ui.feature.update_progress.mvi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.toRoute
+import androidx.compose.ui.window.DialogProperties
+import androidx.navigation.compose.composable
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.navigation.BookNavType
 import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent

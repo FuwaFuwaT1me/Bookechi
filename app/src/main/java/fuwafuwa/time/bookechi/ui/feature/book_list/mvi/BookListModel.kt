@@ -37,7 +37,7 @@ class BookListModel(
         scope.launch {
             readingSessionRepository
                 .getDailyStatsForCurrentWeek()
-                .combine(readingSessionRepository.getCurrentStreakDays()) { weekSessions, streakDays ->
+                .combine(readingSessionRepository.getCurrentStreakDaysBesidesToday()) { weekSessions, streakDays ->
                     weekSessions to streakDays
                 }
                 .collect { (weekSessions, streakDays) ->
@@ -50,10 +50,11 @@ class BookListModel(
                             weekDayStreaks = buildWeekDayStreaks(
                                 weekSessions = weekSessions,
                                 today = today,
-                                streakDays = streakDays,
+                                streakDays = streakDays + if (hasSessionToday) 1 else 0,
                                 hasSessionToday = hasSessionToday
                             ),
-                            totalDaysWithStreak = streakDays
+                            totalDaysWithStreak = streakDays + if (hasSessionToday) 1 else 0,
+                            isTodayStreak = hasSessionToday
                         )
                     }
                 }
@@ -130,6 +131,7 @@ class BookListModel(
         return (0..6).map { offset ->
             val date = startOfWeek.plusDays(offset.toLong())
             val session = sessionsByDate[date]
+
             DayStreak(
                 isStreakDay = session != null &&
                     streakStart != null &&

@@ -120,7 +120,8 @@ private fun StreakDay(
         modifier = Modifier
             .background(
                 color = when {
-                    isToday -> FigmaStreakCurrentDayBackground
+                    isToday && isStreakDay -> FigmaFire
+                    isToday && !isStreakDay -> FigmaStreakCurrentDayBackground
                     isStreakDay -> Color.White
                     else -> Color.White.copy(alpha = 0.17f)
                 },
@@ -130,7 +131,23 @@ private fun StreakDay(
         ,
     ) {
         when {
-            isToday -> {
+            isToday && isStreakDay -> {
+                Text(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    text = dayName,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.size(4.dp))
+
+                FlameWithBottomGlow(
+                    fireTint = Color.White,
+                    showGlow = false,
+                )
+            }
+            isToday && !isStreakDay -> {
                 Text(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     text = dayName,
@@ -161,7 +178,10 @@ private fun StreakDay(
 
                 Spacer(modifier = Modifier.size(4.dp))
 
-                FlameWithBottomGlow()
+                FlameWithBottomGlow(
+                    fireTint = FigmaFire,
+                    showGlow = true,
+                )
             }
             else -> {
                 Text(
@@ -192,39 +212,43 @@ private fun StreakDay(
 
 @Composable
 private fun FlameWithBottomGlow(
+    fireTint: Color,
+    showGlow: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier.size(24.dp),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(Modifier.matchParentSize()) {
-            val blurPx = 8.dp.toPx()
+        if (showGlow) {
+            Canvas(Modifier.matchParentSize()) {
+                val blurPx = 8.dp.toPx()
 
-            drawIntoCanvas { canvas ->
-                val paint = Paint().apply {
-                    isAntiAlias = true
-                    color = FigmaFire.copy(alpha = 0.65f).toArgb()
-                    maskFilter = BlurMaskFilter(blurPx, BlurMaskFilter.Blur.NORMAL)
+                drawIntoCanvas { canvas ->
+                    val paint = Paint().apply {
+                        isAntiAlias = true
+                        color = FigmaFire.copy(alpha = 0.65f).toArgb()
+                        maskFilter = BlurMaskFilter(blurPx, BlurMaskFilter.Blur.NORMAL)
+                    }
+
+                    // эллипс под огоньком (на нижней части)
+                    val cx = size.width / 2f
+                    val cy = size.height * 0.8f
+                    val rx = size.width * 0.35f
+                    val ry = size.height * 0.25f
+
+                    canvas.nativeCanvas.drawOval(
+                        cx - rx, cy - ry,
+                        cx + rx, cy + ry,
+                        paint
+                    )
                 }
-
-                // эллипс под огоньком (на нижней части)
-                val cx = size.width / 2f
-                val cy = size.height * 0.8f
-                val rx = size.width * 0.35f
-                val ry = size.height * 0.25f
-
-                canvas.nativeCanvas.drawOval(
-                    cx - rx, cy - ry,
-                    cx + rx, cy + ry,
-                    paint
-                )
             }
         }
 
         Icon(
             painter = painterResource(R.drawable.fire_5),
-            tint = FigmaFire,
+            tint = fireTint,
             contentDescription = null
         )
     }
@@ -232,7 +256,7 @@ private fun FlameWithBottomGlow(
 
 @Preview
 @Composable
-private fun PreviewStreakPanel() {
+private fun TodayNotStreakPreview() {
     StreakPanel(
         state = BookListState(
             books = emptyList(),
@@ -243,6 +267,27 @@ private fun PreviewStreakPanel() {
                 DayStreak(false, false),
                 DayStreak(false, false),
                 DayStreak(false, true),
+                DayStreak(false, false),
+                DayStreak(false, false),
+                DayStreak(false, false),
+            )
+        )
+    )
+}
+
+@Preview
+@Composable
+private fun TodayStreakPreview() {
+    StreakPanel(
+        state = BookListState(
+            books = emptyList(),
+            totalDaysWithStreak = 10,
+            isTodayStreak = true,
+            weekDayStreaks = listOf(
+                DayStreak(true, false),
+                DayStreak(false, false),
+                DayStreak(false, false),
+                DayStreak(true, true),
                 DayStreak(false, false),
                 DayStreak(false, false),
                 DayStreak(false, false),

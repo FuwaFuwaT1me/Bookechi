@@ -17,7 +17,8 @@ val updateProgressModule = module {
         )
         val model = UpdateProgressModel(
             defaultState = state,
-            bookRepository = get<BookRepository>()
+            bookRepository = get<BookRepository>(),
+            readingSessionRepository = get()
         )
         UpdateProgressViewModel(model = model)
     }

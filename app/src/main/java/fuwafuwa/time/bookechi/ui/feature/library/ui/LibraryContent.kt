@@ -17,6 +17,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
@@ -35,6 +38,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import fuwafuwa.time.bookechi.base.ui.book.BookCoverWithShadow
+import fuwafuwa.time.bookechi.base.ui.book.NewBookCover
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.LibraryAction
@@ -57,15 +62,6 @@ import fuwafuwa.time.bookechi.ui.theme.FigmaBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaLibraryBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
-
-//private data class EditingBookItem(
-//    val title: String,
-//    val action: LibraryAction,
-//)
-//
-//private val EditingBookItems = listOf(
-//    EditingBookItem()
-//)
 
 @Composable
 fun LibraryContent(
@@ -176,8 +172,34 @@ private fun EditBookBottomSheet(
         var bookAuthor by remember(book.id) { mutableStateOf(book.author) }
         var readingStatus by remember(book.id) { mutableStateOf(book.readingStatus) }
         var isFavorite by remember(book.id) { mutableStateOf(book.isFavorite) }
+        var coverPath by remember(book.id) { mutableStateOf(book.coverPath) }
+
+        fun buildUpdatedBook(
+            title: String = bookTitle,
+            author: String = bookAuthor,
+            status: ReadingStatus = readingStatus,
+            favorite: Boolean = isFavorite,
+            cover: String? = coverPath
+        ): Book = book.copy(
+            name = title,
+            author = author,
+            readingStatus = status,
+            isFavorite = favorite,
+            coverPath = cover
+        )
+
+        val coverPickerLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.GetContent()
+        ) { uri ->
+            uri?.let {
+                val newCoverPath = it.toString()
+                coverPath = newCoverPath
+                onAction(LibraryAction.UpdateBook(buildUpdatedBook(cover = newCoverPath)))
+            }
+        }
 
         ModalBottomSheet(
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             modifier = Modifier
                 .wrapContentHeight()
             ,
@@ -188,6 +210,7 @@ private fun EditBookBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Text(
                     text = "Редактирование",
@@ -227,7 +250,11 @@ private fun EditBookBottomSheet(
                                 )
                             }
 
-                            TextButton(onClick = { }) {
+                            TextButton(
+                                onClick = {
+                                    coverPickerLauncher.launch("image/*")
+                                }
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Edit,
                                     contentDescription = null,
@@ -250,11 +277,13 @@ private fun EditBookBottomSheet(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
-                            BookCoverWithShadow(
-                                imageUri = book.coverPath?.toUri(),
-                                coverHeight = 170.dp,
-                                coverWidth = 120.dp,
-                                onClick = { }
+                            NewBookCover(
+                                modifier = Modifier
+                                    .height(170.dp)
+                                    .width(120.dp)
+                                ,
+                                imageUri = coverPath?.toUri(),
+                                onClick = { coverPickerLauncher.launch("image/*") }
                             )
                         }
                     }
@@ -275,7 +304,10 @@ private fun EditBookBottomSheet(
                     ) {
                         ModernTextField(
                             value = bookTitle,
-                            onValueChange = { bookTitle = it },
+                            onValueChange = {
+                                bookTitle = it
+                                onAction(LibraryAction.UpdateBook(buildUpdatedBook(title = it)))
+                            },
                             label = "Название книги",
                             placeholder = "Введите название"
                         )
@@ -284,7 +316,10 @@ private fun EditBookBottomSheet(
 
                         ModernTextField(
                             value = bookAuthor,
-                            onValueChange = { bookAuthor = it },
+                            onValueChange = {
+                                bookAuthor = it
+                                onAction(LibraryAction.UpdateBook(buildUpdatedBook(author = it)))
+                            },
                             label = "Автор",
                             placeholder = "Введите автора"
                         )
@@ -321,7 +356,10 @@ private fun EditBookBottomSheet(
                             ReadingStatus.values().forEachIndexed { index, status ->
                                 FilterChip(
                                     selected = readingStatus == status,
-                                    onClick = { readingStatus = status },
+                                    onClick = {
+                                        readingStatus = status
+                                        onAction(LibraryAction.UpdateBook(buildUpdatedBook(status = status)))
+                                    },
                                     label = {
                                         Text(
                                             text = readingStatusLabel(status),
@@ -345,7 +383,11 @@ private fun EditBookBottomSheet(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         FilledTonalButton(
-                            onClick = { isFavorite = !isFavorite },
+                            onClick = {
+                                val newFavorite = !isFavorite
+                                isFavorite = newFavorite
+                                onAction(LibraryAction.UpdateBook(buildUpdatedBook(favorite = newFavorite)))
+                            },
                             colors = ButtonDefaults.filledTonalButtonColors(
                                 containerColor = if (isFavorite) FigmaTitle else FigmaBackground,
                                 contentColor = if (isFavorite) Color.White else FigmaTitle

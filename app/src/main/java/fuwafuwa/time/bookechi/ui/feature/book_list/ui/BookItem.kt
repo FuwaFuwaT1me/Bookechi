@@ -176,14 +176,14 @@ fun NewBookItem(
                 ) {
                     Column {
                         Text(
-                            text = "Заголовок",
+                            text = book.name,
                             color = FigmaTitle,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold
                         )
 
                         Text(
-                            text = "подзаголовок",
+                            text = book.author,
                             color = FigmaSubtitle,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold

@@ -44,6 +44,16 @@ class LibraryModel(
                     )
                 }
             }
+            is LibraryAction.UpdateBook -> {
+                scope.launch {
+                    updateState {
+                        copy(
+                            editingBook = action.book
+                        )
+                    }
+                    bookRepository.updateBook(action.book)
+                }
+            }
             is LibraryAction.CancelEditingBook -> {
                 updateState {
                     copy(

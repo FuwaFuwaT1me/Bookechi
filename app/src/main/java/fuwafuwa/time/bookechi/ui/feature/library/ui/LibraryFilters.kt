@@ -26,7 +26,7 @@ enum class LibraryFilter {
     Planned,
     Reading,
     Paused,
-    Stopped,
+    Dropped,
     Completed,
     Favorite
 }
@@ -40,10 +40,12 @@ fun LibraryFiltersRow(
 ) {
     val filters = listOf(
         "Все" to LibraryFilter.All,
-        "Читаю" to LibraryFilter.Reading,
-        "Прочитал" to LibraryFilter.Completed,
         "В планах" to LibraryFilter.Planned,
-        "Любимое" to LibraryFilter.Favorite
+        "Читаю" to LibraryFilter.Reading,
+        "Прочитано" to LibraryFilter.Completed,
+        "Любимое" to LibraryFilter.Favorite,
+        "Приостановлено" to LibraryFilter.Paused,
+        "Брошено" to LibraryFilter.Dropped,
     )
 
     LazyRow(

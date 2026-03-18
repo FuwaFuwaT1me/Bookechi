@@ -204,7 +204,8 @@ private fun BookDetailsScreenPreview() {
                 coverPath = null,
                 pages = 1052,
                 currentPage = 448,
-                readingStatus = ReadingStatus.Reading
+                readingStatus = ReadingStatus.Reading,
+                isFavorite = false,
             )
         ),
         onAction = {}
@@ -223,7 +224,8 @@ private fun BookDetailsScreenPausedPreview() {
                 coverPath = "https://example.com/cover.jpg",
                 pages = 328,
                 currentPage = 150,
-                readingStatus = ReadingStatus.Paused
+                readingStatus = ReadingStatus.Paused,
+                isFavorite = false,
             )
         ),
         onAction = {}
@@ -242,7 +244,8 @@ private fun BookDetailsScreenNotStartedPreview() {
                 coverPath = null,
                 pages = 180,
                 currentPage = 0,
-                readingStatus = ReadingStatus.None
+                readingStatus = ReadingStatus.None,
+                isFavorite = false,
             )
         ),
         onAction = {}
@@ -261,7 +264,8 @@ private fun BookDetailsScreenFinishedPreview() {
                 coverPath = null,
                 pages = 1225,
                 currentPage = 1225,
-                readingStatus = ReadingStatus.Stopped
+                readingStatus = ReadingStatus.Dropped,
+                isFavorite = false,
             )
         ),
         onAction = {}

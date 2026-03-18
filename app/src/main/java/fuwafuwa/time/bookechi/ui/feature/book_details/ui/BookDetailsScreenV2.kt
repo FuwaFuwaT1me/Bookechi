@@ -262,9 +262,8 @@ private fun BookDetailsContent(
                     ReadingStatus.Planned -> Color(0xFF94A3B8) to "Planned"
                     ReadingStatus.Reading -> Color(0xFF22C55E) to "📖 Reading"
                     ReadingStatus.Paused -> Color(0xFFF59E0B) to "⏸️ Paused"
-                    ReadingStatus.Stopped -> Color(0xFF6366F1) to "✅ Finished"
+                    ReadingStatus.Dropped -> Color(0xFF6366F1) to "✅ Finished"
                     ReadingStatus.Completed -> Color.Green to "Completed"
-                    ReadingStatus.Favorite -> Color.Red to "Favorite"
                 }
 
                 Box(
@@ -392,7 +391,7 @@ private fun ActionButtonsV2(
             )
         }
 
-        ReadingStatus.Stopped -> {
+        ReadingStatus.Dropped -> {
             ActionButtonV2(
                 text = "Read Again",
                 icon = Icons.Default.PlayArrow,
@@ -404,7 +403,6 @@ private fun ActionButtonsV2(
 
         ReadingStatus.Completed -> {}
         ReadingStatus.Planned -> {}
-        ReadingStatus.Favorite -> {}
     }
 }
 
@@ -460,7 +458,8 @@ private fun BookDetailsScreenV2Preview() {
                 coverPath = null,
                 pages = 1052,
                 currentPage = 448,
-                readingStatus = ReadingStatus.Reading
+                readingStatus = ReadingStatus.Reading,
+                isFavorite = false,
             )
         ),
         onAction = {}
@@ -479,7 +478,8 @@ private fun BookDetailsScreenV2PausedPreview() {
                 coverPath = null,
                 pages = 328,
                 currentPage = 150,
-                readingStatus = ReadingStatus.Paused
+                readingStatus = ReadingStatus.Paused,
+                isFavorite = false,
             )
         ),
         onAction = {}
@@ -498,7 +498,8 @@ private fun BookDetailsScreenV2NotStartedPreview() {
                 coverPath = null,
                 pages = 180,
                 currentPage = 0,
-                readingStatus = ReadingStatus.None
+                readingStatus = ReadingStatus.Planned,
+                isFavorite = false,
             )
         ),
         onAction = {}
@@ -517,7 +518,8 @@ private fun BookDetailsScreenV2FinishedPreview() {
                 coverPath = null,
                 pages = 1225,
                 currentPage = 1225,
-                readingStatus = ReadingStatus.Stopped
+                readingStatus = ReadingStatus.Dropped,
+                isFavorite = false,
             )
         ),
         onAction = {}

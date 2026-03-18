@@ -53,7 +53,7 @@ fun BookReadingActionButtons(
             )
         }
 
-        ReadingStatus.Stopped -> {
+        ReadingStatus.Dropped -> {
             ActionButton(
                 text = "Начать читать снова",
                 color = BlueMain,
@@ -64,7 +64,6 @@ fun BookReadingActionButtons(
         
         ReadingStatus.Completed -> {}
         ReadingStatus.Planned -> {}
-        ReadingStatus.Favorite -> {}
     }
 }
 
@@ -164,7 +163,7 @@ private fun BookReadingActionButtonsPausedPreview() {
 @Composable
 private fun BookReadingActionButtonsStoppedPreview() {
     BookReadingActionButtons(
-        readingStatus = ReadingStatus.Stopped,
+        readingStatus = ReadingStatus.Dropped,
         onAction = {}
     )
 }

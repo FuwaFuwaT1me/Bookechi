@@ -214,7 +214,8 @@ private fun BookListScreenPreview() {
                             author = "Author 1",
                             coverPath = "https://picsum.photos/200/300",
                             currentPage = (0..100).random(),
-                            pages = (100..250).random()
+                            pages = (100..250).random(),
+                            isFavorite = false,
                         )
                     )
                 }

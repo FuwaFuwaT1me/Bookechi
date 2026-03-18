@@ -10,9 +10,27 @@ import kotlinx.coroutines.withContext
 import java.time.Clock
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
+
+data class CurrentStreak(
+    val totalDays: Int,
+    val isTodayStreak: Boolean,
+    val startDate: LocalDate?,
+    val endDate: LocalDate?
+)
+
+data class WeeklyStreak(
+    val totalDays: Int,
+    val isTodayStreak: Boolean,
+    val days: List<WeekStreakDay>
+)
+
+data class WeekStreakDay(
+    val date: LocalDate,
+    val isStreakDay: Boolean,
+    val isToday: Boolean
+)
 
 class ReadingSessionRepository(
     private val readingSessionDao: ReadingSessionDao
@@ -49,21 +67,34 @@ class ReadingSessionRepository(
         return getDailyStatsForPeriod(startOfWeek, endOfWeek)
     }
 
-    fun getCurrentStreakDays(clock: Clock = Clock.systemDefaultZone()): Flow<Int> {
+    fun getCurrentStreak(clock: Clock = Clock.systemDefaultZone()): Flow<CurrentStreak> {
         val today = LocalDate.now(clock)
         val todayKey = today.format(dateFormatter)
-        return readingSessionDao.getSessionDatesUpTo(todayKey).map { dates ->
+        return readingSessionDao.getActiveSessionDatesUpTo(todayKey).map { dates ->
             calculateCurrentStreak(dates, today)
         }
     }
 
-    fun getCurrentStreakDaysBesidesToday(clock: Clock = Clock.systemDefaultZone()): Flow<Int> {
-        val yesterday = LocalDate.now(clock).minusDays(1)
-        val yesterdayKey = yesterday.format(dateFormatter)
-        return readingSessionDao.getSessionDatesUpTo(yesterdayKey).map { dates ->
-            calculateCurrentStreak(dates, yesterday)
+    fun getWeeklyStreak(
+        firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
+        clock: Clock = Clock.systemDefaultZone()
+    ): Flow<WeeklyStreak> {
+        val today = LocalDate.now(clock)
+        val todayKey = today.format(dateFormatter)
+        val startOfWeek = today.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
+
+        return readingSessionDao.getActiveSessionDatesUpTo(todayKey).map { dates ->
+            val streak = calculateCurrentStreak(dates, today)
+            WeeklyStreak(
+                totalDays = streak.totalDays,
+                isTodayStreak = streak.isTodayStreak,
+                days = buildWeekStreakDays(startOfWeek, today, streak.startDate, streak.endDate)
+            )
         }
     }
+
+    fun getCurrentStreakDays(clock: Clock = Clock.systemDefaultZone()): Flow<Int> =
+        getCurrentStreak(clock).map { it.totalDays }
 
     suspend fun getTotalPagesReadForBook(bookId: Long): Int = withContext(Dispatchers.IO) {
         readingSessionDao.getTotalPagesReadForBook(bookId) ?: 0
@@ -98,6 +129,44 @@ class ReadingSessionRepository(
     }
 
     /**
+     * Записывает прогресс чтения, игнорируя нулевые/отрицательные изменения.
+     */
+    suspend fun recordReadingProgress(
+        bookId: Long,
+        startPage: Int,
+        endPage: Int,
+        date: LocalDate = LocalDate.now(),
+        readingTimeMinutes: Int = 0
+    ) = withContext(Dispatchers.IO) {
+        val pagesRead = endPage - startPage
+        if (pagesRead <= 0) return@withContext
+
+        val dateKey = date.format(dateFormatter)
+        val existing = readingSessionDao.getSessionForBookAndDate(bookId, dateKey)
+        if (existing == null) {
+            readingSessionDao.insertSession(
+                ReadingSession(
+                    bookId = bookId,
+                    date = dateKey,
+                    pagesRead = pagesRead,
+                    readingTimeMinutes = readingTimeMinutes,
+                    startPage = startPage,
+                    endPage = endPage
+                )
+            )
+        } else {
+            readingSessionDao.updateSession(
+                existing.copy(
+                    pagesRead = existing.pagesRead + pagesRead,
+                    readingTimeMinutes = existing.readingTimeMinutes + readingTimeMinutes,
+                    startPage = if (existing.startPage == 0) startPage else minOf(existing.startPage, startPage),
+                    endPage = maxOf(existing.endPage, endPage)
+                )
+            )
+        }
+    }
+
+    /**
      * Логирует прочтение страниц за сегодня
      */
     suspend fun logReadingProgress(
@@ -105,6 +174,7 @@ class ReadingSessionRepository(
         pagesRead: Int,
         readingTimeMinutes: Int = 0
     ) = withContext(Dispatchers.IO) {
+        if (pagesRead <= 0) return@withContext
         val today = LocalDate.now().format(dateFormatter)
         readingSessionDao.addOrUpdateSession(bookId, today, pagesRead, readingTimeMinutes)
     }
@@ -118,6 +188,7 @@ class ReadingSessionRepository(
         pagesRead: Int,
         readingTimeMinutes: Int = 0
     ) = withContext(Dispatchers.IO) {
+        if (pagesRead <= 0) return@withContext
         readingSessionDao.addOrUpdateSession(
             bookId,
             date.format(dateFormatter),
@@ -145,8 +216,15 @@ class ReadingSessionRepository(
         endPage = endPage
     )
 
-    private fun calculateCurrentStreak(dates: List<String>, today: LocalDate): Int {
-        if (dates.isEmpty()) return 0
+    private fun calculateCurrentStreak(dates: List<String>, today: LocalDate): CurrentStreak {
+        if (dates.isEmpty()) {
+            return CurrentStreak(
+                totalDays = 0,
+                isTodayStreak = false,
+                startDate = null,
+                endDate = null
+            )
+        }
 
         val todayKey = today.format(dateFormatter)
         val hasToday = dates.firstOrNull() == todayKey
@@ -165,6 +243,40 @@ class ReadingSessionRepository(
             }
         }
 
-        return streak
+        if (streak == 0) {
+            return CurrentStreak(
+                totalDays = 0,
+                isTodayStreak = false,
+                startDate = null,
+                endDate = null
+            )
+        }
+
+        val endDate = if (hasToday) today else today.minusDays(1)
+        val streakStart = endDate.minusDays(streak.toLong() - 1)
+
+        return CurrentStreak(
+            totalDays = streak,
+            isTodayStreak = hasToday,
+            startDate = streakStart,
+            endDate = endDate
+        )
+    }
+
+    private fun buildWeekStreakDays(
+        startOfWeek: LocalDate,
+        today: LocalDate,
+        streakStart: LocalDate?,
+        streakEnd: LocalDate?
+    ): List<WeekStreakDay> = (0..6).map { offset ->
+        val date = startOfWeek.plusDays(offset.toLong())
+        WeekStreakDay(
+            date = date,
+            isStreakDay = streakStart != null &&
+                streakEnd != null &&
+                !date.isBefore(streakStart) &&
+                !date.isAfter(streakEnd),
+            isToday = date == today
+        )
     }
 }

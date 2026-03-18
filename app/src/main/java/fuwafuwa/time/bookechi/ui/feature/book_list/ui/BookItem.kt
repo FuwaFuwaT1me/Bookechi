@@ -317,7 +317,8 @@ private fun PreviewBookItem() {
             author = "Author 1",
             coverPath = "https://picsum.photos/200/300",
             currentPage = 25,
-            pages = 100
+            pages = 100,
+            isFavorite = false,
         ),
         onClick = {},
         onDeleteBookClick = {}
@@ -333,7 +334,8 @@ private fun PreviewZeroProgressBookItem() {
             author = "Author 1",
             coverPath = "https://picsum.photos/200/300",
             currentPage = 0,
-            pages = 100
+            pages = 100,
+            isFavorite = false,
         ),
         onClick = {},
         onDeleteBookClick = {}
@@ -349,7 +351,8 @@ private fun PreviewNewBookItem() {
             author = "Author 1",
             coverPath = "https://picsum.photos/200/300",
             currentPage = 54,
-            pages = 120
+            pages = 120,
+            isFavorite = false,
         ),
         onBookClick = {},
         onEditBookClick = {},

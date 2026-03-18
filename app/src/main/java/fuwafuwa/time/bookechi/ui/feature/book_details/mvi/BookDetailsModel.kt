@@ -29,7 +29,7 @@ class BookDetailsModel(
                 handleUpdateReadingStatus(ReadingStatus.Reading)
             }
             is BookDetailsAction.FinishReading -> scope.launch {
-                handleUpdateReadingStatus(ReadingStatus.Stopped)
+                handleUpdateReadingStatus(ReadingStatus.Dropped)
             }
             is BookDetailsAction.StartReadingAgain -> scope.launch {
                 handleUpdateReadingStatus(ReadingStatus.Reading)

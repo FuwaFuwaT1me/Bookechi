@@ -2,6 +2,7 @@ package fuwafuwa.time.bookechi.ui.feature.add_book.mvi
 
 import android.net.Uri
 import fuwafuwa.time.bookechi.data.model.Book
+import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
 import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent
@@ -39,7 +40,9 @@ class AddBookModel(
                 author = bookAuthor,
                 coverPath = bookCoverPath,
                 pages = bookPages,
-                currentPage = bookCurrentPage
+                currentPage = bookCurrentPage,
+                readingStatus = if (readingNow) ReadingStatus.Reading else ReadingStatus.None,
+                isFavorite = false,
             )
         }
 

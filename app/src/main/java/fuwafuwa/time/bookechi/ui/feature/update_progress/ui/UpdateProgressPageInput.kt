@@ -181,7 +181,8 @@ private fun PageInputPreview() {
                 author = "Murakami",
                 coverPath = null,
                 pages = 256,
-                currentPage = 40
+                currentPage = 40,
+                isFavorite = false,
             )
         ),
         onValueChange = {}

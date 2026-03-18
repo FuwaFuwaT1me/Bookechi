@@ -12,7 +12,8 @@ internal object LibraryPreviewData {
             coverPath = null,
             pages = 320,
             currentPage = 54,
-            readingStatus = ReadingStatus.Reading
+            readingStatus = ReadingStatus.Reading,
+            isFavorite = false,
         ),
         Book(
             id = 2,
@@ -21,7 +22,8 @@ internal object LibraryPreviewData {
             coverPath = null,
             pages = 480,
             currentPage = 480,
-            readingStatus = ReadingStatus.Completed
+            readingStatus = ReadingStatus.Completed,
+            isFavorite = false,
         ),
         Book(
             id = 3,
@@ -30,7 +32,8 @@ internal object LibraryPreviewData {
             coverPath = null,
             pages = 640,
             currentPage = 0,
-            readingStatus = ReadingStatus.None
+            readingStatus = ReadingStatus.None,
+            isFavorite = false,
         )
     )
 }

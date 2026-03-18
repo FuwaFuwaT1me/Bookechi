@@ -64,6 +64,16 @@ interface ReadingSessionDao {
     """)
     fun getSessionDatesUpTo(endDate: String): Flow<List<String>>
 
+    @Query("""
+        SELECT date
+        FROM ReadingSession
+        WHERE date <= :endDate
+        GROUP BY date
+        HAVING SUM(pagesRead) > 0
+        ORDER BY date DESC
+    """)
+    fun getActiveSessionDatesUpTo(endDate: String): Flow<List<String>>
+
     @Query("SELECT SUM(pagesRead) FROM ReadingSession WHERE bookId = :bookId")
     suspend fun getTotalPagesReadForBook(bookId: Long): Int?
 
@@ -117,4 +127,3 @@ interface ReadingSessionDao {
         }
     }
 }
-

@@ -144,7 +144,8 @@ class ProductivityModel(
                 coverPath = null,
                 pages = 500,
                 currentPage = 500,
-                readingStatus = ReadingStatus.Completed
+                readingStatus = ReadingStatus.Completed,
+                isFavorite = false,
             )
         }
         bookRepository.insertBooks(books)
@@ -204,7 +205,8 @@ class ProductivityModel(
                 coverPath = null,
                 pages = 500,
                 currentPage = 500,
-                readingStatus = ReadingStatus.Completed
+                readingStatus = ReadingStatus.Completed,
+                isFavorite = false,
             )
         }
         bookRepository.insertBooks(books)

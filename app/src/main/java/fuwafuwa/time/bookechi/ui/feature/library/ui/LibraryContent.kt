@@ -40,10 +40,10 @@ fun LibraryContent(
         LibraryFilter.All -> state.books
         LibraryFilter.Reading -> state.books.filter { it.readingStatus == ReadingStatus.Reading }
         LibraryFilter.Completed -> state.books.filter { it.readingStatus == ReadingStatus.Completed }
-        LibraryFilter.Planned -> state.books.filter { it.readingStatus == ReadingStatus.None }
-        LibraryFilter.Favorite -> emptyList()
-        LibraryFilter.Paused -> emptyList()
-        LibraryFilter.Stopped -> emptyList()
+        LibraryFilter.Planned -> state.books.filter { it.readingStatus == ReadingStatus.Planned }
+        LibraryFilter.Favorite -> state.books.filter { it.isFavorite}
+        LibraryFilter.Paused -> state.books.filter { it.readingStatus == ReadingStatus.Paused }
+        LibraryFilter.Dropped -> state.books.filter { it.readingStatus == ReadingStatus.Dropped }
     }
 
     Box(

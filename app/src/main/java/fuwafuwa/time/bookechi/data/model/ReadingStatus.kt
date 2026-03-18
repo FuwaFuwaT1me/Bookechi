@@ -5,7 +5,6 @@ enum class ReadingStatus {
     Planned,
     Reading,
     Paused,
-    Stopped,
+    Dropped,
     Completed,
-    Favorite,
 }

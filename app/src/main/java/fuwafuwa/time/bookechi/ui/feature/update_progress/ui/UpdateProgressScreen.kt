@@ -236,7 +236,8 @@ private fun PositiveProgressPreview() {
                 author = "Murakami",
                 coverPath = null,
                 pages = 256,
-                currentPage = 40
+                currentPage = 40,
+                isFavorite = false,
             )
         ),
         onAction = {}
@@ -255,7 +256,8 @@ private fun NegativeProgressPreview() {
                 author = "Murakami",
                 coverPath = null,
                 pages = 256,
-                currentPage = 40
+                currentPage = 40,
+                isFavorite = false,
             )
         ),
         onAction = {}

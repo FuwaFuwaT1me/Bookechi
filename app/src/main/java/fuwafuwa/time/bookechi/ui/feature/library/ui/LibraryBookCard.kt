@@ -153,13 +153,12 @@ fun LibraryBookCard(
 }
 
 private fun bookTag(book: Book): String? = when (book.readingStatus) {
-    ReadingStatus.Reading -> "Читаю"
-    ReadingStatus.Completed -> "Прочитал"
-    ReadingStatus.Paused -> "Пауза"
-    ReadingStatus.Stopped -> "Завершена"
-    ReadingStatus.None -> ""
+    ReadingStatus.None -> null
     ReadingStatus.Planned -> "В планах"
-    ReadingStatus.Favorite -> "Избранное"
+    ReadingStatus.Reading -> "Читаю"
+    ReadingStatus.Paused -> "Приостановлена"
+    ReadingStatus.Dropped -> "Брошена"
+    ReadingStatus.Completed -> "Прочитана"
 }
 
 @Preview

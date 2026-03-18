@@ -1,12 +1,12 @@
 package fuwafuwa.time.bookechi.ui.feature.update_progress.mvi
 
+import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
 import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent
 import fuwafuwa.time.bookechi.ui.feature.update_result.mvi.NavigateToUpdateResult
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 class UpdateProgressModel(
     defaultState: UpdateProgressState,
@@ -37,19 +37,17 @@ class UpdateProgressModel(
             }
             is UpdateProgressAction.SaveChanges -> scope.launch {
                 val state = currentState()
-                val updatedBook = state.book.copy(currentPage = action.value)
+                val updatedBook = state.book.copy(
+                    currentPage = action.value,
+                    readingStatus = ReadingStatus.Reading
+                )
 
                 bookRepository.updateBook(updatedBook)
-                readingSessionRepository.apply {
-                    val newSession = createSession(
-                        bookId = updatedBook.id,
-                        date = LocalDate.now(),
-                        pagesRead = action.value - state.startPages,
-                        startPage = state.startPages,
-                        endPage = action.value
-                    )
-                    insertSession(newSession)
-                }
+                readingSessionRepository.recordReadingProgress(
+                    bookId = updatedBook.id,
+                    startPage = state.startPages,
+                    endPage = action.value
+                )
 
                 sendNavigationEvent(
                     NavigateToUpdateResult(

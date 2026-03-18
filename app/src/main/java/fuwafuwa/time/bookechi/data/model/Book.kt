@@ -16,5 +16,6 @@ data class Book(
     val coverPath: String?,
     val pages: Int,
     val currentPage: Int,
-    val readingStatus: ReadingStatus = ReadingStatus.None
+    val readingStatus: ReadingStatus = ReadingStatus.None,
+    val isFavorite: Boolean,
 ) : Parcelable

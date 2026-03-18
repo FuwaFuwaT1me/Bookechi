@@ -343,7 +343,8 @@ private fun ProgressBookCoverShowcasePreview() {
             author = "sadf",
             coverPath = null,
             currentPage = 256,
-            pages = 1024
+            pages = 1024,
+            isFavorite = false,
         ),
         imageUri = null,
         progress = 0.25f
@@ -360,7 +361,8 @@ private fun ProgressBookCoverShowcaseSmallNumbersPreview() {
             author = "sadf",
             coverPath = null,
             currentPage = 12,
-            pages = 48
+            pages = 48,
+            isFavorite = false,
         ),
         imageUri = null,
         progress = 0.25f
@@ -386,7 +388,8 @@ private fun ProgressBookCoverShowcaseLargePreview() {
         author = "sadf",
         coverPath = null,
         currentPage = 256,
-        pages = 1024
+        pages = 1024,
+        isFavorite = false,
     )
 
     ProgressBookCoverShowcase(
@@ -408,7 +411,8 @@ private fun ProgressBookCoverShowcaseLargeSmallNumbersPreview() {
         author = "sadf",
         coverPath = null,
         currentPage = 5,
-        pages = 20
+        pages = 20,
+        isFavorite = false,
     )
 
     ProgressBookCoverShowcase(

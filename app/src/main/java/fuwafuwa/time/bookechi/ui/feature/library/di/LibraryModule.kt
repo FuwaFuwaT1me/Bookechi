@@ -4,6 +4,7 @@ import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.LibraryModel
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.LibraryState
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.LibraryViewModel
+import fuwafuwa.time.bookechi.utils.file.CacheHelper
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -21,7 +22,8 @@ val libraryModule = module {
     factory {
         LibraryModel(
             defaultState = get<LibraryState>(),
-            bookRepository = get<BookRepository>()
+            bookRepository = get<BookRepository>(),
+            cacheHelper = get<CacheHelper>()
         )
     }
 }

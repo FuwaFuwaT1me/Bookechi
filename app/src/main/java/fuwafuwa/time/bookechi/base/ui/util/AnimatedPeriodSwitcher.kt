@@ -84,7 +84,14 @@ fun AnimatedPeriodSwitcher(
                         .weight(1f)
                         .fillMaxHeight()
                         .clip(RoundedCornerShape(innerCornerRadius))
-                        .clickable { onSwitch(index) },
+                        .clickable(
+                            interactionSource = null,
+                            indication = null,
+                            onClick = {
+                                onSwitch(index)
+                            }
+                        )
+                    ,
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

@@ -98,7 +98,7 @@ fun LibraryContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(FigmaBackground)
+            .background(FigmaLibraryBackground)
     ) {
         Column(
             modifier = Modifier

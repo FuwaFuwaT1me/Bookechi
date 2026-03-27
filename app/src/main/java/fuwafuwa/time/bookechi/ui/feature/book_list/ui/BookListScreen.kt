@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.book_list.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListAction
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListState
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListViewModel
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.DayStreak
+import fuwafuwa.time.bookechi.ui.theme.FigmaLibraryBackground
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 import kotlinx.serialization.Serializable
@@ -59,6 +61,7 @@ private fun BookListScreenPrivate(
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .fillMaxSize()
+            .background(FigmaLibraryBackground)
     ) {
         BookListContent(
             state = state,

@@ -43,4 +43,6 @@ val FigmaActivityCellThreeActivity = Color(0xFFED8835)
 val FigmaActivityCellFourActivity = Color(0xFFCB4700)
 val FigmaActivityCellFiveActivity = Color(0xFFA62700)
 val FigmaAddBookBackground = Color(0xFFDEC5B9)
-val FigmaLibraryBackground = Color(0xFFFFF9F7)
+val FigmaLibraryBackground = Color(0xFFFFF9F6)
+
+val BottomBarDivider = Color(0xFFD9CEC6)

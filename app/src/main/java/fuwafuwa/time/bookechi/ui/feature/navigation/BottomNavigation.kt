@@ -1,6 +1,9 @@
 package fuwafuwa.time.bookechi.ui.feature.navigation
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.BarChart
@@ -14,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -29,6 +33,7 @@ import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.library.ui.LibraryScreen
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityScreen
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
+import fuwafuwa.time.bookechi.ui.theme.BottomBarDivider
 import fuwafuwa.time.bookechi.ui.theme.FigmaBottomNavSelectedTab
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
 import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
@@ -59,7 +64,19 @@ val BottomNavItems = listOf(
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
-    NavigationBar {
+    NavigationBar(
+        modifier = Modifier
+            .height(96.dp)
+            .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+            .border(
+                width = 1.dp,
+                color = BottomBarDivider,
+                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+            )
+        ,
+        containerColor = Color.White,
+        tonalElevation = 6.dp,
+    ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
@@ -80,7 +97,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                     Icon(
                         modifier = Modifier
                             .size(
-                                if (isSelected) 32.dp else 24.dp
+                                24.dp
                             )
                         ,
                         painter = painterResource(navItem.resId),
@@ -90,7 +107,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                 label = {
                     Text(
                         text = navItem.label,
-                        fontSize = if (isSelected) 14.sp else 12.sp
+                        fontSize = 12.sp
                     )
                 },
                 alwaysShowLabel = true,

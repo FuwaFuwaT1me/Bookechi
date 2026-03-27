@@ -61,7 +61,7 @@ fun ProductivityScreen(
                 )
             }
         },
-        debugActions = if (BuildConfig.DEBUG) {
+        debugActions = if (BuildConfig.DEBUG && false) {
             ProductivityDebugActions(
                 overwriteYear = { year, pagesPerDay, booksCount ->
                     viewModel.sendAction(

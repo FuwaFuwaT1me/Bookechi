@@ -59,9 +59,9 @@ private fun BookListScreenPrivate(
 ) {
     Box(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
             .fillMaxSize()
             .background(FigmaLibraryBackground)
+            .padding(horizontal = 16.dp)
     ) {
         BookListContent(
             state = state,

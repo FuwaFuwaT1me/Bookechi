@@ -17,6 +17,7 @@ room = "2.8.4"
 ksp = "2.2.21-2.0.4"
 koin = "4.1.1"
 koinAndroid = "4.1.1"
+googleAccompanist = "0.27.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,7 @@ koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin"
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koinAndroid" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koinAndroid" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation-layout" }
+accompanist-systemuicontroller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "googleAccompanist" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

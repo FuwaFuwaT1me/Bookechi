@@ -1,8 +1,9 @@
 package fuwafuwa.time.bookechi.ui.feature.navigation
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -66,7 +67,6 @@ val BottomNavItems = listOf(
 fun BottomNavigationBar(navController: NavHostController) {
     NavigationBar(
         modifier = Modifier
-            .height(96.dp)
             .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
             .border(
                 width = 1.dp,
@@ -75,6 +75,7 @@ fun BottomNavigationBar(navController: NavHostController) {
             )
         ,
         containerColor = Color.White,
+        windowInsets = WindowInsets.navigationBars,
         tonalElevation = 6.dp,
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -97,7 +98,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                     Icon(
                         modifier = Modifier
                             .size(
-                                24.dp
+                                18.dp
                             )
                         ,
                         painter = painterResource(navItem.resId),
@@ -107,7 +108,7 @@ fun BottomNavigationBar(navController: NavHostController) {
                 label = {
                     Text(
                         text = navItem.label,
-                        fontSize = 12.sp
+                        fontSize = 10.sp
                     )
                 },
                 alwaysShowLabel = true,

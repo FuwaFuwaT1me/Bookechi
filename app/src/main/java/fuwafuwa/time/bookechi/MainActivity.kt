@@ -1,18 +1,24 @@
 package fuwafuwa.time.bookechi
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import fuwafuwa.time.bookechi.navigation.NavigationHost
 import fuwafuwa.time.bookechi.ui.feature.navigation.BottomNavigationBar
+import fuwafuwa.time.bookechi.ui.theme.FigmaBackground
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
+import fuwafuwa.time.bookechi.ui.theme.FigmaLibraryBackground
 
 class MainActivity : ComponentActivity() {
 
@@ -22,17 +28,25 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
+            val systemUiController = rememberSystemUiController()
+            systemUiController.setSystemBarsColor(
+                color = FigmaLibraryBackground
+            )
+
             BookechiTheme {
                 val navController = rememberNavController()
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
+                    containerColor = FigmaLibraryBackground,
                     bottomBar = {
                         BottomNavigationBar(navController = navController)
                     },
                     content = { innerPadding ->
                         NavigationHost(
-                            modifier = Modifier.padding(innerPadding),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding),
                             navController = navController
                         )
                     }

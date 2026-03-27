@@ -8,7 +8,7 @@ import fuwafuwa.time.bookechi.data.model.ReadingSession
 
 @Database(
     entities = [Book::class, ReadingSession::class],
-    version = 2,
+    version = 1,
     exportSchema = false
 )
 @TypeConverters()

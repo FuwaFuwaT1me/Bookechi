@@ -99,7 +99,7 @@ fun LibraryBookCard(
                 }
             }
 
-            if (book.readingStatus == ReadingStatus.Completed) {
+            if (book.isFavorite) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -181,7 +181,10 @@ private fun bookTag(book: Book): String? = when (book.readingStatus) {
 @Composable
 private fun LibraryBookCardPreview() {
     LibraryBookCard(
-        book = LibraryPreviewData.books().first(),
+        book = LibraryPreviewData.books().first().copy(
+            isFavorite = true,
+            readingStatus = ReadingStatus.Completed
+        ),
         onClick = {},
         onEditClick = {}
     )

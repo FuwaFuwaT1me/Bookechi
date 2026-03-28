@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.library.ui
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -64,33 +65,11 @@ fun BoxScope.EditBookBottomSheet(
 ) {
     val book = state.editingBook ?: return
 
-    var bookTitle by remember(book.id) { mutableStateOf(book.name) }
-    var bookAuthor by remember(book.id) { mutableStateOf(book.author) }
-    var readingStatus by remember(book.id) { mutableStateOf(book.readingStatus) }
-    var isFavorite by remember(book.id) { mutableStateOf(book.isFavorite) }
-    var coverPath by remember(book.id) { mutableStateOf(book.coverPath) }
-
-    fun buildUpdatedBook(
-        title: String = bookTitle,
-        author: String = bookAuthor,
-        status: ReadingStatus = readingStatus,
-        favorite: Boolean = isFavorite,
-        cover: String? = coverPath
-    ): Book = book.copy(
-        name = title,
-        author = author,
-        readingStatus = status,
-        isFavorite = favorite,
-        coverPath = cover
-    )
-
     val coverPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
-            val newCoverPath = it.toString()
-            coverPath = newCoverPath
-            onAction(LibraryAction.UpdateBook(buildUpdatedBook(cover = newCoverPath)))
+            onAction(LibraryAction.UpdateBook(book.copy(coverPath = it.toString())))
         }
     }
 
@@ -158,7 +137,7 @@ fun BoxScope.EditBookBottomSheet(
                                     modifier = Modifier
                                         .height(170.dp)
                                         .width(120.dp),
-                                    imageUri = coverPath?.toUri(),
+                                    imageUri = book.coverPath?.toUri(),
                                     onClick = { coverPickerLauncher.launch("image/*") }
                                 )
                             }
@@ -183,10 +162,9 @@ fun BoxScope.EditBookBottomSheet(
                                 .padding(16.dp)
                         ) {
                             ModernTextField(
-                                value = bookTitle,
+                                value = book.name,
                                 onValueChange = {
-                                    bookTitle = it
-                                    onAction(LibraryAction.UpdateBook(buildUpdatedBook(title = it)))
+                                    onAction(LibraryAction.UpdateBook(book.copy(name = it)))
                                 },
                                 label = "Название книги",
                                 placeholder = "Введите название"
@@ -195,10 +173,9 @@ fun BoxScope.EditBookBottomSheet(
                             Spacer(modifier = Modifier.height(12.dp))
 
                             ModernTextField(
-                                value = bookAuthor,
+                                value = book.author,
                                 onValueChange = {
-                                    bookAuthor = it
-                                    onAction(LibraryAction.UpdateBook(buildUpdatedBook(author = it)))
+                                    onAction(LibraryAction.UpdateBook(book.copy(author = it)))
                                 },
                                 label = "Автор",
                                 placeholder = "Введите автора"
@@ -241,12 +218,11 @@ fun BoxScope.EditBookBottomSheet(
                             ) {
                                 ReadingStatus.entries.forEach { status ->
                                     FilterChip(
-                                        selected = readingStatus == status,
+                                        selected = book.readingStatus == status,
                                         onClick = {
-                                            readingStatus = status
                                             onAction(
                                                 LibraryAction.UpdateBook(
-                                                    buildUpdatedBook(status = status)
+                                                    book.copy(readingStatus = status)
                                                 )
                                             )
                                         },
@@ -270,23 +246,22 @@ fun BoxScope.EditBookBottomSheet(
 
                             FilledTonalButton(
                                 onClick = {
-                                    val newFavorite = !isFavorite
-                                    isFavorite = newFavorite
+                                    Log.d("ANIME", "isFav before click = ${book.isFavorite}")
                                     onAction(
                                         LibraryAction.UpdateBook(
-                                            buildUpdatedBook(favorite = newFavorite)
+                                            book.copy(isFavorite = !book.isFavorite)
                                         )
                                     )
                                 },
                                 colors = ButtonDefaults.filledTonalButtonColors(
-                                    containerColor = if (isFavorite) FigmaTitle else FigmaBackground,
-                                    contentColor = if (isFavorite) Color.White else FigmaTitle
+                                    containerColor = if (book.isFavorite) FigmaTitle else FigmaBackground,
+                                    contentColor = if (book.isFavorite) Color.White else FigmaTitle
                                 ),
                                 shape = RoundedCornerShape(14.dp),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Icon(
-                                    imageVector = if (isFavorite) {
+                                    imageVector = if (book.isFavorite) {
                                         Icons.Default.Favorite
                                     } else {
                                         Icons.Default.FavoriteBorder
@@ -296,7 +271,7 @@ fun BoxScope.EditBookBottomSheet(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = if (isFavorite) "В избранном" else "В избранное",
+                                    text = if (book.isFavorite) "В избранном" else "В избранное",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Medium
                                 )

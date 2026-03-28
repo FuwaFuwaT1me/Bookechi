@@ -116,6 +116,7 @@ fun ProgressBookCoverShowcase(
     onCoverClick: (() -> Unit)? = null,
     onCoverLongTap: (() -> Unit)? = null,
     onAddPageClick: (() -> Unit)? = null,
+    accentColor: Color = BlueMain,
 ) {
     var animationPlayed by remember { mutableStateOf(false) }
 
@@ -192,7 +193,7 @@ fun ProgressBookCoverShowcase(
             ) {
                 val strokeWidthPx = arcStrokeWidth.toPx()
                 drawArc(
-                    color = BlueMain,
+                    color = accentColor,
                     startAngle = startGapAngleDegrees,
                     sweepAngle = maxSweepAngle * animatedProgress,
                     useCenter = false,
@@ -225,7 +226,7 @@ fun ProgressBookCoverShowcase(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .background(
-                            color = BlueMain,
+                            color = accentColor,
                             shape = RoundedCornerShape(badgeCornerRadius)
                         )
                         .padding(horizontal = badgePaddingH, vertical = badgePaddingV),
@@ -263,7 +264,7 @@ fun ProgressBookCoverShowcase(
                         modifier = Modifier
                             .size(buttonInnerSize)
                             .clip(CircleShape)
-                            .background(color = BlueMain)
+                            .background(color = accentColor)
                             .clickable { onAddPageClick?.invoke() },
                         contentAlignment = Alignment.Center
                     ) {

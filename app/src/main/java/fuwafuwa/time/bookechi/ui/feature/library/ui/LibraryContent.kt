@@ -111,7 +111,7 @@ fun LibraryContent(
                         modifier = Modifier.padding(horizontal = horizontalPadding),
                         books = filteredBooks,
                         onBookClick = { book ->
-                            onAction(LibraryAction.NavigateToBookDetails(book))
+                            onAction(LibraryAction.EditBook(book))
                         },
                         onEditClick = { book ->
                             onAction(LibraryAction.EditBook(book))
@@ -124,6 +124,7 @@ fun LibraryContent(
         LibraryAddBookFab(
             onClick = { onAction(LibraryAction.OpenAddBookSheet) },
             modifier = Modifier.align(Alignment.BottomEnd)
+                .padding(bottom = 76.dp)
         )
 
         LibraryAddBookBottomSheet(

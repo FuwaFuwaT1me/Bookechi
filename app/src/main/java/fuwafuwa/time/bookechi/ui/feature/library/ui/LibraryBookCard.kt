@@ -148,22 +148,22 @@ fun LibraryBookCard(
                 )
             }
 
-            Spacer(modifier = Modifier.width(6.dp))
-
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-                IconButton(
-                    modifier = Modifier
-                        .size(24.dp)
-                    ,
-                    onClick = onEditClick
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More",
-                        tint = FigmaTitle
-                    )
-                }
-            }
+//            Spacer(modifier = Modifier.width(6.dp))
+//
+//            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+//                IconButton(
+//                    modifier = Modifier
+//                        .size(24.dp)
+//                    ,
+//                    onClick = onEditClick
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.Default.MoreVert,
+//                        contentDescription = "More",
+//                        tint = FigmaTitle
+//                    )
+//                }
+//            }
         }
     }
 }

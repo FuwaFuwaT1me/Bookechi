@@ -128,6 +128,8 @@ private fun ProductivityScreenPrivate(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        Spacer(Modifier.height(82.dp))
     }
 }
 

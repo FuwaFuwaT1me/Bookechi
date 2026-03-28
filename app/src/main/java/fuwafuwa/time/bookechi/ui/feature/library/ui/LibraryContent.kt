@@ -57,7 +57,7 @@ fun LibraryContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(vertical = 20.dp)
+                .padding(top = 20.dp)
         ) {
             LibraryHeader(
                 booksCount = filteredBooks.size,

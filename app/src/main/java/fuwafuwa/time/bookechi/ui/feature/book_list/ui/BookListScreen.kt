@@ -84,6 +84,10 @@ private fun BookListContent(
     ) {
         bookListHeader(state)
         bookListBody(state, onAction)
+
+        item {
+            Spacer(Modifier.height(68.dp))
+        }
     }
 }
 

@@ -1,27 +1,27 @@
 package fuwafuwa.time.bookechi.ui.feature.navigation
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,11 +33,9 @@ import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.library.ui.LibraryScreen
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityScreen
-import fuwafuwa.time.bookechi.ui.theme.BlueMain
 import fuwafuwa.time.bookechi.ui.theme.BottomBarDivider
 import fuwafuwa.time.bookechi.ui.theme.FigmaBottomNavSelectedTab
 import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
-import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
 
 data class BottomNavItem(
     val label: String,
@@ -64,9 +62,12 @@ val BottomNavItems = listOf(
 )
 
 @Composable
-fun BottomNavigationBar(navController: NavHostController) {
+fun BottomNavigationBar(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     NavigationBar(
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
             .border(
                 width = 1.dp,
@@ -75,52 +76,80 @@ fun BottomNavigationBar(navController: NavHostController) {
             )
         ,
         containerColor = Color.White,
-        windowInsets = WindowInsets.navigationBars,
         tonalElevation = 6.dp,
     ) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+            ,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
 
-        BottomNavItems.forEach { navItem ->
-            val isSelected = currentRoute == navItem.route::class.qualifiedName
-            NavigationBarItem(
-                selected = isSelected,
-                onClick = {
-                    navController.navigate(navItem.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
+
+            BottomNavItems.forEach { navItem ->
+                val isSelected = currentRoute == navItem.route::class.qualifiedName
+
+                NavigationItem(
+                    selected = isSelected,
+                    onClick = {
+                        navController.navigate(navItem.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                icon = {
-                    Icon(
-                        modifier = Modifier
-                            .size(
-                                18.dp
-                            )
-                        ,
-                        painter = painterResource(navItem.resId),
-                        contentDescription = navItem.label,
-                    )
-                },
-                label = {
-                    Text(
-                        text = navItem.label,
-                        fontSize = 10.sp
-                    )
-                },
-                alwaysShowLabel = true,
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = FigmaBottomNavSelectedTab,
-                    selectedTextColor = FigmaTitle,
-                    unselectedIconColor = FigmaSubtitle,
-                    unselectedTextColor = FigmaSubtitle,
-                    indicatorColor = Color.Transparent,
+                    },
+                    navItem = navItem,
+                    selectedColor = FigmaBottomNavSelectedTab,
+                    unselectedColor = FigmaSubtitle
                 )
-            )
+            }
         }
+    }
+}
+
+@Composable
+private fun NavigationItem(
+    selected: Boolean,
+    navItem: BottomNavItem,
+    selectedColor: Color,
+    unselectedColor: Color,
+    onClick: () -> Unit
+) {
+    val color = if (selected) { selectedColor } else unselectedColor
+
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(14.dp))
+            .clickable {
+                onClick()
+            }
+        ,
+    ) {
+        Icon(
+            modifier = Modifier
+                .size(22.dp)
+                .align(Alignment.CenterHorizontally)
+            ,
+            painter = painterResource(navItem.resId),
+            tint = color,
+            contentDescription = navItem.label,
+        )
+
+        Spacer(Modifier.height(2.dp))
+
+        Text(
+            modifier = Modifier
+                .padding(horizontal = 4.dp)
+            ,
+            text = navItem.label,
+            fontSize = 12.sp,
+            color = color,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 

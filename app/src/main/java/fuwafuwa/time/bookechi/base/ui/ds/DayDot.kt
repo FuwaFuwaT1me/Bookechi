@@ -75,8 +75,26 @@ fun DayDot(
                     Box(
                         modifier = Modifier
                             .size(28.dp)
-                            .border(2.dp, colors.accent, CircleShape),
-                    )
+                            .border(2.dp, colors.accent, CircleShape)
+                            .padding(4.dp)
+                        ,
+                    ) {
+
+                        val ringColor = colors.streakCurrentDay
+                        Canvas(modifier = Modifier.size(28.dp)) {
+                            drawCircle(
+                                color = ringColor,
+                                radius = size.minDimension / 2f - 1.dp.toPx(),
+                                style = Stroke(
+                                    width = 1.5.dp.toPx(),
+                                    pathEffect = PathEffect.dashPathEffect(
+                                        intervals = floatArrayOf(3.dp.toPx(), 3.dp.toPx()),
+                                        phase = 0f,
+                                    ),
+                                ),
+                            )
+                        }
+                    }
                 }
                 DayState.Empty -> {
                     // Пунктирное кольцо (как в макете), но видимым тёплым тоном, не блёклым.

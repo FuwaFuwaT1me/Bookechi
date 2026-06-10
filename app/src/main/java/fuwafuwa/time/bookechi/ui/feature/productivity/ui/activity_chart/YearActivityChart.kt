@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
+import fuwafuwa.time.bookechi.base.ui.chart.getRelativeActivityIntensity
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.data.model.DailyReadingStats
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityPreviewData
@@ -63,8 +64,7 @@ fun YearActivityChart(
     val today = LocalDate.now()
     val currentMonth = if (today.year == year) today.monthValue else 0
 
-    val barShape = RoundedCornerShape(topStart = 2.dp, topEnd = 2.dp)
-    val barBrush = Brush.verticalGradient(listOf(colors.accent, colors.accentDeep))
+    val barShape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
     val labelStyle = MaterialTheme.typography.labelSmall.copy(
         fontSize = 10.sp,
         letterSpacing = 0.sp,
@@ -81,6 +81,15 @@ fun YearActivityChart(
             val isCurrent = month == currentMonth
             val fraction = if (maxPages > 0) pages.toFloat() / maxPages else 0f
 
+            // Цвет столбика зависит от активности месяца: чем больше страниц — тем насыщеннее.
+            val intensity = getRelativeActivityIntensity(pages, maxPages).ordinal
+            val barBrush = Brush.verticalGradient(
+                listOf(
+                    colors.heatmap[intensity],
+                    colors.heatmap[(intensity + 1).coerceAtMost(colors.heatmap.lastIndex)],
+                )
+            )
+
             Column(
                 modifier = Modifier.weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -92,6 +101,7 @@ fun YearActivityChart(
                     color = colors.accentDeep,
                     maxLines = 1,
                     modifier = Modifier.height(16.dp),
+                    textAlign = TextAlign.Center
                 )
 
                 Spacer(Modifier.height(Spacing.xs))
@@ -114,17 +124,22 @@ fun YearActivityChart(
                         pages <= 0 -> Box(
                             modifier = barModifier.clip(barShape).background(colors.stroke),
                         )
-                        isCurrent -> Box(
-                            modifier = barModifier
-                                .border(2.dp, colors.textPrimary, barShape)
-                                .padding(2.dp),
-                        ) {
+                        isCurrent -> {
+                            // Текущий месяц: приятная полностью скруглённая обводка
+                            // (цвет → белая прослойка → чёрная обводка).
+                            val highlightShape = RoundedCornerShape(10.dp)
                             Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(barShape)
-                                    .background(barBrush),
-                            )
+                                modifier = barModifier
+                                    .border(1.dp, colors.textPrimary, highlightShape)
+                                    .padding(3.5.dp),
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clip(highlightShape)
+                                        .background(barBrush),
+                                )
+                            }
                         }
                         else -> Box(
                             modifier = barModifier.clip(barShape).background(barBrush),
@@ -164,7 +179,7 @@ private fun buildMonthlyPages(
 /** «1207» -> «1 207» (разряды тысяч пробелом). */
 private fun formatPages(n: Int): String =
     n.toString().reversed().chunked(3).joinToString(" ").reversed()
-
+й
 @Preview(name = "YearActivityChart Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
 @Composable
 private fun YearActivityChartPreviewLight() {

@@ -47,8 +47,8 @@ fun ActivityChartCell(
         val innerShape = RoundedCornerShape((config.cornerRadius.value - 2f).coerceAtLeast(2f).dp)
         Box(
             modifier = modifier
-                .border(2.dp, colors.textPrimary, shape)
-                .padding(2.5.dp),
+                .border(1.dp, colors.textPrimary, shape)
+                .padding(3.5.dp),
         ) {
             Box(
                 modifier = Modifier

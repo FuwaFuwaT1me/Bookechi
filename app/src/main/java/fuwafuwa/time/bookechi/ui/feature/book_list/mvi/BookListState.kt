@@ -24,6 +24,12 @@ data class BookListState(
      * TODO: compute comeback from streak history
      */
     val isComeback: Boolean = false,
+    /** Показана ли шторка настройки напоминания. */
+    val showReminderSheet: Boolean = false,
+    /** Включено ли ежедневное напоминание о чтении. */
+    val reminderEnabled: Boolean = true,
+    /** Время напоминания (HH:mm). */
+    val reminderTime: String = "21:00",
 ) : State
 
 data class DayStreak(

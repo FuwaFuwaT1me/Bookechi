@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -37,6 +39,7 @@ fun RatingStars(
             val starModifier = if (onRate != null) {
                 Modifier
                     .size(28.dp)
+                    .clip(CircleShape)
                     .clickable { onRate(i) }
             } else {
                 Modifier.size(28.dp)

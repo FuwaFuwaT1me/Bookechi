@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -83,7 +84,8 @@ private fun PeriodSwitcher(
                     .weight(1f)
                     .fillMaxWidth()
                     .height(40.dp)
-                    .background(segmentBg, DsShapes.pill)
+                    .clip(DsShapes.pill)
+                    .background(segmentBg)
                     .then(
                         if (selected) {
                             Modifier.border(BorderStroke(1.dp, colors.stroke), DsShapes.pill)

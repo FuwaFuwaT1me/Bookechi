@@ -2,6 +2,7 @@ package fuwafuwa.time.bookechi.ui.feature.library.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,7 +31,8 @@ fun LibraryAddBookFab(
         modifier = modifier
             .padding(Spacing.xl)
             .size(56.dp)
-            .background(colors.accent, CircleShape)
+            .clip(CircleShape)
+            .background(colors.accent)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

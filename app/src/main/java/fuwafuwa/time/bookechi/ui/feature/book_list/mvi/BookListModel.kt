@@ -1,6 +1,7 @@
 package fuwafuwa.time.bookechi.ui.feature.book_list.mvi
 
 import fuwafuwa.time.bookechi.data.model.Book
+import fuwafuwa.time.bookechi.data.preferences.AppPreferences
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
@@ -17,9 +18,21 @@ class BookListModel(
     defaultState: BookListState,
     private val bookRepository: BookRepository,
     private val readingSessionRepository: ReadingSessionRepository,
+    private val appPreferences: AppPreferences,
 ) : BaseModel<BookListState, BookListAction>(defaultState) {
 
     init {
+        scope.launch {
+            appPreferences.reminderEnabled.collect { enabled ->
+                updateState { copy(reminderEnabled = enabled) }
+            }
+        }
+        scope.launch {
+            appPreferences.reminderTime.collect { time ->
+                updateState { copy(reminderTime = time) }
+            }
+        }
+
         scope.launch {
             bookRepository.getAllBooks().collect { books ->
                 updateState {
@@ -86,6 +99,10 @@ class BookListModel(
                 NavigateToBookDetails(action.book)
             )
             is BookListAction.OpenSettings -> sendNavigationEvent(NavigateToSettings)
+            is BookListAction.OpenReminderSheet -> updateState { copy(showReminderSheet = true) }
+            is BookListAction.CloseReminderSheet -> updateState { copy(showReminderSheet = false) }
+            is BookListAction.SetReminderEnabled -> appPreferences.setReminderEnabled(action.enabled)
+            is BookListAction.SetReminderTime -> appPreferences.setReminderTime(action.time)
         }
     }
 

@@ -9,7 +9,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
@@ -49,6 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import fuwafuwa.time.bookechi.base.ui.ds.BookCover
 import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
@@ -112,11 +111,11 @@ private fun UpdateProgressScreenContent(
             color = colors.textPrimary,
         )
 
-        Spacer(Modifier.height(Spacing.sm))
+        Spacer(Modifier.height(Spacing.xs))
 
         Text(
             text = "Дочитал до страницы",
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = colors.textSecondary,
         )
 
@@ -240,25 +239,34 @@ private fun PageCounter(
     modifier: Modifier = Modifier,
 ) {
     val colors = BookechiTheme.colors
-    val underlineColor = colors.accentDeep
+    // Цвета как в дизайне: число — эспрессо (textPrimary), при превышении — терракота (accentDeep).
+    val isError = value > total
+    val numberColor = if (isError) colors.accentDeep else colors.textPrimary
+    val underlineColor = if (isError) colors.accentDeep else colors.textSecondary.copy(alpha = 0.45f)
+
+    val numberStyle = MaterialTheme.typography.displayLarge.copy(
+        fontSize = 56.sp,
+        lineHeight = 60.sp,
+    )
+
     Row(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Bottom,
     ) {
-        // Крупное число — редактируемое: можно ввести страницу с клавиатуры.
+        // Поле ввода во всю ширину: число слева, поле занимает всё свободное место,
+        // подчёркивание (drawBehind) тянется по всей ширине поля, обрываясь до «/ 320».
         BasicTextField(
             value = if (value == 0) "" else value.toString(),
             onValueChange = { text ->
                 val digits = text.filter { it.isDigit() }.take(6)
                 onValueChange(digits.toIntOrNull() ?: 0)
             },
-            textStyle = MaterialTheme.typography.displayLarge.copy(color = colors.accentDeep),
+            textStyle = numberStyle.copy(color = numberColor),
             singleLine = true,
             cursorBrush = SolidColor(colors.accent),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier
-                .widthIn(min = 96.dp)
-                .width(IntrinsicSize.Min)
+                .weight(1f)
                 .drawBehind {
                     val y = size.height - 1.dp.toPx()
                     drawLine(
@@ -268,24 +276,24 @@ private fun PageCounter(
                         strokeWidth = 2.dp.toPx(),
                     )
                 }
-                .padding(bottom = Spacing.xs),
+                .padding(bottom = Spacing.sm),
             decorationBox = { inner ->
                 if (value == 0) {
                     Text(
                         text = "0",
-                        style = MaterialTheme.typography.displayLarge,
-                        color = colors.textSecondary.copy(alpha = 0.4f),
+                        style = numberStyle,
+                        color = colors.textSecondary.copy(alpha = 0.35f),
                     )
                 }
                 inner()
             },
         )
-        Spacer(Modifier.size(Spacing.sm))
+        Spacer(Modifier.width(Spacing.md))
         Text(
             text = "/ $total",
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = 30.sp),
             color = colors.textSecondary,
-            modifier = Modifier.padding(bottom = Spacing.sm),
+            modifier = Modifier.padding(bottom = Spacing.md),
         )
     }
 }
@@ -308,7 +316,7 @@ private fun ProgressSlider(
     val trackHeight = 8.dp
     val trackColor = colors.stroke
     val activeColor = colors.accent
-    val haloColor = colors.surfaceElevated
+    val thumbColor = colors.accentDeep
 
     Column(modifier = modifier.fillMaxWidth()) {
         Box(
@@ -354,10 +362,9 @@ private fun ProgressSlider(
                     size = Size(usable * fraction, th),
                     cornerRadius = corner,
                 )
-                // thumb: тёплое гало + сплошной акцент
+                // thumb: плоская сплошная терракотовая точка (как в макете)
                 val cx = left + usable * fraction
-                drawCircle(color = haloColor, radius = r, center = Offset(cx, cy))
-                drawCircle(color = activeColor, radius = r - 3.dp.toPx(), center = Offset(cx, cy))
+                drawCircle(color = thumbColor, radius = r, center = Offset(cx, cy))
             }
         }
 
@@ -408,9 +415,8 @@ private fun ReadTodayCounter(
             withStyle(
                 SpanStyle(color = colors.accent, fontWeight = FontWeight.Bold),
             ) {
-                append("+$read")
+                append("+$read ${pagesPlural(read)}")
             }
-            append(" ${pagesPlural(read)}")
         },
         style = MaterialTheme.typography.bodyLarge,
         color = colors.textPrimary,
@@ -431,14 +437,16 @@ private fun ReadingTimeField(
             color = colors.textSecondary,
         )
         Spacer(Modifier.height(Spacing.sm))
+        // Поле времени — примерно половина ширины, без плавающего лейбла (как в макете).
         WarmTextField(
             value = value.takeIf { it > 0 }?.toString() ?: "",
             onValueChange = { text ->
                 onValueChange(text.filter { it.isDigit() }.toIntOrNull() ?: 0)
             },
-            label = "Минуты",
             placeholder = "25",
             keyboardType = KeyboardType.Number,
+            modifier = Modifier.fillMaxWidth(0.62f),
+            fillWidth = false,
         )
     }
 }

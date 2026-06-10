@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.book_list.di
 
+import fuwafuwa.time.bookechi.data.preferences.AppPreferences
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListModel
@@ -30,7 +31,8 @@ val bookListModule = module {
         BookListModel(
             defaultState = get<BookListState>(),
             bookRepository = get<BookRepository>(),
-            readingSessionRepository = get<ReadingSessionRepository>()
+            readingSessionRepository = get<ReadingSessionRepository>(),
+            appPreferences = get<AppPreferences>()
         )
     }
 }

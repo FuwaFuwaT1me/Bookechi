@@ -29,6 +29,22 @@ class AppPreferences(context: Context) {
     }
 
     fun toggleDarkTheme() = setDarkTheme(!_isDarkTheme.value)
+
+    private val _reminderEnabled = MutableStateFlow(prefs.getBoolean(KEY_REMINDER_ENABLED, true))
+    val reminderEnabled: StateFlow<Boolean> = _reminderEnabled.asStateFlow()
+
+    private val _reminderTime = MutableStateFlow(prefs.getString(KEY_REMINDER_TIME, "21:00") ?: "21:00")
+    val reminderTime: StateFlow<String> = _reminderTime.asStateFlow()
+
+    fun setReminderEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_REMINDER_ENABLED, enabled).apply()
+        _reminderEnabled.value = enabled
+    }
+
+    fun setReminderTime(time: String) {
+        prefs.edit().putString(KEY_REMINDER_TIME, time).apply()
+        _reminderTime.value = time
+    }
     
     private fun loadDesignPreferences(): DesignPreferences {
         return DesignPreferences(
@@ -61,5 +77,7 @@ class AppPreferences(context: Context) {
         private const val KEY_BOOK_LIST_VIEW_TYPE = "book_list_view_type"
         private const val KEY_GRID_COLUMNS = "grid_columns"
         private const val KEY_DARK_THEME = "dark_theme"
+        private const val KEY_REMINDER_ENABLED = "reminder_enabled"
+        private const val KEY_REMINDER_TIME = "reminder_time"
     }
 }

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.NotificationsNone
+import androidx.compose.ui.draw.clip
 import fuwafuwa.time.bookechi.ui.theme.LocalThemeToggle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -129,6 +130,16 @@ private fun BookListScreenPrivate(
             )
         }
     }
+
+    if (state.showReminderSheet) {
+        ReminderBottomSheet(
+            enabled = state.reminderEnabled,
+            time = state.reminderTime,
+            onToggle = { onAction(BookListAction.SetReminderEnabled(it)) },
+            onTimeSelected = { onAction(BookListAction.SetReminderTime(it)) },
+            onDismiss = { onAction(BookListAction.CloseReminderSheet) },
+        )
+    }
 }
 
 @Composable
@@ -162,7 +173,7 @@ private fun BookListContent(
                 isComeback = state.isComeback,
                 hasBooks = hasBooks,
                 markedToday = markedToday,
-                onBellClick = { onAction(BookListAction.OpenSettings) },
+                onBellClick = { onAction(BookListAction.OpenReminderSheet) },
             )
         }
 
@@ -270,7 +281,8 @@ private fun CircleIconButton(
     Box(
         modifier = modifier
             .size(44.dp)
-            .background(colors.surface, CircleShape)
+            .clip(CircleShape)
+            .background(colors.surface)
             .border(BorderStroke(1.dp, colors.stroke), CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -327,6 +339,7 @@ private fun StreakCard(
                 ),
                 shape = DsShapes.card,
             )
+            .border(1.dp, colors.streakCurrentDay, DsShapes.card)
             .padding(Spacing.xl),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
@@ -610,7 +623,8 @@ private fun PlannedBookRow(
             style = MaterialTheme.typography.titleSmall,
             color = colors.accent,
             modifier = Modifier
-                .background(colors.accentSoft, CircleShape)
+                .clip(CircleShape)
+                .background(colors.accentSoft)
                 .clickable(onClick = onStart)
                 .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
         )

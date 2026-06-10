@@ -28,18 +28,19 @@ import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 fun WarmTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
     placeholder: String,
     modifier: Modifier = Modifier,
+    label: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
+    fillWidth: Boolean = true,
 ) {
     val colors = BookechiTheme.colors
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.then(if (fillWidth) Modifier.fillMaxWidth() else Modifier),
         shape = DsShapes.button,
-        label = { Text(text = label) },
+        label = label?.let { lbl -> { Text(text = lbl) } },
         placeholder = {
             Text(text = placeholder, color = colors.textSecondary)
         },

@@ -1,6 +1,5 @@
 package fuwafuwa.time.bookechi.base.ui.ds
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
@@ -79,20 +76,12 @@ fun DayDot(
                     )
                 }
                 DayState.Empty -> {
-                    val stroke = colors.stroke
-                    Canvas(modifier = Modifier.size(28.dp)) {
-                        drawCircle(
-                            color = stroke,
-                            radius = size.minDimension / 2f - 1f,
-                            style = Stroke(
-                                width = 1.5.dp.toPx(),
-                                pathEffect = PathEffect.dashPathEffect(
-                                    intervals = floatArrayOf(4f, 4f),
-                                    phase = 0f,
-                                ),
-                            ),
-                        )
-                    }
+                    // Чистое тонкое кольцо тёплого тона — читается на фоне карточки (как в макете).
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .border(1.5.dp, colors.streakCurrentDay, CircleShape),
+                    )
                 }
             }
         }

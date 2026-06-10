@@ -14,6 +14,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,7 +59,8 @@ fun FilterChip(
         style = MaterialTheme.typography.titleSmall,
         color = fg,
         modifier = modifier
-            .background(bg, CircleShape)
+            .clip(CircleShape)
+            .background(bg)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
     )
@@ -80,7 +82,8 @@ fun QuickLogChip(
         style = MaterialTheme.typography.titleSmall,
         color = colors.accent,
         modifier = modifier
-            .background(colors.surface, CircleShape)
+            .clip(CircleShape)
+            .background(colors.surface)
             .border(BorderStroke(1.dp, colors.stroke), CircleShape)
             .clickable(onClick = onClick)
             .padding(horizontal = Spacing.lg, vertical = Spacing.sm),

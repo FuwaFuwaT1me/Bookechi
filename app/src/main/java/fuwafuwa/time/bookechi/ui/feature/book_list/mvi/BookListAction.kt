@@ -13,4 +13,9 @@ sealed interface BookListAction : Action {
     data object NavigateToAddBook : BookListAction
     data class NavigateToBookDetails(val book: Book) : BookListAction
     data object OpenSettings : BookListAction
+
+    data object OpenReminderSheet : BookListAction
+    data object CloseReminderSheet : BookListAction
+    data class SetReminderEnabled(val enabled: Boolean) : BookListAction
+    data class SetReminderTime(val time: String) : BookListAction
 }

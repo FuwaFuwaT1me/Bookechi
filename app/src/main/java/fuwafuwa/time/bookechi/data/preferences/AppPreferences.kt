@@ -15,6 +15,20 @@ class AppPreferences(context: Context) {
 
     private val _designPreferences = MutableStateFlow(loadDesignPreferences())
     val designPreferences: StateFlow<DesignPreferences> = _designPreferences.asStateFlow()
+
+    private val systemDark: Boolean = (context.resources.configuration.uiMode and
+        android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+        android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+    private val _isDarkTheme = MutableStateFlow(prefs.getBoolean(KEY_DARK_THEME, systemDark))
+    val isDarkTheme: StateFlow<Boolean> = _isDarkTheme.asStateFlow()
+
+    fun setDarkTheme(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_DARK_THEME, enabled).apply()
+        _isDarkTheme.value = enabled
+    }
+
+    fun toggleDarkTheme() = setDarkTheme(!_isDarkTheme.value)
     
     private fun loadDesignPreferences(): DesignPreferences {
         return DesignPreferences(
@@ -46,5 +60,6 @@ class AppPreferences(context: Context) {
         private const val KEY_USE_MODERN_DESIGN = "use_modern_design"
         private const val KEY_BOOK_LIST_VIEW_TYPE = "book_list_view_type"
         private const val KEY_GRID_COLUMNS = "grid_columns"
+        private const val KEY_DARK_THEME = "dark_theme"
     }
 }

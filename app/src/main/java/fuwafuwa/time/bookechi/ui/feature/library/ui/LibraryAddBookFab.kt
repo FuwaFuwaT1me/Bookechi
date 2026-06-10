@@ -6,43 +6,59 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import fuwafuwa.time.bookechi.ui.theme.FigmaAddBookBackground
-import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
+import fuwafuwa.time.bookechi.base.ui.ds.Spacing
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
+/** Круглый FAB «+» на accent. */
 @Composable
 fun LibraryAddBookFab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colors = BookechiTheme.colors
     Box(
         modifier = modifier
-            .padding(20.dp)
+            .padding(Spacing.xl)
             .size(56.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(FigmaAddBookBackground)
-            .clickable { onClick() }
+            .background(colors.accent, CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = "+",
-            modifier = Modifier.align(androidx.compose.ui.Alignment.Center),
-            color = FigmaTitle,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Добавить книгу",
+            tint = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.size(28.dp),
         )
     }
 }
 
-@Preview
+@Preview(name = "LibraryAddBookFab Light", showBackground = true, backgroundColor = 0xFFFFF9F6)
 @Composable
-private fun LibraryAddBookFabPreview() {
-    LibraryAddBookFab(onClick = {})
+private fun LibraryAddBookFabPreviewLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            LibraryAddBookFab(onClick = {})
+        }
+    }
+}
+
+@Preview(name = "LibraryAddBookFab Dark", showBackground = true, backgroundColor = 0xFF1C1611)
+@Composable
+private fun LibraryAddBookFabPreviewDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            LibraryAddBookFab(onClick = {})
+        }
+    }
 }

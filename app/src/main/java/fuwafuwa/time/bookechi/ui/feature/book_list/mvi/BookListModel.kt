@@ -6,10 +6,12 @@ import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
 import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.NavigateToAddBook
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.NavigateToBookDetails
+import fuwafuwa.time.bookechi.ui.feature.settings.mvi.NavigateToSettings
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.NavigateToUpdateProgress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 
 class BookListModel(
     defaultState: BookListState,
@@ -48,6 +50,25 @@ class BookListModel(
                     }
                 }
         }
+
+        scope.launch {
+            readingSessionRepository
+                .getDailyStatsForCurrentWeek()
+                .collect { stats ->
+                    val weeklyPages = stats.sumOf { it.totalPagesRead }
+                    val today = LocalDate.now().toString()
+                    val todayPages = stats
+                        .firstOrNull { it.date == today }
+                        ?.totalPagesRead
+                        ?: 0
+                    updateState {
+                        copy(
+                            weeklyPagesRead = weeklyPages,
+                            pagesReadToday = todayPages
+                        )
+                    }
+                }
+        }
     }
 
     override fun onAction(action: BookListAction) {
@@ -64,6 +85,7 @@ class BookListModel(
             is BookListAction.NavigateToBookDetails -> sendNavigationEvent(
                 NavigateToBookDetails(action.book)
             )
+            is BookListAction.OpenSettings -> sendNavigationEvent(NavigateToSettings)
         }
     }
 

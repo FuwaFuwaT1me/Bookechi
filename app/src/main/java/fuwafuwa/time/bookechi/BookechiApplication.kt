@@ -32,6 +32,7 @@ class BookechiApplication : Application() {
                 updateProgressModule,
                 updateResultModule,
                 libraryModule,
+                settingsModule,
             )
         }
     }

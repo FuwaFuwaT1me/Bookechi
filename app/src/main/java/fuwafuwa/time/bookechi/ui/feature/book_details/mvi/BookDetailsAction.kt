@@ -10,5 +10,6 @@ sealed interface BookDetailsAction : Action {
     data object ResumeReading : BookDetailsAction
     data object FinishReading : BookDetailsAction
     data object StartReadingAgain : BookDetailsAction
+    data object ToggleFavorite : BookDetailsAction
+    data object NavigateToUpdateProgress : BookDetailsAction
 }
-

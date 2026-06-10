@@ -1,54 +1,89 @@
 package fuwafuwa.time.bookechi.ui.feature.book_list.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.LazyGridScope
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.outlined.NotificationsNone
+import fuwafuwa.time.bookechi.ui.theme.LocalThemeToggle
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import fuwafuwa.time.bookechi.base.ui.ds.BookCover
+import fuwafuwa.time.bookechi.base.ui.ds.DayDot
+import fuwafuwa.time.bookechi.base.ui.ds.DayState
+import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
+import fuwafuwa.time.bookechi.base.ui.ds.EmptyState
+import fuwafuwa.time.bookechi.base.ui.ds.InsightPlinth
+import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
+import fuwafuwa.time.bookechi.base.ui.ds.ProgressBar
+import fuwafuwa.time.bookechi.base.ui.ds.QuickLogChip
+import fuwafuwa.time.bookechi.base.ui.ds.SecondaryButton
+import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
+import fuwafuwa.time.bookechi.base.ui.ds.Spacing
+import fuwafuwa.time.bookechi.base.ui.ds.StatusChip
+import fuwafuwa.time.bookechi.base.ui.ds.WeeklyGoalCard
 import fuwafuwa.time.bookechi.data.model.Book
+import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListAction
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListState
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.BookListViewModel
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.DayStreak
-import fuwafuwa.time.bookechi.ui.theme.FigmaLibraryBackground
-import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
-import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 import kotlinx.serialization.Serializable
+import kotlin.math.ceil
 
 @Serializable
 data object BookListScreen : Screen
 
+/** Подписи дней недели Пн..Вс под weekDayStreaks. */
+private val WeekDayLabels = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+
+/** Среднее число страниц в день для прогноза, когда нет точных данных. */
+private const val DEFAULT_PAGES_PER_DAY = 25 // TODO: compute from reading sessions average
+
 @Composable
 fun BookListScreen(
-    viewModel: BookListViewModel
+    viewModel: BookListViewModel,
 ) {
     val state by viewModel.model.state.collectAsState()
 
     BookListScreenPrivate(
         state = state,
-        onAction = viewModel::sendAction
+        onAction = viewModel::sendAction,
     )
 }
 
@@ -56,214 +91,672 @@ fun BookListScreen(
 private fun BookListScreenPrivate(
     state: BookListState,
     onAction: (BookListAction) -> Unit,
+    onToggleTheme: () -> Unit = {},
 ) {
+    val colors = BookechiTheme.colors
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(FigmaLibraryBackground)
-            .padding(horizontal = 16.dp)
+            .background(colors.canvas),
     ) {
-        BookListContent(
-            state = state,
-            onAction = onAction
-        )
+        when {
+            state.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(color = colors.accent)
+                }
+            }
+
+            state.error != null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "Что-то пошло не так",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.textSecondary,
+                    )
+                }
+            }
+
+            else -> BookListContent(
+                state = state,
+                onAction = onAction,
+                onToggleTheme = onToggleTheme,
+            )
+        }
     }
 }
 
 @Composable
 private fun BookListContent(
     state: BookListState,
-    onAction: (BookListAction) -> Unit
+    onAction: (BookListAction) -> Unit,
+    onToggleTheme: () -> Unit,
 ) {
-    LazyVerticalGrid(
+    val activeBook = state.books.firstOrNull { it.readingStatus == ReadingStatus.Reading }
+        ?: state.books.firstOrNull { it.readingStatus == ReadingStatus.None }
+    val restBooks = state.books.filter { it != activeBook }
+    val plannedBooks = state.books.filter { it.readingStatus == ReadingStatus.Planned }
+    val hasBooks = state.books.isNotEmpty()
+    val markedToday = state.isTodayStreak || state.pagesReadToday > 0
+
+    LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        columns = GridCells.Fixed(state.gridColumnCount),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        contentPadding = PaddingValues(bottom = 16.dp)
+        contentPadding = PaddingValues(
+            start = Spacing.lg,
+            end = Spacing.lg,
+            top = Spacing.lg,
+            bottom = 96.dp,
+        ),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
-        bookListHeader(state)
-        bookListBody(state, onAction)
+        item { HomeHeader(onToggleTheme = onToggleTheme) }
 
         item {
-            Spacer(Modifier.height(68.dp))
+            StreakCard(
+                state = state,
+                isComeback = state.isComeback,
+                hasBooks = hasBooks,
+                markedToday = markedToday,
+                onBellClick = { onAction(BookListAction.OpenSettings) },
+            )
         }
-    }
-}
 
-private fun LazyGridScope.bookListHeader(state: BookListState) {
-    item(span = { GridItemSpan(maxLineSpan) }) {
-        Spacer(modifier = Modifier.height(4.dp))
-    }
-    item(span = { GridItemSpan(maxLineSpan) }) {
-        Header(state)
-    }
-}
+        item {
+            WeeklyGoalCard(
+                pagesRead = state.weeklyPagesRead,
+                pagesTarget = state.weeklyPagesTarget,
+            )
+        }
 
-private fun LazyGridScope.bookListBody(
-    state: BookListState,
-    onAction: (BookListAction) -> Unit
-) {
-    when {
-        state.isLoading -> {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
+        when {
+            !hasBooks -> {
+                item {
+                    EmptyState(
+                        icon = Icons.AutoMirrored.Outlined.MenuBook,
+                        title = "Добавьте первую книгу",
+                        subtitle = "Она появится здесь, и каждый прочитанный вечер будет в копилке.",
+                        ctaText = "Добавить книгу",
+                        onCta = { onAction(BookListAction.NavigateToAddBook) },
+                    )
+                }
+            }
+
+            activeBook == null -> {
+                item {
+                    Text(
+                        text = "Что читаете сейчас?",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = BookechiTheme.colors.textPrimary,
+                    )
+                }
+                items(items = plannedBooks, key = { it.id }) { book ->
+                    PlannedBookRow(
+                        book = book,
+                        onStart = { onAction(BookListAction.NavigateToEditBook(book)) },
+                        onClick = { onAction(BookListAction.NavigateToBookDetails(book)) },
+                    )
+                }
+            }
+
+            else -> {
+                item {
+                    ActiveBookHeroCard(
+                        book = activeBook,
+                        markedToday = markedToday,
+                        pagesReadToday = state.pagesReadToday,
+                        onQuickLog = { onAction(BookListAction.NavigateToEditBook(activeBook)) },
+                        onMarkProgress = { onAction(BookListAction.NavigateToEditBook(activeBook)) },
+                    )
+                }
+
+                if (restBooks.isNotEmpty()) {
+                    item { SectionLabel(text = "Ещё в чтении и планах") }
+                    items(items = restBooks, key = { it.id }) { book ->
+                        CompactBookRow(
+                            book = book,
+                            onClick = { onAction(BookListAction.NavigateToBookDetails(book)) },
+                        )
+                    }
                 }
             }
         }
+    }
+}
 
-        state.error != null -> {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Text("Something went wrong")
-            }
+/* ----------------------------------------------------------------------------
+ * Шапка
+ * ------------------------------------------------------------------------- */
+@Composable
+private fun HomeHeader(onToggleTheme: () -> Unit) {
+    val colors = BookechiTheme.colors
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Добрый вечер, Иван",
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.textSecondary,
+            )
+            Spacer(Modifier.height(Spacing.xs))
+            Text(
+                text = "Что читаем сегодня?",
+                style = MaterialTheme.typography.headlineMedium,
+                color = colors.textPrimary,
+            )
         }
-
-        state.books.isEmpty() -> {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                EmptyBookList(
-                    onAddBookClick = {
-                        onAction(BookListAction.NavigateToAddBook)
-                    }
-                )
-            }
-        }
-
-        else -> {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(
-                    text = "Сейчас читаете",
-                    color = FigmaTitle,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            items(state.books, key = { it.id }) { book ->
-                NewBookItem(
-                    modifier = Modifier.animateItem(
-                        fadeInSpec = null,
-                        fadeOutSpec = null
-                    ),
-                    book = book,
-                    onBookClick = {
-                        onAction(BookListAction.NavigateToBookDetails(book))
-                    },
-                    onEditBookClick = {
-                        onAction(BookListAction.NavigateToEditBook(book))
-                    },
-                    onDeleteBookClick = {
-                        onAction(BookListAction.DeleteBook(book))
-                    }
-                )
-            }
-        }
+        CircleIconButton(
+            icon = if (colors.isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
+            contentDescription = "Переключить тему",
+            onClick = LocalThemeToggle.current,
+        )
     }
 }
 
 @Composable
-private fun Header(state: BookListState) {
+private fun CircleIconButton(
+    icon: ImageVector,
+    contentDescription: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = BookechiTheme.colors
+    Box(
+        modifier = modifier
+            .size(44.dp)
+            .background(colors.surface, CircleShape)
+            .border(BorderStroke(1.dp, colors.stroke), CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = colors.textPrimary,
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
+/* ----------------------------------------------------------------------------
+ * Стрик-карточка
+ * ------------------------------------------------------------------------- */
+@Composable
+private fun StreakCard(
+    state: BookListState,
+    isComeback: Boolean,
+    hasBooks: Boolean,
+    markedToday: Boolean,
+    onBellClick: () -> Unit,
+) {
+    val colors = BookechiTheme.colors
+
+    val title: String
+    val subtitle: String
+    when {
+        isComeback -> {
+            title = "С возвращением"
+            subtitle = "Серия на паузе. Пара страниц — и она начнётся заново"
+        }
+        !hasBooks -> {
+            title = "Начните серию сегодня"
+            subtitle = "Отметьте чтение, чтобы запустить серию"
+        }
+        markedToday -> {
+            title = "${state.totalDaysWithStreak} дней подряд"
+            subtitle = "Сегодня уже отмечено"
+        }
+        else -> {
+            title = "${state.totalDaysWithStreak} дней подряд"
+            subtitle = "Отметьте чтение, чтобы продолжить серию"
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
-        ,
+            .background(
+                brush = Brush.verticalGradient(
+                    listOf(colors.streakGradientStart, colors.streakGradientEnd),
+                ),
+                shape = DsShapes.card,
+            )
+            .padding(Spacing.xl),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
-        Text(
-            modifier = Modifier
-                .align(Alignment.Start)
-            ,
-            text = "Доброе утро, Иван!",
-            fontSize = 16.sp,
-            color = FigmaSubtitle,
-            fontWeight = FontWeight.SemiBold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(colors.surface, DsShapes.tile),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocalFireDepartment,
+                    contentDescription = null,
+                    tint = colors.accent,
+                    modifier = Modifier.size(26.dp),
+                )
+            }
+            Spacer(Modifier.size(Spacing.md))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = colors.textPrimary,
+                )
+                Spacer(Modifier.height(Spacing.xs))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary,
+                )
+            }
+            CircleIconButton(
+                icon = Icons.Outlined.NotificationsNone,
+                contentDescription = "Напоминания",
+                onClick = onBellClick,
+                modifier = Modifier.size(36.dp),
+            )
+        }
 
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            modifier = Modifier
-                .align(Alignment.Start)
-            ,
-            text = if (state.isTodayStreak) {
-                "Стрик продлен, так держать!"
-            } else {
-                "Ты уже читал сегодня?"
-            },
-            fontSize = 30.sp,
-            color = FigmaTitle,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        StreakPanel(state)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            state.weekDayStreaks.forEachIndexed { index, day ->
+                val dayState = when {
+                    isComeback -> DayState.Empty
+                    day.isStreakDay -> DayState.Done
+                    day.isToday -> DayState.Today
+                    else -> DayState.Empty
+                }
+                DayDot(
+                    label = WeekDayLabels.getOrElse(index) { "" },
+                    state = dayState,
+                )
+            }
+        }
     }
 }
 
-@Preview(showBackground = true)
+/* ----------------------------------------------------------------------------
+ * Hero-карточка активной книги
+ * ------------------------------------------------------------------------- */
 @Composable
-private fun BookListScreenPreview() {
-    BookListScreenPrivate(
-        state = BookListState(
-            isLoading = false,
-            gridColumnCount = 1,
-            error = null,
-            books = buildList {
-                repeat(10) {
-                    add(
-                        Book(
-                            id = it.toLong(),
-                            name = "Book 1",
-                            author = "Author 1",
-                            coverPath = "https://picsum.photos/200/300",
-                            currentPage = (0..100).random(),
-                            pages = (100..250).random(),
-                            isFavorite = false,
-                        )
+private fun ActiveBookHeroCard(
+    book: Book,
+    markedToday: Boolean,
+    pagesReadToday: Int,
+    onQuickLog: () -> Unit,
+    onMarkProgress: () -> Unit,
+) {
+    val colors = BookechiTheme.colors
+    val safePages = book.pages.coerceAtLeast(1)
+    val progress = (book.currentPage.toFloat() / safePages).coerceIn(0f, 1f)
+    val percent = (progress * 100).toInt()
+    val pagesLeft = (book.pages - book.currentPage).coerceAtLeast(0)
+    val daysLeft = ceil(pagesLeft.toFloat() / DEFAULT_PAGES_PER_DAY).toInt().coerceAtLeast(0)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colors.surfaceElevated, DsShapes.hero)
+            .border(BorderStroke(1.dp, colors.stroke), DsShapes.hero)
+            .padding(Spacing.xl),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+    ) {
+        Row {
+            BookCover(
+                coverPath = book.coverPath,
+                title = book.name,
+                author = book.author,
+                width = 96.dp,
+            )
+            Spacer(Modifier.size(Spacing.lg))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = book.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = colors.textPrimary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.height(Spacing.xs))
+                Text(
+                    text = book.author,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.height(Spacing.md))
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = "стр. ",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = colors.textSecondary,
+                    )
+                    Text(
+                        text = "${book.currentPage}",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = colors.accent,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = " / ${book.pages}",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = colors.textSecondary,
                     )
                 }
-            },
-            totalDaysWithStreak = 10,
-            isTodayStreak = false,
-            weekDayStreaks = listOf(
-                DayStreak(true, false),
-                DayStreak(false, false),
-                DayStreak(false, false),
-                DayStreak(false, true),
-                DayStreak(false, false),
-                DayStreak(false, false),
-                DayStreak(false, false),
+                Spacer(Modifier.height(Spacing.sm))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ProgressBar(progress = progress, modifier = Modifier.weight(1f))
+                    Spacer(Modifier.size(Spacing.sm))
+                    Text(
+                        text = "$percent%",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.accentDeep,
+                    )
+                }
+            }
+        }
+
+        if (pagesLeft > 0) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.LocalFireDepartment,
+                    contentDescription = null,
+                    tint = colors.accent,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(Modifier.size(Spacing.xs))
+                Text(
+                    text = "При твоём темпе — около $daysLeft дней до конца",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary,
+                )
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            QuickLogChip(text = "+ 10", onClick = onQuickLog)
+            QuickLogChip(text = "+ 25", onClick = onQuickLog)
+            QuickLogChip(text = "+ 50", onClick = onQuickLog)
+            QuickLogChip(text = "+", onClick = onQuickLog)
+        }
+
+        if (markedToday) {
+            Text(
+                text = "✓ Отмечено сегодня · +$pagesReadToday стр.",
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.sage,
             )
-        ),
-        onAction = {}
-    )
+            SecondaryButton(text = "Добавить ещё страницы", onClick = onMarkProgress)
+        } else {
+            InsightPlinth(text = "Сегодняшние страницы ещё не отмечены — это займёт минуту")
+            PrimaryButton(text = "Отметить прогресс", onClick = onMarkProgress)
+        }
+    }
 }
 
-@Preview(showBackground = true)
+/* ----------------------------------------------------------------------------
+ * Компактные строки списка
+ * ------------------------------------------------------------------------- */
 @Composable
-private fun EmptyBookListScreenPreview() {
-    BookListScreenPrivate(
-        state = BookListState(
-            isLoading = false,
-            gridColumnCount = 1,
-            error = null,
-            books = emptyList(),
-            totalDaysWithStreak = 10,
-            isTodayStreak = false,
-            weekDayStreaks = listOf(
-                DayStreak(true, false),
-                DayStreak(false, false),
-                DayStreak(false, false),
-                DayStreak(false, true),
-                DayStreak(false, false),
-                DayStreak(false, false),
-                DayStreak(false, false),
+private fun CompactBookRow(
+    book: Book,
+    onClick: () -> Unit,
+) {
+    val colors = BookechiTheme.colors
+    val safePages = book.pages.coerceAtLeast(1)
+    val progress = (book.currentPage.toFloat() / safePages).coerceIn(0f, 1f)
+    val isReading = book.readingStatus == ReadingStatus.Reading || book.currentPage > 0
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colors.surface, DsShapes.card)
+            .border(BorderStroke(1.dp, colors.stroke), DsShapes.card)
+            .clickable(onClick = onClick)
+            .padding(Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        BookCover(
+            coverPath = book.coverPath,
+            title = book.name,
+            author = book.author,
+            width = 44.dp,
+        )
+        Spacer(Modifier.size(Spacing.md))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = book.name,
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
-        ),
-        onAction = {}
-    )
+            Text(
+                text = book.author,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (isReading) {
+                Spacer(Modifier.height(Spacing.sm))
+                ProgressBar(progress = progress, height = 6.dp)
+            }
+        }
+        if (!isReading) {
+            Spacer(Modifier.size(Spacing.sm))
+            StatusChip(status = statusLabel(book.readingStatus))
+        }
+    }
+}
+
+@Composable
+private fun PlannedBookRow(
+    book: Book,
+    onStart: () -> Unit,
+    onClick: () -> Unit,
+) {
+    val colors = BookechiTheme.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colors.surface, DsShapes.card)
+            .border(BorderStroke(1.dp, colors.stroke), DsShapes.card)
+            .clickable(onClick = onClick)
+            .padding(Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        BookCover(
+            coverPath = book.coverPath,
+            title = book.name,
+            author = book.author,
+            width = 44.dp,
+        )
+        Spacer(Modifier.size(Spacing.md))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = book.name,
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = book.author,
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Spacer(Modifier.size(Spacing.sm))
+        Text(
+            text = "Начать",
+            style = MaterialTheme.typography.titleSmall,
+            color = colors.accent,
+            modifier = Modifier
+                .background(colors.accentSoft, CircleShape)
+                .clickable(onClick = onStart)
+                .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
+        )
+    }
+}
+
+private fun statusLabel(status: ReadingStatus): String = when (status) {
+    ReadingStatus.Reading -> "Читаю"
+    ReadingStatus.Planned -> "В планах"
+    ReadingStatus.Completed -> "Прочитано"
+    ReadingStatus.Paused -> "Пауза"
+    ReadingStatus.Dropped -> "Брошено"
+    ReadingStatus.None -> "Без статуса"
+}
+
+/* ----------------------------------------------------------------------------
+ * Превью
+ * ------------------------------------------------------------------------- */
+private fun mockBook(
+    id: Long,
+    name: String,
+    author: String,
+    current: Int,
+    pages: Int,
+    status: ReadingStatus,
+) = Book(
+    id = id,
+    name = name,
+    author = author,
+    coverPath = null,
+    pages = pages,
+    currentPage = current,
+    readingStatus = status,
+    isFavorite = false,
+)
+
+private val mockWeek = listOf(
+    DayStreak(isStreakDay = true, isToday = false),
+    DayStreak(isStreakDay = true, isToday = false),
+    DayStreak(isStreakDay = true, isToday = false),
+    DayStreak(isStreakDay = false, isToday = true),
+    DayStreak(isStreakDay = false, isToday = false),
+    DayStreak(isStreakDay = false, isToday = false),
+    DayStreak(isStreakDay = false, isToday = false),
+)
+
+private fun mockState(
+    books: List<Book>,
+    isTodayStreak: Boolean = false,
+    pagesReadToday: Int = 0,
+    isComeback: Boolean = false,
+    days: List<DayStreak> = mockWeek,
+) = BookListState(
+    books = books,
+    isLoading = false,
+    error = null,
+    gridColumnCount = 1,
+    totalDaysWithStreak = if (isComeback) 0 else 12,
+    weekDayStreaks = days,
+    isTodayStreak = isTodayStreak,
+    weeklyPagesRead = 340,
+    weeklyPagesTarget = 400,
+    pagesReadToday = pagesReadToday,
+    isComeback = isComeback,
+)
+
+private val mockBooks = listOf(
+    mockBook(1, "Норвежский лес", "Харуки Мураками", 168, 320, ReadingStatus.Reading),
+    mockBook(2, "Думай медленно… решай быстро", "Даниэль Канеман", 40, 480, ReadingStatus.Reading),
+    mockBook(3, "1984", "Джордж Оруэлл", 0, 328, ReadingStatus.Planned),
+)
+
+@Preview(name = "Home Main Light", showBackground = true)
+@Composable
+private fun HomeMainLightPreview() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            BookListScreenPrivate(state = mockState(mockBooks), onAction = {})
+        }
+    }
+}
+
+@Preview(name = "Home Main Dark", showBackground = true)
+@Composable
+private fun HomeMainDarkPreview() {
+    BookechiTheme(darkTheme = true) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            BookListScreenPrivate(state = mockState(mockBooks), onAction = {})
+        }
+    }
+}
+
+@Preview(name = "Home Marked Today Light", showBackground = true)
+@Composable
+private fun HomeMarkedLightPreview() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            BookListScreenPrivate(
+                state = mockState(mockBooks, isTodayStreak = true, pagesReadToday = 32),
+                onAction = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "Home Empty Light", showBackground = true)
+@Composable
+private fun HomeEmptyLightPreview() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            BookListScreenPrivate(state = mockState(emptyList()), onAction = {})
+        }
+    }
+}
+
+@Preview(name = "Home Comeback Dark", showBackground = true)
+@Composable
+private fun HomeComebackDarkPreview() {
+    BookechiTheme(darkTheme = true) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            BookListScreenPrivate(
+                state = mockState(
+                    mockBooks,
+                    isComeback = true,
+                    days = List(7) { DayStreak(isStreakDay = false, isToday = it == 3) },
+                ),
+                onAction = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "Home No Active Light", showBackground = true)
+@Composable
+private fun HomeNoActiveLightPreview() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            BookListScreenPrivate(
+                state = mockState(
+                    listOf(
+                        mockBook(10, "Сапиенс", "Юваль Ной Харари", 0, 500, ReadingStatus.Planned),
+                        mockBook(11, "Чистый код", "Роберт Мартин", 0, 464, ReadingStatus.Planned),
+                    ),
+                ),
+                onAction = {},
+            )
+        }
+    }
 }

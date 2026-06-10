@@ -26,10 +26,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.AlertDialog
@@ -56,12 +54,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
+import fuwafuwa.time.bookechi.base.ui.ds.FilterChip
+import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
+import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
+import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.data.preferences.BookListViewType
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.settings.mvi.SettingsAction
 import fuwafuwa.time.bookechi.ui.feature.settings.mvi.SettingsState
 import fuwafuwa.time.bookechi.ui.feature.settings.mvi.SettingsViewModel
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -194,30 +198,14 @@ private fun SettingsScreenContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Notifications Section
-                SettingsSection(title = "Notifications") {
-                    SettingsToggleItem(
-                        icon = Icons.Filled.Notifications,
-                        iconColor = Color(0xFFF59E0B),
-                        title = "Daily Reminders",
-                        subtitle = "Get reminded to read",
-                        isChecked = state.notificationsEnabled,
-                        onCheckedChange = { onAction(SettingsAction.SetNotifications(it)) }
-                    )
-                    
-                    HorizontalDivider(
-                        modifier = Modifier.padding(start = 56.dp),
-                        color = Color(0xFFE2E8F0)
-                    )
-                    
-                    SettingsClickableItem(
-                        icon = Icons.Filled.Schedule,
-                        iconColor = Color(0xFF10B981),
-                        title = "Reminder Time",
-                        subtitle = state.dailyReminderTime,
-                        onClick = { /* TODO: Show time picker */ }
-                    )
-                }
+                // Напоминание о чтении («Terracotta & Linen»)
+                ReadingReminderSection(
+                    enabled = state.notificationsEnabled,
+                    reminderTime = state.dailyReminderTime,
+                    onToggle = { onAction(SettingsAction.ToggleReminder(it)) },
+                    onTimeSelected = { onAction(SettingsAction.UpdateReminderTime(it)) },
+                    onDone = { /* секция остаётся встроенной в экран настроек */ }
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -316,6 +304,99 @@ private fun SettingsScreenContent(
         }
     }
 }
+
+/**
+ * Секция «Напоминание о чтении» в тёплом стиле «Terracotta & Linen».
+ * Serif-заголовок, мягкая подпись, переключатель + ряд DS FilterChip со временем.
+ */
+@Composable
+private fun ReadingReminderSection(
+    enabled: Boolean,
+    reminderTime: String,
+    onToggle: (Boolean) -> Unit,
+    onTimeSelected: (String) -> Unit,
+    onDone: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = BookechiTheme.colors
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(DsShapes.card)
+            .background(colors.surface)
+            .border(width = 1.dp, color = colors.stroke, shape = DsShapes.card)
+            .padding(Spacing.xl),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
+            Text(
+                text = "Напоминание о чтении",
+                style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
+                color = colors.textPrimary,
+            )
+            Text(
+                text = "Вечером, когда дела стихают, — самое время для пары глав. " +
+                    "Напомним мягко, один раз в день.",
+                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                color = colors.textSecondary,
+            )
+        }
+
+        // Переключатель «Напоминать каждый день»
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onToggle(!enabled) },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Напоминать каждый день",
+                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
+                color = colors.textPrimary,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = enabled,
+                onCheckedChange = onToggle,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = colors.accent,
+                    uncheckedThumbColor = Color.White,
+                    uncheckedTrackColor = colors.stroke,
+                )
+            )
+        }
+
+        SectionLabel(text = "Время")
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+        ) {
+            ReminderTimeOptions.forEach { time ->
+                FilterChip(
+                    text = time,
+                    selected = enabled && time == reminderTime,
+                    onClick = { onTimeSelected(time) },
+                )
+            }
+        }
+
+        Text(
+            text = if (enabled) {
+                "Хорошо: в $reminderTime напомним о чтении."
+            } else {
+                "Напоминания выключены — включите, чтобы выбрать время."
+            },
+            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+            color = colors.textSecondary,
+        )
+
+        PrimaryButton(text = "Готово", onClick = onDone)
+    }
+}
+
+private val ReminderTimeOptions = listOf("20:00", "20:30", "21:00", "21:30", "22:00")
 
 @Composable
 private fun ViewTypeSelector(
@@ -721,4 +802,38 @@ private fun SettingsScreenGridPreview() {
             gridColumns = 4
         )
     )
+}
+
+@Preview(name = "ReadingReminder Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
+@Composable
+private fun ReadingReminderSectionPreviewLight() {
+    BookechiTheme(darkTheme = false) {
+        androidx.compose.material3.Surface(color = BookechiTheme.colors.canvas) {
+            ReadingReminderSection(
+                enabled = true,
+                reminderTime = "21:00",
+                onToggle = {},
+                onTimeSelected = {},
+                onDone = {},
+                modifier = Modifier.padding(Spacing.lg),
+            )
+        }
+    }
+}
+
+@Preview(name = "ReadingReminder Dark", showBackground = true, backgroundColor = 0xFF1C1611)
+@Composable
+private fun ReadingReminderSectionPreviewDark() {
+    BookechiTheme(darkTheme = true) {
+        androidx.compose.material3.Surface(color = BookechiTheme.colors.canvas) {
+            ReadingReminderSection(
+                enabled = false,
+                reminderTime = "20:00",
+                onToggle = {},
+                onTimeSelected = {},
+                onDone = {},
+                modifier = Modifier.padding(Spacing.lg),
+            )
+        }
+    }
 }

@@ -1,17 +1,19 @@
 package fuwafuwa.time.bookechi.ui.feature.library.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,52 +22,41 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import fuwafuwa.time.bookechi.data.model.Book
-import fuwafuwa.time.bookechi.data.model.ReadingStatus
+import fuwafuwa.time.bookechi.base.ui.ds.EmptyState
+import fuwafuwa.time.bookechi.base.ui.ds.Spacing
+import fuwafuwa.time.bookechi.ui.feature.library.mvi.AddingBookDraft
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.LibraryAction
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.LibraryState
-import fuwafuwa.time.bookechi.ui.theme.FigmaLibraryBackground
-import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
-import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
 @Composable
 fun LibraryContent(
     state: LibraryState,
     onAction: (LibraryAction) -> Unit = {}
 ) {
-    val horizontalPadding = 16.dp
+    val colors = BookechiTheme.colors
+    val horizontalPadding = Spacing.lg
+
     var activeFilter by remember { mutableStateOf(LibraryFilter.All) }
-    val filteredBooks = when (activeFilter) {
-        LibraryFilter.All -> state.books
-        LibraryFilter.Reading -> state.books.filter { it.readingStatus == ReadingStatus.Reading }
-        LibraryFilter.Completed -> state.books.filter { it.readingStatus == ReadingStatus.Completed }
-        LibraryFilter.Planned -> state.books.filter { it.readingStatus == ReadingStatus.Planned }
-        LibraryFilter.Favorite -> state.books.filter { it.isFavorite}
-        LibraryFilter.Paused -> state.books.filter { it.readingStatus == ReadingStatus.Paused }
-        LibraryFilter.Dropped -> state.books.filter { it.readingStatus == ReadingStatus.Dropped }
-    }
+    val filteredBooks = state.books.filteredBy(activeFilter)
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(FigmaLibraryBackground)
+            .background(colors.canvas)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 20.dp)
+                .padding(top = Spacing.xl)
         ) {
             LibraryHeader(
-                booksCount = filteredBooks.size,
-                onEditClick = {},
+                booksCount = state.books.size,
                 modifier = Modifier.padding(horizontal = horizontalPadding)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             LibraryFiltersRow(
                 activeFilter = activeFilter,
@@ -74,34 +65,49 @@ fun LibraryContent(
                 contentPadding = PaddingValues(horizontal = horizontalPadding)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
 
             when {
                 state.isLoading -> {
-                    Row(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = horizontalPadding, vertical = 24.dp),
-                        horizontalArrangement = Arrangement.Center
+                            .padding(Spacing.xxl),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = colors.accent)
                     }
                 }
 
                 state.error != null -> {
                     Text(
-                        text = state.error ?: "Что-то пошло не так",
-                        color = FigmaSubtitle,
-                        fontSize = 14.sp,
+                        text = state.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.textSecondary,
                         modifier = Modifier.padding(horizontal = horizontalPadding)
                     )
+                }
+
+                state.books.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        EmptyState(
+                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            title = "Библиотека пуста",
+                            subtitle = "Добавьте книгу — бумажную, электронную, какую угодно.",
+                            ctaText = "Добавить книгу",
+                            onCta = { onAction(LibraryAction.OpenAddBookSheet) },
+                        )
+                    }
                 }
 
                 filteredBooks.isEmpty() -> {
                     Text(
                         text = "Книг в этой категории пока нет.",
-                        color = FigmaSubtitle,
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.textSecondary,
                         modifier = Modifier.padding(horizontal = horizontalPadding)
                     )
                 }
@@ -111,21 +117,21 @@ fun LibraryContent(
                         modifier = Modifier.padding(horizontal = horizontalPadding),
                         books = filteredBooks,
                         onBookClick = { book ->
-                            onAction(LibraryAction.EditBook(book))
+                            onAction(LibraryAction.NavigateToBookDetails(book))
                         },
-                        onEditClick = { book ->
-                            onAction(LibraryAction.EditBook(book))
-                        }
                     )
                 }
             }
         }
 
-        LibraryAddBookFab(
-            onClick = { onAction(LibraryAction.OpenAddBookSheet) },
-            modifier = Modifier.align(Alignment.BottomEnd)
-                .padding(bottom = 76.dp)
-        )
+        if (state.books.isNotEmpty()) {
+            LibraryAddBookFab(
+                onClick = { onAction(LibraryAction.OpenAddBookSheet) },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = Spacing.xxl)
+            )
+        }
 
         LibraryAddBookBottomSheet(
             state = state,
@@ -134,48 +140,111 @@ fun LibraryContent(
 
         EditBookBottomSheet(
             state = state,
-            onAction = onAction,
-            header = {
-                Text(
-                    text = "Редактирование",
-                    color = FigmaTitle,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
-                )
-            }
+            onAction = onAction
         )
     }
 }
 
-
-
-@Preview
+@Preview(name = "Library Filled Light")
 @Composable
-private fun LibraryContentPreview() {
-    LibraryContent(
-        state = LibraryState(
-            books = LibraryPreviewData.books(),
-            isLoading = false
-        )
-    )
+private fun LibraryContentFilledLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface {
+            LibraryContent(
+                state = LibraryState(books = LibraryPreviewData.books(), isLoading = false)
+            )
+        }
+    }
 }
 
-@Preview
+@Preview(name = "Library Filled Dark")
 @Composable
-private fun EditingBookPreview() {
-    LibraryContent(
-        state = LibraryState(
-            books = LibraryPreviewData.books(),
-            isLoading = false,
-            editingBook = Book(
-                name = "name",
-                author = "author",
-                coverPath = null,
-                pages = 256,
-                currentPage = 54,
-                isFavorite = false,
+private fun LibraryContentFilledDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface {
+            LibraryContent(
+                state = LibraryState(books = LibraryPreviewData.books(), isLoading = false)
             )
-        )
-    )
+        }
+    }
+}
+
+@Preview(name = "Library Empty Light")
+@Composable
+private fun LibraryContentEmptyLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface {
+            LibraryContent(state = LibraryState(books = emptyList(), isLoading = false))
+        }
+    }
+}
+
+@Preview(name = "Library Empty Dark")
+@Composable
+private fun LibraryContentEmptyDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface {
+            LibraryContent(state = LibraryState(books = emptyList(), isLoading = false))
+        }
+    }
+}
+
+@Preview(name = "Add Sheet Light")
+@Composable
+private fun LibraryAddSheetLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface {
+            LibraryContent(
+                state = LibraryState(
+                    books = LibraryPreviewData.books(),
+                    addingBook = AddingBookDraft(name = "Норвежский лес", author = "Харуки Мураками", pages = "296"),
+                )
+            )
+        }
+    }
+}
+
+@Preview(name = "Add Sheet Dark")
+@Composable
+private fun LibraryAddSheetDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface {
+            LibraryContent(
+                state = LibraryState(
+                    books = LibraryPreviewData.books(),
+                    addingBook = AddingBookDraft(name = "Норвежский лес", author = "Харуки Мураками", pages = "296"),
+                )
+            )
+        }
+    }
+}
+
+@Preview(name = "Edit Sheet Light")
+@Composable
+private fun LibraryEditSheetLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface {
+            LibraryContent(
+                state = LibraryState(
+                    books = LibraryPreviewData.books(),
+                    editingBook = LibraryPreviewData.books().first().copy(isFavorite = true),
+                )
+            )
+        }
+    }
+}
+
+@Preview(name = "Edit Sheet Dark")
+@Composable
+private fun LibraryEditSheetDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface {
+            LibraryContent(
+                state = LibraryState(
+                    books = LibraryPreviewData.books(),
+                    editingBook = LibraryPreviewData.books().first().copy(isFavorite = true),
+                )
+            )
+        }
+    }
 }

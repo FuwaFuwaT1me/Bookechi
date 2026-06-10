@@ -16,7 +16,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,16 +33,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fuwafuwa.time.bookechi.BuildConfig
+import fuwafuwa.time.bookechi.base.ui.ds.InsightPlinth
+import fuwafuwa.time.bookechi.base.ui.ds.MetricCard
+import fuwafuwa.time.bookechi.base.ui.ds.Spacing
+import fuwafuwa.time.bookechi.base.ui.ds.WeeklyGoalCard
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ActivityChartTab
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityAction
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityState
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityViewModel
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart.ActivityPanel
-import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 import kotlinx.serialization.Serializable
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.time.LocalDate
 
 @Serializable
@@ -101,24 +105,32 @@ private fun ProductivityScreenPrivate(
     onToggleActivityChartSwitch: (Int) -> Unit,
     debugActions: ProductivityDebugActions? = null
 ) {
+    val colors = BookechiTheme.colors
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(horizontal = 16.dp)
-            .verticalScroll(rememberScrollState()),
+            .background(colors.canvas)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
-        Header(state)
+        Header()
 
-        Spacer(modifier = Modifier.height(30.dp))
+        MetricsGrid(state)
+
+        WeeklyGoalCard(
+            pagesRead = state.weeklyPagesRead,
+            pagesTarget = state.weeklyPagesTarget,
+        )
+
+        Insight(state)
 
         ActivityPanel(state, onToggleActivityChartSwitch)
 
         if (debugActions != null) {
-            Spacer(modifier = Modifier.height(24.dp))
             DebugPanel(
                 onOverwriteYear = debugActions.overwriteYear,
                 onOverwriteMonth = debugActions.overwriteMonth,
@@ -127,112 +139,179 @@ private fun ProductivityScreenPrivate(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         Spacer(Modifier.height(82.dp))
     }
 }
 
 @Composable
-private fun Header(
-    state: ProductivityState
-) {
-    Column {
+private fun Header() {
+    val colors = BookechiTheme.colors
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
         Text(
-            text = "Моя продуктивность",
-            color = FigmaTitle,
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold
+            text = "Статистика чтения",
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.textSecondary,
         )
+        Text(
+            text = "Продуктивность",
+            style = MaterialTheme.typography.headlineLarge,
+            color = colors.textPrimary,
+        )
+    }
+}
 
-        Spacer(modifier = Modifier.height(26.dp))
+@Composable
+private fun MetricsGrid(state: ProductivityState) {
+    val empty = state.isEmpty
+    val placeholder = "—"
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+    val books = if (empty) placeholder else state.booksRead.toString()
+    val pages = if (empty) placeholder else formatThousands(state.pagesRead)
+    val streak = if (empty) placeholder else state.dayStreak.toString()
+    val average = if (empty) placeholder else formatAverage(state.averagePages)
+
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+        Row(
+            modifier = Modifier.height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            Row(
-                modifier = Modifier.height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ProductivityHeaderStatsItem(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                    ,
-                    numberValue = state.booksRead,
-                    subtitle = "книг прочитано"
-                )
-
-                ProductivityHeaderStatsItem(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                    ,
-                    numberValue = state.pagesRead,
-                    subtitle = "страниц прочитано"
-                )
-            }
-
-            Row(
-                modifier = Modifier.height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ProductivityHeaderStatsItem(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                    ,
-                    numberValue = state.dayStreak,
-                    subtitle = "дней без перерывов"
-                )
-
-                ProductivityHeaderStatsItem(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                    ,
-                    numberValue = BigDecimal(
-                        state.averagePages.toString()
-                    ).setScale(1, RoundingMode.HALF_UP),
-                    subtitle = "страниц/день в среднем"
-                )
-            }
+            MetricCard(
+                value = books,
+                label = "книг прочитано",
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+            MetricCard(
+                value = pages,
+                label = "страниц прочитано",
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+        }
+        Row(
+            modifier = Modifier.height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+        ) {
+            MetricCard(
+                value = streak,
+                label = "дней без перерывов",
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+            MetricCard(
+                value = average,
+                label = "стр. в день в среднем",
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
         }
     }
 }
 
-@Preview
 @Composable
-private fun PreviewProductivityScreenMonth() {
-    ProductivityScreenPrivate(
-        state = ProductivityState(
-            booksRead = 6,
-            pagesRead = 18574,
-            dayStreak = 280,
-            averagePages = 12.5f,
-            sessions = ProductivityPreviewData.generateMonthData()
-        ),
-        onToggleActivityChartSwitch = {},
-        debugActions = null
-    )
+private fun Insight(state: ProductivityState) {
+    if (state.dayStreak <= 0) return
+    InsightPlinth(text = "Личный рекорд серии: ${state.dayStreak} дней")
 }
 
-@Preview
-@Composable
-private fun PreviewProductivityScreenYear() {
-    ProductivityScreenPrivate(
-        state = ProductivityState(
-            booksRead = 6,
-            pagesRead = 18574,
-            dayStreak = 280,
-            averagePages = 12.5f,
-            sessions = ProductivityPreviewData.generateYearData(),
-            activityChartTab = ActivityChartTab.YEAR
-        ),
-        onToggleActivityChartSwitch = {},
-        debugActions = null
-    )
+/** Форматирует число с пробелом как разделителем тысяч: 3480 -> «3 480». */
+private fun formatThousands(value: Int): String {
+    val sign = if (value < 0) "-" else ""
+    val digits = kotlin.math.abs(value).toString()
+    val chunked = digits.reversed().chunked(3).joinToString(" ").reversed()
+    return sign + chunked
 }
+
+/** Среднее с одной цифрой после запятой: 12.5 -> «12,5». */
+private fun formatAverage(value: Float): String {
+    return String.format("%.1f", value).replace('.', ',')
+}
+
+private fun russianMonthName(month: Int): String = when (month) {
+    1 -> "Январь"
+    2 -> "Февраль"
+    3 -> "Март"
+    4 -> "Апрель"
+    5 -> "Май"
+    6 -> "Июнь"
+    7 -> "Июль"
+    8 -> "Август"
+    9 -> "Сентябрь"
+    10 -> "Октябрь"
+    11 -> "Ноябрь"
+    12 -> "Декабрь"
+    else -> ""
+}
+
+/** «Июнь 2026». Если месяц вне диапазона — только год. */
+fun russianMonthYear(month: Int, year: Int): String {
+    val name = russianMonthName(month)
+    return if (name.isEmpty()) "$year" else "$name $year"
+}
+
+@Preview(name = "Productivity Filled Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
+@Composable
+private fun PreviewProductivityFilledLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            ProductivityScreenPrivate(
+                state = filledPreviewState(),
+                onToggleActivityChartSwitch = {},
+                debugActions = null
+            )
+        }
+    }
+}
+
+@Preview(name = "Productivity Filled Dark", showBackground = true, backgroundColor = 0xFF1C1611)
+@Composable
+private fun PreviewProductivityFilledDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            ProductivityScreenPrivate(
+                state = filledPreviewState().copy(activityChartTab = ActivityChartTab.YEAR),
+                onToggleActivityChartSwitch = {},
+                debugActions = null
+            )
+        }
+    }
+}
+
+@Preview(name = "Productivity Zero Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
+@Composable
+private fun PreviewProductivityZeroLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            ProductivityScreenPrivate(
+                state = ProductivityState(currentYear = 2026, currentMonth = 6),
+                onToggleActivityChartSwitch = {},
+                debugActions = null
+            )
+        }
+    }
+}
+
+@Preview(name = "Productivity Zero Dark", showBackground = true, backgroundColor = 0xFF1C1611)
+@Composable
+private fun PreviewProductivityZeroDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            ProductivityScreenPrivate(
+                state = ProductivityState(currentYear = 2026, currentMonth = 6),
+                onToggleActivityChartSwitch = {},
+                debugActions = null
+            )
+        }
+    }
+}
+
+private fun filledPreviewState() = ProductivityState(
+    booksRead = 6,
+    pagesRead = 3480,
+    dayStreak = 12,
+    averagePages = 12.5f,
+    weeklyPagesRead = 340,
+    weeklyPagesTarget = 400,
+    sessions = ProductivityPreviewData.generateMonthData(2026, 6),
+    currentYear = 2026,
+    currentMonth = 6,
+)
 
 @Composable
 private fun DebugPanel(

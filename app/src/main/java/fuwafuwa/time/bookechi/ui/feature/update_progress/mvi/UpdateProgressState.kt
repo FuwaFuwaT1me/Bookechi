@@ -7,6 +7,7 @@ data class UpdateProgressState(
     val book: Book,
     val startPages: Int = 0,
     val updatedInputPages: Int = 0,
+    val readingTimeMinutes: Int = 0,
     val isSaving: Boolean = false,
     val error: String? = null
 ) : State

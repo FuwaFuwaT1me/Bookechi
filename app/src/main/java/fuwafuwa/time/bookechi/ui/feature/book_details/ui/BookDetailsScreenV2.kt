@@ -1,12 +1,14 @@
 package fuwafuwa.time.bookechi.ui.feature.book_details.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,14 +21,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,25 +37,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
-import fuwafuwa.time.bookechi.base.ui.book.ProgressBookCoverShowcase
+import fuwafuwa.time.bookechi.base.ui.ds.BookCover
+import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
+import fuwafuwa.time.bookechi.base.ui.ds.EmptyState
+import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
+import fuwafuwa.time.bookechi.base.ui.ds.ProgressBar
+import fuwafuwa.time.bookechi.base.ui.ds.RatingStars
+import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
+import fuwafuwa.time.bookechi.base.ui.ds.Spacing
+import fuwafuwa.time.bookechi.base.ui.ds.StatusChip
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsAction
+import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookQuote
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsState
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsViewModel
-import fuwafuwa.time.bookechi.ui.theme.FigmaFire
-import fuwafuwa.time.bookechi.ui.theme.FigmaLibraryBackground
-import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
-import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
+import kotlin.math.ceil
 
 @Composable
 fun BookDetailsScreenV2(
@@ -71,10 +78,11 @@ private fun BookDetailsScreenV2Content(
     state: BookDetailsState,
     onAction: (BookDetailsAction) -> Unit
 ) {
+    val colors = BookechiTheme.colors
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(FigmaLibraryBackground)
+            .background(colors.canvas)
     ) {
         when {
             state.isLoading -> {
@@ -82,7 +90,7 @@ private fun BookDetailsScreenV2Content(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = FigmaTitle)
+                    CircularProgressIndicator(color = colors.accent)
                 }
             }
 
@@ -93,6 +101,9 @@ private fun BookDetailsScreenV2Content(
             state.book != null -> {
                 BookDetailsContent(
                     book = state.book,
+                    recentSessionPages = state.recentSessionPages,
+                    quotes = state.quotes,
+                    rating = state.rating,
                     onAction = onAction
                 )
             }
@@ -102,39 +113,38 @@ private fun BookDetailsScreenV2Content(
 
 @Composable
 private fun ErrorContent(onBack: () -> Unit) {
+    val colors = BookechiTheme.colors
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp),
+            .padding(horizontal = Spacing.xxl),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "Не удалось загрузить книгу",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = FigmaTitle,
+            style = MaterialTheme.typography.headlineSmall,
+            color = colors.textPrimary,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.md))
         Text(
             text = "Попробуйте вернуться назад",
-            fontSize = 14.sp,
-            color = FigmaSubtitle
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.textSecondary,
+            textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(20.dp))
-        ActionButtonV2(
-            text = "Назад",
-            icon = Icons.AutoMirrored.Filled.ArrowBack,
-            backgroundColor = FigmaTitle,
-            onClick = onBack
-        )
+        Spacer(modifier = Modifier.height(Spacing.xl))
+        PrimaryButton(text = "Назад", onClick = onBack)
     }
 }
 
 @Composable
 private fun BookDetailsContent(
     book: Book,
+    recentSessionPages: List<Int>,
+    quotes: List<BookQuote>,
+    rating: Int,
     onAction: (BookDetailsAction) -> Unit
 ) {
     val progress = if (book.pages > 0) {
@@ -142,136 +152,88 @@ private fun BookDetailsContent(
     } else {
         0f
     }
-    val statusUi = readingStatusUi(book.readingStatus)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 20.dp)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.xl)
     ) {
-        BookDetailsHeader(
+        TopBar(
+            isFavorite = book.isFavorite,
             onBackClick = { onAction(BookDetailsAction.NavigateBack) },
-            onMoreClick = {}
+            onEditClick = { /* TODO wire to edit_book */ },
+            onFavoriteClick = { onAction(BookDetailsAction.ToggleFavorite) }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 18.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ProgressBookCoverShowcase(
-                    book = book,
-                    imageUri = book.coverPath?.toUri(),
-                    progress = progress,
-                    circleSize = 250.dp,
-                    coverHeight = 170.dp,
-                    coverWidth = 120.dp,
-                    onAddPageClick = { /* TODO */ },
-                    accentColor = FigmaFire
-                )
+        HeaderSection(book = book)
 
-                Spacer(modifier = Modifier.height(14.dp))
+        Spacer(modifier = Modifier.height(Spacing.xl))
 
-                Text(
-                    text = book.name,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = FigmaTitle,
-                    textAlign = TextAlign.Center,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
+        ProgressCard(
+            currentPage = book.currentPage,
+            totalPages = book.pages,
+            progress = progress
+        )
 
-                Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(Spacing.lg))
 
-                Text(
-                    text = book.author,
-                    fontSize = 15.sp,
-                    color = FigmaSubtitle,
-                    textAlign = TextAlign.Center
-                )
+        PrimaryButton(
+            text = "Отметить прогресс",
+            onClick = { onAction(BookDetailsAction.NavigateToUpdateProgress) }
+        )
 
-                Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(statusUi.color.copy(alpha = 0.14f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = statusUi.text,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = statusUi.color
-                    )
+        SectionLabel(text = "История чтения")
+        Spacer(modifier = Modifier.height(Spacing.md))
+        ReadingHistorySparkline(recentSessionPages = recentSessionPages)
+
+        Spacer(modifier = Modifier.height(Spacing.xxl))
+
+        SectionLabel(text = "Цитаты и заметки")
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        if (rating > 0) {
+            RatingStars(rating = rating)
+            Spacer(modifier = Modifier.height(Spacing.lg))
+        }
+
+        if (quotes.isEmpty()) {
+            EmptyState(
+                icon = Icons.Default.FormatQuote,
+                title = "Здесь будут ваши цитаты",
+                subtitle = "Сохраняйте любимые строки и заметки прямо во время чтения.",
+                ctaText = null,
+                onCta = null
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                quotes.forEach { quote ->
+                    QuoteCard(quote = quote)
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                StatItem(
-                    value = book.currentPage.toString(),
-                    label = "Текущая",
-                    color = FigmaTitle
-                )
-                StatItem(
-                    value = book.pages.toString(),
-                    label = "Всего",
-                    color = FigmaSubtitle
-                )
-                StatItem(
-                    value = "${(progress * 100).toInt()}%",
-                    label = "Прогресс",
-                    color = FigmaFire
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ActionButtonsV2(
-            readingStatus = book.readingStatus,
-            onAction = onAction
-        )
-
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(Spacing.xxl))
     }
 }
 
 @Composable
-private fun BookDetailsHeader(
+private fun TopBar(
+    isFavorite: Boolean,
     onBackClick: () -> Unit,
-    onMoreClick: () -> Unit
+    onEditClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
+    val colors = BookechiTheme.colors
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        HeaderIconButton(
+        CircleIconButton(
             icon = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Назад",
             onClick = onBackClick
@@ -279,253 +241,340 @@ private fun BookDetailsHeader(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Text(
-            text = "Детали книги",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = FigmaTitle
+        CircleIconButton(
+            icon = Icons.Default.Edit,
+            contentDescription = "Редактировать",
+            onClick = onEditClick
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.width(Spacing.sm))
 
-        HeaderIconButton(
-            icon = Icons.Default.MoreVert,
-            contentDescription = "Дополнительно",
-            onClick = onMoreClick
+        CircleIconButton(
+            icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+            contentDescription = if (isFavorite) "Убрать из избранного" else "В избранное",
+            onClick = onFavoriteClick,
+            tint = if (isFavorite) colors.accent else colors.textSecondary
         )
     }
 }
 
 @Composable
-private fun HeaderIconButton(
+private fun CircleIconButton(
     icon: ImageVector,
     contentDescription: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    tint: androidx.compose.ui.graphics.Color = BookechiTheme.colors.textPrimary
 ) {
+    val colors = BookechiTheme.colors
     Box(
         modifier = Modifier
-            .size(40.dp)
+            .size(44.dp)
             .clip(CircleShape)
-            .background(Color(0xFFEFE4DE))
+            .background(colors.surfaceElevated)
+            .border(1.dp, colors.stroke, CircleShape)
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = FigmaTitle
+            tint = tint,
+            modifier = Modifier.size(20.dp)
         )
     }
 }
 
 @Composable
-private fun StatItem(
-    value: String,
-    label: String,
-    color: Color
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = value,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = color
+private fun HeaderSection(book: Book) {
+    val colors = BookechiTheme.colors
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
+    ) {
+        BookCover(
+            coverPath = book.coverPath,
+            title = book.name,
+            author = book.author,
+            width = 104.dp
         )
-        Text(
-            text = label,
-            fontSize = 12.sp,
-            color = FigmaSubtitle
-        )
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(top = Spacing.xs)
+        ) {
+            Text(
+                text = book.name,
+                style = MaterialTheme.typography.titleLarge,
+                color = colors.textPrimary,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(Spacing.xs))
+            Text(
+                text = book.author,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.textSecondary
+            )
+            Spacer(modifier = Modifier.height(Spacing.md))
+            StatusChip(status = readingStatusLabel(book.readingStatus))
+        }
     }
 }
 
 @Composable
-private fun ActionButtonsV2(
-    readingStatus: ReadingStatus,
-    onAction: (BookDetailsAction) -> Unit
+private fun ProgressCard(
+    currentPage: Int,
+    totalPages: Int,
+    progress: Float
 ) {
-    when (readingStatus) {
-        ReadingStatus.None,
-        ReadingStatus.Planned -> {
-            ActionButtonV2(
-                text = "Начать читать",
-                icon = Icons.Default.PlayArrow,
-                backgroundColor = FigmaTitle,
-                onClick = { onAction(BookDetailsAction.StartReading) }
+    val colors = BookechiTheme.colors
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(DsShapes.card)
+            .background(colors.surfaceElevated)
+            .border(1.dp, colors.stroke, DsShapes.card)
+            .padding(Spacing.lg)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "стр. $currentPage / $totalPages",
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.textPrimary
+            )
+            Text(
+                text = "${(progress * 100).toInt()}%",
+                style = MaterialTheme.typography.titleSmall,
+                color = colors.accentDeep
             )
         }
 
-        ReadingStatus.Reading -> {
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        ProgressBar(progress = progress, height = 10.dp)
+
+        Spacer(modifier = Modifier.height(Spacing.md))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
+        ) {
+            Icon(
+                imageVector = Icons.Default.LocalFireDepartment,
+                contentDescription = null,
+                tint = colors.accent,
+                modifier = Modifier.size(14.dp)
+            )
+            Text(
+                text = paceForecast(currentPage, totalPages),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textSecondary
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReadingHistorySparkline(recentSessionPages: List<Int>) {
+    val colors = BookechiTheme.colors
+    // TODO: данные из ReadingSessionRepository.getSessionsForBook(bookId); пусто → дефолтный плейсхолдер.
+    val pages = recentSessionPages.takeLast(10)
+    val maxPages = (pages.maxOrNull() ?: 0).coerceAtLeast(1)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(DsShapes.card)
+            .background(colors.surfaceElevated)
+            .border(1.dp, colors.stroke, DsShapes.card)
+            .padding(Spacing.lg)
+    ) {
+        if (pages.isEmpty()) {
+            Text(
+                text = "Пока нет записей о чтении этой книги.",
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textSecondary
+            )
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(72.dp),
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                pages.forEach { value ->
+                    val ratio = value.toFloat() / maxPages
+                    val heatColor = heatColorFor(ratio, colors.heatmap)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(ratio.coerceIn(0.08f, 1f))
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(heatColor)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(Spacing.md))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                ActionButtonV2(
-                    text = "Пауза",
-                    icon = Icons.Default.Pause,
-                    backgroundColor = Color(0xFFB98A63),
-                    onClick = { onAction(BookDetailsAction.PauseReading) },
-                    modifier = Modifier.weight(1f)
+                Text(
+                    text = "Последние ${pages.size} дней",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary
                 )
-                ActionButtonV2(
-                    text = "Завершить",
-                    icon = Icons.Default.Stop,
-                    backgroundColor = FigmaFire,
-                    onClick = { onAction(BookDetailsAction.FinishReading) },
-                    modifier = Modifier.weight(1f)
+                Text(
+                    text = "$maxPages стр.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.textSecondary
                 )
             }
         }
-
-        ReadingStatus.Paused -> {
-            ActionButtonV2(
-                text = "Продолжить",
-                icon = Icons.Default.PlayArrow,
-                backgroundColor = FigmaTitle,
-                onClick = { onAction(BookDetailsAction.ResumeReading) }
-            )
-        }
-
-        ReadingStatus.Dropped,
-        ReadingStatus.Completed -> {
-            ActionButtonV2(
-                text = "Читать снова",
-                icon = Icons.Default.PlayArrow,
-                backgroundColor = FigmaTitle,
-                onClick = { onAction(BookDetailsAction.StartReadingAgain) }
-            )
-        }
     }
 }
 
 @Composable
-private fun ActionButtonV2(
-    text: String,
-    icon: ImageVector,
-    backgroundColor: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
+private fun QuoteCard(quote: BookQuote) {
+    val colors = BookechiTheme.colors
+    Column(
+        modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(backgroundColor)
-            .clickable { onClick() }
-            .padding(vertical = 14.dp),
-        contentAlignment = Alignment.Center
+            .clip(DsShapes.card)
+            .background(colors.surfaceElevated)
+            .border(1.dp, colors.stroke, DsShapes.card)
+            .padding(Spacing.lg)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = text,
-                color = Color.White,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
+        Text(
+            text = "«${quote.text}»",
+            style = MaterialTheme.typography.titleLarge.copy(fontStyle = FontStyle.Italic),
+            color = colors.textPrimary
+        )
+        Spacer(modifier = Modifier.height(Spacing.sm))
+        Text(
+            text = "стр. ${quote.page}",
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textSecondary
+        )
     }
 }
 
-private data class ReadingStatusUi(
-    val text: String,
-    val color: Color
+private fun heatColorFor(ratio: Float, heatmap: List<androidx.compose.ui.graphics.Color>): androidx.compose.ui.graphics.Color {
+    if (heatmap.isEmpty()) return androidx.compose.ui.graphics.Color.Transparent
+    // ratio 0..1 → ступень heatmap (пропускаем нулевой «пустой» оттенок).
+    val span = heatmap.size - 1
+    val index = (1 + ceil(ratio * (span - 1)).toInt()).coerceIn(1, span)
+    return heatmap[index]
+}
+
+private fun readingStatusLabel(status: ReadingStatus): String = when (status) {
+    ReadingStatus.None -> "Не начата"
+    ReadingStatus.Planned -> "В планах"
+    ReadingStatus.Reading -> "Читаю"
+    ReadingStatus.Paused -> "На паузе"
+    ReadingStatus.Dropped -> "Брошена"
+    ReadingStatus.Completed -> "Прочитано"
+}
+
+private fun paceForecast(currentPage: Int, totalPages: Int): String {
+    val remaining = (totalPages - currentPage).coerceAtLeast(0)
+    if (remaining == 0) return "Книга прочитана до конца"
+    // Грубая эвристика темпа: ~25 стр/день. TODO: считать средний темп из сессий.
+    val perDay = 25
+    val days = ceil(remaining.toFloat() / perDay).toInt().coerceAtLeast(1)
+    return "При твоём темпе — около $days дней до конца"
+}
+
+/* ---------------------------- Previews ---------------------------- */
+
+private val previewQuotes = listOf(
+    BookQuote(text = "Мы все живём в одном мире, но каждый видит свой собственный.", page = 124),
+    BookQuote(text = "Тишина бывает разной — есть та, что лечит, и та, что ранит.", page = 318),
 )
 
-private fun readingStatusUi(status: ReadingStatus): ReadingStatusUi = when (status) {
-    ReadingStatus.None -> ReadingStatusUi("Не начата", FigmaSubtitle)
-    ReadingStatus.Planned -> ReadingStatusUi("В планах", FigmaSubtitle)
-    ReadingStatus.Reading -> ReadingStatusUi("Читаю", FigmaFire)
-    ReadingStatus.Paused -> ReadingStatusUi("На паузе", Color(0xFFB98A63))
-    ReadingStatus.Dropped -> ReadingStatusUi("Брошена", Color(0xFF9A7E72))
-    ReadingStatus.Completed -> ReadingStatusUi("Прочитана", FigmaTitle)
+private val previewSessions = listOf(8, 14, 0, 22, 31, 12, 0, 19, 27, 16)
+
+@Composable
+private fun BookDetailsPreviewBody(state: BookDetailsState) {
+    Surface(color = BookechiTheme.colors.canvas) {
+        BookDetailsScreenV2Content(state = state, onAction = {})
+    }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "BookDetails Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
 @Composable
-private fun BookDetailsScreenV2Preview() {
-    BookDetailsScreenV2Content(
-        state = BookDetailsState(
-            book = Book(
-                id = 1,
-                name = "Хроники заводной птицы",
-                author = "Харуки Мураками",
-                coverPath = null,
-                pages = 1052,
-                currentPage = 448,
-                readingStatus = ReadingStatus.Reading,
-                isFavorite = false
+private fun BookDetailsScreenV2PreviewLight() {
+    BookechiTheme(darkTheme = false) {
+        BookDetailsPreviewBody(
+            state = BookDetailsState(
+                book = Book(
+                    id = 1,
+                    name = "Хроники заводной птицы",
+                    author = "Харуки Мураками",
+                    coverPath = null,
+                    pages = 1052,
+                    currentPage = 448,
+                    readingStatus = ReadingStatus.Reading,
+                    isFavorite = true
+                ),
+                recentSessionPages = previewSessions,
+                quotes = previewQuotes,
+                rating = 4
             )
-        ),
-        onAction = {}
-    )
+        )
+    }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "BookDetails Dark", showBackground = true, backgroundColor = 0xFF1C1611)
 @Composable
-private fun BookDetailsScreenV2PausedPreview() {
-    BookDetailsScreenV2Content(
-        state = BookDetailsState(
-            book = Book(
-                id = 2,
-                name = "1984",
-                author = "George Orwell",
-                coverPath = null,
-                pages = 328,
-                currentPage = 150,
-                readingStatus = ReadingStatus.Paused,
-                isFavorite = false
+private fun BookDetailsScreenV2PreviewDark() {
+    BookechiTheme(darkTheme = true) {
+        BookDetailsPreviewBody(
+            state = BookDetailsState(
+                book = Book(
+                    id = 1,
+                    name = "Хроники заводной птицы",
+                    author = "Харуки Мураками",
+                    coverPath = null,
+                    pages = 1052,
+                    currentPage = 448,
+                    readingStatus = ReadingStatus.Reading,
+                    isFavorite = true
+                ),
+                recentSessionPages = previewSessions,
+                quotes = previewQuotes,
+                rating = 4
             )
-        ),
-        onAction = {}
-    )
+        )
+    }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "BookDetails Empty quotes Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
 @Composable
-private fun BookDetailsScreenV2PlannedPreview() {
-    BookDetailsScreenV2Content(
-        state = BookDetailsState(
-            book = Book(
-                id = 3,
-                name = "The Great Gatsby",
-                author = "F. Scott Fitzgerald",
-                coverPath = null,
-                pages = 180,
-                currentPage = 0,
-                readingStatus = ReadingStatus.Planned,
-                isFavorite = false
+private fun BookDetailsScreenV2EmptyPreview() {
+    BookechiTheme(darkTheme = false) {
+        BookDetailsPreviewBody(
+            state = BookDetailsState(
+                book = Book(
+                    id = 3,
+                    name = "Великий Гэтсби",
+                    author = "Ф. Скотт Фицджеральд",
+                    coverPath = null,
+                    pages = 180,
+                    currentPage = 0,
+                    readingStatus = ReadingStatus.Planned,
+                    isFavorite = false
+                ),
+                recentSessionPages = emptyList(),
+                quotes = emptyList(),
+                rating = 0
             )
-        ),
-        onAction = {}
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BookDetailsScreenV2DroppedPreview() {
-    BookDetailsScreenV2Content(
-        state = BookDetailsState(
-            book = Book(
-                id = 4,
-                name = "Война и мир",
-                author = "Лев Толстой",
-                coverPath = null,
-                pages = 1225,
-                currentPage = 1225,
-                readingStatus = ReadingStatus.Dropped,
-                isFavorite = false
-            )
-        ),
-        onAction = {}
-    )
+        )
+    }
 }

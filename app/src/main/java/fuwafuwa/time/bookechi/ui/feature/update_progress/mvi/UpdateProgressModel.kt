@@ -35,6 +35,11 @@ class UpdateProgressModel(
                     }
                 }
             }
+            is UpdateProgressAction.UpdateReadingTime -> {
+                updateState {
+                    copy(readingTimeMinutes = action.value.coerceAtLeast(0))
+                }
+            }
             is UpdateProgressAction.SaveChanges -> scope.launch {
                 val state = currentState()
                 val updatedBook = state.book.copy(
@@ -46,7 +51,8 @@ class UpdateProgressModel(
                 readingSessionRepository.recordReadingProgress(
                     bookId = updatedBook.id,
                     startPage = state.startPages,
-                    endPage = action.value
+                    endPage = action.value,
+                    readingTimeMinutes = state.readingTimeMinutes
                 )
 
                 sendNavigationEvent(

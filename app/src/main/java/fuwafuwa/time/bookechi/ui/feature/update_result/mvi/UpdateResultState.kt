@@ -8,4 +8,12 @@ data class UpdateResultState(
     val updatedPages: Int,
     val allBookPages: Int,
     val newStreakCount: Int,
-) : State
+    // TODO: persist rating & note (needs schema) — пока живут только в State этой фичи.
+    val rating: Int = 0,
+    val note: String = "",
+) : State {
+
+    /** Книга дочитана: текущая страница достигла/превысила объём книги. */
+    val isFinished: Boolean
+        get() = allBookPages > 0 && updatedPages >= allBookPages
+}

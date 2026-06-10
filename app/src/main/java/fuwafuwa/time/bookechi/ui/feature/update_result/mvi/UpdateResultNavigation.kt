@@ -8,9 +8,15 @@ import androidx.navigation.toRoute
 import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent
 import fuwafuwa.time.bookechi.mvi.ui.BaseScreen
 import fuwafuwa.time.bookechi.mvi.ui.Screen
+import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.update_result.ui.UpdateResultScreen
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+
+/** Возврат на главный экран — деталей книги может не быть в стеке (путь Home→прогресс→успех). */
+object NavigateBackToHome : BaseNavigationEvent.NavigateBackTo {
+    override val screen: Screen = BookListScreen
+}
 
 fun NavGraphBuilder.updateResultNavRoot(
     navController: NavController

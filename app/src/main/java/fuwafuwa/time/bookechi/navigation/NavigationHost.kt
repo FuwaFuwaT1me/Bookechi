@@ -13,6 +13,7 @@ import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.bookListNavRoot
 import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.libraryNavRoot
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.productivityNavRoot
+import fuwafuwa.time.bookechi.ui.feature.settings.mvi.settingsNavRoot
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.updateProgressNavRoot
 import fuwafuwa.time.bookechi.ui.feature.update_result.mvi.updateResultNavRoot
 
@@ -35,6 +36,8 @@ fun NavigationHost(
         productivityScenario(navController)
 
         libraryScenario(navController)
+
+        settingsNavRoot(navController)
     }
 }
 

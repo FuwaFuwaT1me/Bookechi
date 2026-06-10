@@ -12,4 +12,5 @@ sealed interface BookListAction : Action {
     data class NavigateToEditBook(val book: Book) : BookListAction
     data object NavigateToAddBook : BookListAction
     data class NavigateToBookDetails(val book: Book) : BookListAction
+    data object OpenSettings : BookListAction
 }

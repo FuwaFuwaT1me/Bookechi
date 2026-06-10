@@ -4,10 +4,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent
 import fuwafuwa.time.bookechi.mvi.ui.BaseScreen
+import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.settings.ui.SettingsScreen
 import fuwafuwa.time.bookechi.ui.feature.settings.ui.SettingsScreenRoute
 import org.koin.compose.viewmodel.koinViewModel
+
+object NavigateToSettings : BaseNavigationEvent.NavigateTo {
+    override val screen: Screen = SettingsScreenRoute
+}
 
 fun NavGraphBuilder.settingsNavRoot(
     navController: NavController

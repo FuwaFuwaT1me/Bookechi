@@ -48,7 +48,7 @@ class LibraryModel(
             }
 
             is LibraryAction.UpdateAddingBookName -> updateAddingDraft {
-                copy(name = action.name, error = null)
+                copy(name = action.name, nameError = false, error = null)
             }
 
             is LibraryAction.UpdateAddingBookAuthor -> updateAddingDraft {
@@ -56,29 +56,17 @@ class LibraryModel(
             }
 
             is LibraryAction.UpdateAddingBookCurrentPage -> updateAddingDraft {
-                val page = action.page.coerceAtLeast(0)
-                val normalized = if (pages > 0) page.coerceAtMost(pages) else page
-                copy(currentPage = normalized, error = null)
+                copy(currentPage = action.page.filter { it.isDigit() }, error = null)
             }
 
             is LibraryAction.UpdateAddingBookAllPages -> updateAddingDraft {
-                val normalizedPages = action.pages.coerceAtLeast(0)
-                val normalizedCurrentPage = if (normalizedPages > 0) {
-                    currentPage.coerceAtMost(normalizedPages)
-                } else {
-                    0
-                }
-                copy(
-                    pages = normalizedPages,
-                    currentPage = normalizedCurrentPage,
-                    error = null
-                )
+                copy(pages = action.pages.filter { it.isDigit() }, pagesError = false, error = null)
             }
 
-            is LibraryAction.UpdateAddingBookReadingNow -> updateAddingDraft {
+            is LibraryAction.UpdateAddingBookStatus -> updateAddingDraft {
                 copy(
-                    readingNow = action.readingNow,
-                    currentPage = if (action.readingNow) currentPage else 0,
+                    status = action.status,
+                    currentPage = if (action.status == ReadingStatus.Reading) currentPage else "",
                     error = null
                 )
             }
@@ -121,6 +109,15 @@ class LibraryModel(
                     )
                 }
             }
+
+            is LibraryAction.DeleteBook -> {
+                scope.launch {
+                    updateState {
+                        copy(editingBook = null)
+                    }
+                    bookRepository.deleteBook(action.book)
+                }
+            }
         }
     }
 
@@ -133,9 +130,13 @@ class LibraryModel(
 
     private fun saveAddingBook() {
         val draft = state.value.addingBook ?: return
-        if (draft.name.isBlank()) {
+
+        val nameBlank = draft.name.isBlank()
+        val pagesValue = draft.pages.toIntOrNull() ?: 0
+        val pagesInvalid = pagesValue <= 0
+        if (nameBlank || pagesInvalid) {
             updateAddingDraft {
-                copy(error = "Введите название книги")
+                copy(nameError = nameBlank, pagesError = pagesInvalid)
             }
             return
         }
@@ -144,13 +145,20 @@ class LibraryModel(
             copy(isSaving = true, error = null)
         }
 
+        val currentPage = when (draft.status) {
+            ReadingStatus.Reading ->
+                (draft.currentPage.toIntOrNull() ?: 0).coerceIn(0, pagesValue)
+            ReadingStatus.Completed -> pagesValue
+            else -> 0
+        }
+
         val book = Book(
             name = draft.name.trim(),
             author = draft.author.trim(),
             coverPath = draft.coverPath,
-            pages = draft.pages,
-            currentPage = draft.currentPage,
-            readingStatus = if (draft.readingNow) ReadingStatus.Reading else ReadingStatus.None,
+            pages = pagesValue,
+            currentPage = currentPage,
+            readingStatus = draft.status,
             isFavorite = false
         )
 

@@ -2,47 +2,119 @@ package fuwafuwa.time.bookechi.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+/* ============================================================================
+ * Bookechi — палитра «Terracotta & Linen»
+ * Тёплый минимализм: льняная бумага, ореховый текст, приглушённая терракота,
+ * шалфей как второй акцент. Подробности — docs/design-prompt.md.
+ * ============================================================================ */
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// --- Светлая тема: сырые токены ----------------------------------------------
+val LinenCanvas = Color(0xFFF4ECE1)
+val LinenSurface = Color(0xFFFBF6EF)
+val LinenSurfaceWhite = Color(0xFFFFFFFF)
+val LinenLibraryBg = Color(0xFFFFF9F6)
+val WarmStroke = Color(0xFFE4D9CC)
+val WarmDivider = Color(0xFFD9CCBC)
 
+val Espresso = Color(0xFF382A20)   // textPrimary
+val Taupe = Color(0xFF8C7C6E)      // textSecondary
+
+val Terracotta = Color(0xFFBE5E3B)        // accent
+val TerracottaDeep = Color(0xFF9E4A2C)    // accent deep
+val TerracottaPressed = Color(0xFF843B22)
+val TerracottaSoft = Color(0xFFE8C9B6)    // tint background
+
+val Sage = Color(0xFF7C8A6E)              // secondary accent
+val SageSoft = Color(0xFFDDE3D2)          // insight plinth bg
+
+val CoverPlaceholder = Color(0xFFA08B7C)
+val ChipBg = Color(0xFFEBE2D6)
+val CardTint = Color(0xFFEFE0D2)
+val AddBookBg = Color(0xFFE0CFC0)
+
+// Стрик
+val StreakBadge = Color(0xFFF0C9A8)
+val StreakGradientStart = Color(0xFFFBE9D6)
+val StreakGradientEnd = Color(0xFFF3D8BF)
+val StreakCurrentDay = Color(0xFFC9A98C)
+val Fire = Color(0xFFBE5E3B)
+
+// Heatmap 0→5 (светлая)
+val Heat0 = Color(0xFFF2E7DC)
+val Heat0Stroke = Color(0xFFE0D3C4)
+val Heat1 = Color(0xFFF0D2BC)
+val Heat2 = Color(0xFFE0A786)
+val Heat3 = Color(0xFFC97A53)
+val Heat4 = Color(0xFFA85636)
+val Heat5 = Color(0xFF7E3A22)
+
+// --- Тёмная тема: сырые токены (тёплая ореховая, НЕ серый Material) -----------
+val DarkCanvas = Color(0xFF1C1611)
+val DarkSurface = Color(0xFF261D17)
+val DarkSurfaceElevated = Color(0xFF31261E)
+val DarkStroke = Color(0xFF3C2F26)
+
+val DarkTextPrimary = Color(0xFFF0E7DC)
+val DarkTextSecondary = Color(0xFFAE9D8E)
+
+val DarkAccent = Color(0xFFCE6E48)
+val DarkAccentHover = Color(0xFFE08960)
+val DarkAccentDeep = Color(0xFFB4583A)
+val DarkSage = Color(0xFF8FA07E)
+val DarkSageSoft = Color(0xFF2E3A2A)
+
+val DarkChipBg = Color(0xFF31261E)
+val DarkCardTint = Color(0xFF31261E)
+
+val DarkStreakGradientStart = Color(0xFF3A2A1E)
+val DarkStreakGradientEnd = Color(0xFF2E2018)
+val DarkStreakCurrentDay = Color(0xFF6E513B)
+
+// Heatmap 0→5 (тёмная)
+val DarkHeat0 = Color(0xFF2A211A)
+val DarkHeat1 = Color(0xFF4A3526)
+val DarkHeat2 = Color(0xFF6E472F)
+val DarkHeat3 = Color(0xFF97583B)
+val DarkHeat4 = Color(0xFFB86A45)
+val DarkHeat5 = Color(0xFFD17E52)
+
+/* ============================================================================
+ * LEGACY-алиасы `Figma*`.
+ * Значения ретюнингованы под «Terracotta & Linen», чтобы экраны, ссылающиеся
+ * на эти имена, сразу получили новую палитру без правок. При переработке
+ * экранов мигрируем на BookechiColors (Theme.kt) с поддержкой тёмной темы.
+ * ============================================================================ */
+val FigmaBackground = LinenCanvas
+val FigmaBackgroundStroke = WarmStroke
+val FigmaGrey = Espresso
+val FigmaLightGrey = WarmDivider
+val FigmaTitle = Espresso
+val FigmaSubtitle = Taupe
+val FigmaBookCover = CoverPlaceholder
+val FigmaRedTitle = TerracottaDeep
+val FigmaStreakBackground = StreakBadge
+val FigmaStreakBackgroundStart = StreakGradientStart
+val FigmaStreakBackgroundEnd = StreakGradientEnd
+val FigmaStreakCurrentDayBackground = StreakCurrentDay
+val FigmaFire = Fire
+val FigmaBottomNavSelectedTab = TerracottaDeep
+val FigmaProductivityHeaderItemBackground = CardTint
+val FigmaPeriodSwitcherBackground = ChipBg
+val FigmaActivityCellZeroActivityStroke = Heat0Stroke
+val FigmaActivityCellZeroActivity = Heat0
+val FigmaActivityCellOneActivity = Heat1
+val FigmaActivityCellTwoActivity = Heat2
+val FigmaActivityCellThreeActivity = Heat3
+val FigmaActivityCellFourActivity = Heat4
+val FigmaActivityCellFiveActivity = Heat5
+val FigmaAddBookBackground = AddBookBg
+val FigmaLibraryBackground = LinenLibraryBg
+
+val BottomBarDivider = WarmDivider
+
+// Прочие legacy-имена (используются в старых экранах) — ретюн на терракоту
 val SuperLightGray = Color(0xFFF1F1F1)
-val BlueMain = Color(0xFF2F8BE1)
-val BlueMainDark = Color(0xFF1E6FB9)
-
-val BlackLight = Color(0xFF464646)
+val BlueMain = Terracotta
+val BlueMainDark = TerracottaDeep
+val BlackLight = Espresso
 val BlackLight2 = Color(0xFF121212)
-
-//----
-
-val FigmaBackground = Color(0xFFF6EEEB)
-val FigmaBackgroundStroke = Color(0xFFE7DBD5)
-val FigmaGrey = Color(0xFF2F1909)
-val FigmaLightGrey = Color(0xFFD6C6C4)
-val FigmaTitle = Color(0xFF2F1909)
-val FigmaSubtitle = Color(0xFF937D75)
-val FigmaBookCover = Color(0xFF8C7770)
-val FigmaRedTitle = Color(0xFFCB4700)
-val FigmaStreakBackground = Color(0xFFFFCE9F)
-val FigmaStreakBackgroundStart = Color(0xFFFFEBD9)
-val FigmaStreakBackgroundEnd = Color(0xFFFFDDBB)
-val FigmaStreakCurrentDayBackground = Color(0xFFCFAC90)
-val FigmaFire = Color(0xFFED8835)
-val FigmaBottomNavSelectedTab = Color(0xFFA65519)
-val FigmaProductivityHeaderItemBackground = Color(0xFFF2DBC9)
-val FigmaPeriodSwitcherBackground = Color(0xFFEDE4E1)
-val FigmaActivityCellZeroActivityStroke = Color(0xFFDFD4D4)
-val FigmaActivityCellZeroActivity = Color(0xFFF9F1EE)
-val FigmaActivityCellOneActivity = Color(0xFFFFE6CF)
-val FigmaActivityCellTwoActivity = Color(0xFFF9B779)
-val FigmaActivityCellThreeActivity = Color(0xFFED8835)
-val FigmaActivityCellFourActivity = Color(0xFFCB4700)
-val FigmaActivityCellFiveActivity = Color(0xFFA62700)
-val FigmaAddBookBackground = Color(0xFFDEC5B9)
-val FigmaLibraryBackground = Color(0xFFFFF9F6)
-
-val BottomBarDivider = Color(0xFFD9CEC6)

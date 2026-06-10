@@ -1,141 +1,105 @@
 package fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fuwafuwa.time.bookechi.base.time.Date
 import fuwafuwa.time.bookechi.base.time.getDaysInMonth
-import fuwafuwa.time.bookechi.base.time.getWeeksInMonth
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
-import fuwafuwa.time.bookechi.base.ui.chart.ActivityColorScheme
 import fuwafuwa.time.bookechi.base.ui.chart.ChartCellData
 import fuwafuwa.time.bookechi.base.ui.chart.getRelativeActivityIntensity
+import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.data.model.DailyReadingStats
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityPreviewData
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 import java.time.LocalDate
 
 private const val DAYS_IN_WEEK = 7
-private const val COMPACT_HORIZONTAL_MONTH_COLUMNS = 10
 
+private val WEEKDAY_LABELS = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+
+/**
+ * Месячный график активности — календарная сетка (макет «05 Продуктивность — месяц»).
+ *
+ * Шапка-строка дней недели (Пн..Вс) + строки-недели по 7 колонок.
+ * День месяца стоит в колонке своего дня недели (понедельник — первый).
+ * Пустые позиции до 1-го числа и после последнего — пропуски.
+ * Ячейка — скруглённый квадрат heatmap[intensity]; нулевая — heatmap[0] с границей;
+ * сегодняшний день — обводка accent.
+ */
 @Composable
 fun MonthActivityChart(
     year: Int,
     month: Int,
-    isHorizontal: Boolean,
     modifier: Modifier = Modifier,
-    config: ActivityChartConfig = ActivityChartConfig(),
+    config: ActivityChartConfig = ActivityChartConfig(cornerRadius = 6.dp),
     sessions: List<DailyReadingStats> = emptyList(),
 ) {
-    val weeksInMonth = remember(year, month) { getWeeksInMonth(year, month) }
-    val daysInMonth = remember(year, month) { getDaysInMonth(year, month) }
+    val colors = BookechiTheme.colors
     val today = LocalDate.now()
 
-    val (weekGridCells, linearCells) = remember(year, month, sessions) {
-        val maxPages = sessions.maxByOrNull { it.totalPagesRead }?.totalPagesRead ?: 0
-        val weekGrid = buildWeekGridCellsForMonth(
-            daysInMonth = daysInMonth,
-            weeksInMonth = weeksInMonth,
-            sessions = sessions,
-            maxPages = maxPages
-        )
-        val linear = buildLinearMonthCells(
-            daysInMonth = daysInMonth,
-            sessions = sessions,
-            maxPages = maxPages
-        )
-        weekGrid to linear
+    val weeks = remember(year, month, sessions) {
+        val daysInMonth = getDaysInMonth(year, month)
+        val maxPages = sessions.maxOfOrNull { it.totalPagesRead } ?: 0
+        buildCalendarWeeks(daysInMonth, sessions, maxPages)
     }
 
-    if (isHorizontal) {
-        HorizontalMonthChart(
-            cellsData = linearCells,
-            config = config,
-            highlightDate = today,
-            modifier = modifier
-        )
-    } else {
-        VerticalMonthChart(
-            weeksInMonth = weeksInMonth,
-            cellsData = weekGridCells,
-            config = config,
-            highlightDate = today,
-            modifier = modifier
-        )
-    }
-}
-
-@Composable
-private fun HorizontalMonthChart(
-    cellsData: List<ChartCellData>,
-    config: ActivityChartConfig,
-    highlightDate: LocalDate,
-    modifier: Modifier = Modifier
-) {
-    val verticalSpacing = if (config.showSpacing) config.itemVerticalSpacing else 0.dp
-    val horizontalSpacing = if (config.showSpacing) config.itemHorizontalSpacing else 0.dp
-    val rows =
-        (cellsData.size + COMPACT_HORIZONTAL_MONTH_COLUMNS - 1) / COMPACT_HORIZONTAL_MONTH_COLUMNS
+    val cellSpacing = if (config.showSpacing) config.itemHorizontalSpacing else 0.dp
+    val rowSpacing = if (config.showSpacing) config.itemVerticalSpacing else 0.dp
 
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(verticalSpacing)
+        verticalArrangement = Arrangement.spacedBy(rowSpacing),
     ) {
-        for (row in 0 until rows) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(horizontalSpacing)
-            ) {
-                for (col in 0 until COMPACT_HORIZONTAL_MONTH_COLUMNS) {
-                    val cellIndex = row * COMPACT_HORIZONTAL_MONTH_COLUMNS + col
-                    val cellData = cellsData.getOrNull(cellIndex)
-
-                    ActivityChartCell(
-                        cellData = cellData,
-                        config = config,
-                        highlightDate = highlightDate,
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f)
-                    )
-                }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(cellSpacing),
+        ) {
+            WEEKDAY_LABELS.forEach { label ->
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.textSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f),
+                )
             }
         }
-    }
-}
 
-@Composable
-private fun VerticalMonthChart(
-    weeksInMonth: Int,
-    cellsData: List<ChartCellData>,
-    config: ActivityChartConfig,
-    highlightDate: LocalDate,
-    modifier: Modifier = Modifier
-) {
-    BoxWithConstraints(modifier = modifier) {
-        val cellSize = maxWidth / weeksInMonth
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            for (row in 0 until DAYS_IN_WEEK) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    for (col in 0 until weeksInMonth) {
-                        val cellIndex = row * weeksInMonth + col
-                        val cellData = cellsData.getOrNull(cellIndex)
-
+        weeks.forEach { week ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(cellSpacing),
+            ) {
+                week.forEach { cellData ->
+                    if (cellData == null) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f),
+                        )
+                    } else {
                         ActivityChartCell(
                             cellData = cellData,
                             config = config,
-                            highlightDate = highlightDate,
-                            modifier = Modifier.size(cellSize)
+                            highlightDate = today,
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f),
                         )
                     }
                 }
@@ -144,89 +108,72 @@ private fun VerticalMonthChart(
     }
 }
 
-private fun buildWeekGridCellsForMonth(
+/**
+ * Раскладывает дни месяца в недели (списки по 7 элементов).
+ * Индекс колонки = (dayOfWeek - 1), понедельник первый; null — пустая позиция.
+ */
+private fun buildCalendarWeeks(
     daysInMonth: List<Date>,
-    weeksInMonth: Int,
     sessions: List<DailyReadingStats>,
-    maxPages: Int
-): List<ChartCellData> {
+    maxPages: Int,
+): List<List<ChartCellData?>> {
+    if (daysInMonth.isEmpty()) return emptyList()
+
     val sessionByDate = sessions.associateBy { it.date }
-    val dayByGridKey = daysInMonth.associateBy { gridKey(it.weekOfMonth, it.dayOfWeek.value) }
-    val cells = ArrayList<ChartCellData>(weeksInMonth * DAYS_IN_WEEK)
+    val weeks = mutableListOf<MutableList<ChartCellData?>>()
+    var currentWeek = MutableList<ChartCellData?>(DAYS_IN_WEEK) { null }
 
-    for (row in 0 until DAYS_IN_WEEK) {
-        for (col in 0 until weeksInMonth) {
-            val dayOfWeek = row + 1
-            val weekOfMonth = col + 1
+    val leadingEmpty = daysInMonth.first().dayOfWeek.value - 1
+    var column = leadingEmpty
 
-            val day = dayByGridKey[gridKey(weekOfMonth, dayOfWeek)]
-            val pagesRead = day?.let { sessionByDate[it.dateKey]?.totalPagesRead } ?: 0
-
-            cells.add(
-                ChartCellData(
-                    date = day,
-                    intensity = getRelativeActivityIntensity(pagesRead, maxPages),
-                    pagesRead = pagesRead
-                )
-            )
+    daysInMonth.forEach { day ->
+        if (column >= DAYS_IN_WEEK) {
+            weeks.add(currentWeek)
+            currentWeek = MutableList(DAYS_IN_WEEK) { null }
+            column = 0
         }
-    }
 
-    return cells
-}
-
-private fun buildLinearMonthCells(
-    daysInMonth: List<Date>,
-    sessions: List<DailyReadingStats>,
-    maxPages: Int
-): List<ChartCellData> {
-    val sessionByDate = sessions.associateBy { it.date }
-    return daysInMonth.map { day ->
         val pagesRead = sessionByDate[day.dateKey]?.totalPagesRead ?: 0
-        ChartCellData(
+        currentWeek[column] = ChartCellData(
             date = day,
             intensity = getRelativeActivityIntensity(pagesRead, maxPages),
-            pagesRead = pagesRead
+            pagesRead = pagesRead,
         )
+        column++
+    }
+    weeks.add(currentWeek)
+
+    return weeks
+}
+
+@Preview(name = "MonthActivityChart Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
+@Composable
+private fun MonthActivityChartPreviewLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            Column(modifier = Modifier.padding(Spacing.lg)) {
+                MonthActivityChart(
+                    year = 2026,
+                    month = 6,
+                    sessions = ProductivityPreviewData.generateMonthData(year = 2026, month = 6),
+                )
+            }
+        }
     }
 }
 
-private fun gridKey(weekOfMonth: Int, dayOfWeek: Int): Int {
-    return weekOfMonth * 100 + dayOfWeek
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Preview(name = "MonthActivityChart Dark", showBackground = true, backgroundColor = 0xFF1C1611)
 @Composable
-private fun VerticalMonthChartPreview() {
-    Column(modifier = Modifier.padding(8.dp)) {
-        MonthActivityChart(
-            year = 2026,
-            month = 1,
-            isHorizontal = false,
-            config = ActivityChartConfig(
-                showSpacing = true,
-                colorScheme = ActivityColorScheme.OrangeActivity,
-                cornerRadius = 4.dp
-            ),
-            sessions = ProductivityPreviewData.generateMonthData()
-        )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
-@Composable
-private fun HorizontalMonthChartPreview() {
-    Column(modifier = Modifier.padding(8.dp)) {
-        MonthActivityChart(
-            year = 2026,
-            month = 1,
-            isHorizontal = true,
-            config = ActivityChartConfig(
-                showSpacing = true,
-                colorScheme = ActivityColorScheme.OrangeActivity,
-                cornerRadius = 4.dp
-            ),
-            sessions = ProductivityPreviewData.generateMonthData()
-        )
+private fun MonthActivityChartPreviewDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            Column(modifier = Modifier.padding(Spacing.lg)) {
+                MonthActivityChart(
+                    year = 2026,
+                    month = 6,
+                    sessions = ProductivityPreviewData.generateMonthData(year = 2026, month = 6),
+                )
+            }
+        }
     }
 }

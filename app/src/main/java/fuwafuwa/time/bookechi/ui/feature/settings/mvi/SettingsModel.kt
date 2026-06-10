@@ -23,6 +23,10 @@ class SettingsModel(
             is SettingsAction.SetDarkMode -> updateState { copy(isDarkMode = action.enabled) }
             is SettingsAction.SetNotifications -> updateState { copy(notificationsEnabled = action.enabled) }
             is SettingsAction.SetReminderTime -> updateState { copy(dailyReminderTime = action.time) }
+            // «Напоминание о чтении» — пока только updateState.
+            // TODO: persist reminder time/enabled in prefs and schedule a daily notification.
+            is SettingsAction.ToggleReminder -> updateState { copy(notificationsEnabled = action.enabled) }
+            is SettingsAction.UpdateReminderTime -> updateState { copy(dailyReminderTime = action.time) }
             is SettingsAction.SetLanguage -> updateState { copy(selectedLanguage = action.language) }
             is SettingsAction.SetUseModernDesign -> handleSetModernDesign(action.enabled)
             is SettingsAction.SetBookListViewType -> handleSetBookListViewType(action.viewType)

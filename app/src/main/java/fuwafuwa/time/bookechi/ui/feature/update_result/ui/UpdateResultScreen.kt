@@ -1,51 +1,49 @@
 package fuwafuwa.time.bookechi.ui.feature.update_result.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import fuwafuwa.time.bookechi.R
-import fuwafuwa.time.bookechi.base.ui.util.DiffConfig
-import fuwafuwa.time.bookechi.base.ui.util.SimpleProgressIndicator
+import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
+import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
+import fuwafuwa.time.bookechi.base.ui.ds.ProgressBar
+import fuwafuwa.time.bookechi.base.ui.ds.RatingStars
+import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
+import fuwafuwa.time.bookechi.base.ui.ds.Spacing
+import fuwafuwa.time.bookechi.base.ui.ds.WarmTextField
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.update_result.mvi.UpdateResultAction
 import fuwafuwa.time.bookechi.ui.feature.update_result.mvi.UpdateResultState
 import fuwafuwa.time.bookechi.ui.feature.update_result.mvi.UpdateResultViewModel
-import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellThreeActivity
-import fuwafuwa.time.bookechi.ui.theme.FigmaActivityCellTwoActivity
-import fuwafuwa.time.bookechi.ui.theme.FigmaFire
-import fuwafuwa.time.bookechi.ui.theme.FigmaLightGrey
-import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 import kotlinx.serialization.Serializable
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -74,199 +72,212 @@ private fun UpdateResultScreenContent(
     state: UpdateResultState,
     onAction: (UpdateResultAction) -> Unit
 ) {
-    val delta = state.pagesDelta
-    val absPages = abs(delta)
-    val sign = if (delta >= 0) "+" else "−"
-    val pagesLabel = pluralizePages(absPages)
-    val flameColor = Color(0xFFFFE7D2)
+    val colors = BookechiTheme.colors
 
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                color = FigmaFire
-            )
-            .padding(horizontal = 24.dp, vertical = 20.dp)
+            .background(colors.canvas)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = Spacing.xxl, vertical = Spacing.xl),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(Spacing.xxxl))
 
-            Box(
-                modifier = Modifier.height(200.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.fire_5),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    colorFilter = ColorFilter.tint(flameColor)
-                )
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter),
-                ) {
-                    Text(
-                        text = "${state.newStreakCount}",
-                        color = FigmaTitle,
-                        fontSize = 84.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            Column(
-                modifier = Modifier,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "$sign$absPages",
-                    color = Color.White,
-                    fontSize = 100.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Text(
-                    text = pagesLabel,
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            val currentProgress = (1f * state.updatedPages / state.allBookPages).coerceIn(0f, 1f)
-            val startProgress = (1f * state.startPages / state.allBookPages).coerceIn(0f, 1f)
-            val currentPercent = (currentProgress * 100f).roundToInt()
-            val diffPercent = ((currentProgress - startProgress) * 100f).roundToInt()
-            val showDiff = state.updatedPages > state.startPages
-            val progressLabel = if (showDiff) {
-                "+${diffPercent}%"
-            } else {
-                "${currentPercent}%"
-            }
-
-            Column(
-                modifier = Modifier
-                    .background(
-                        color = Color.White,
-                        shape = RoundedCornerShape(6.dp)
-                    )
-                    .padding(vertical = 8.dp, horizontal = 16.dp),
-            ) {
-
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                color = FigmaTitle,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 18.sp
-                            ),
-                        ) {
-                            append("${100 * state.startPages / state.allBookPages}%")
-                        }
-
-                        withStyle(
-                            style = SpanStyle(
-                                baselineShift = BaselineShift(0.15f)
-                            ),
-                        ) {
-                            append("  ➞  ")
-                        }
-
-                        withStyle(
-                            style = SpanStyle(
-                                color = FigmaFire,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp
-                            ),
-                        ) {
-                            append("${100 * state.updatedPages / state.allBookPages}%")
-                        }
-                    }
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                SimpleProgressIndicator(
-                    modifier = Modifier
-                        .height(24.dp)
-                        .fillMaxWidth(),
-                    progress = currentProgress,
-                    progressBarColor = FigmaFire,
-                    cornerRadius = 6.dp,
-                    trackColor = FigmaLightGrey,
-                    diffConfig = DiffConfig(
-                        lastProgress = if (showDiff) startProgress else currentProgress,
-                        diffColor = FigmaActivityCellTwoActivity,
-                        labelText = progressLabel,
-                        showingPercentColor = Color.White,
-                        showPercent = true
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = "Так держать!",
-                color = Color.White,
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Ты здорово постарался!",
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(Modifier.weight(1f))
-
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonColors(
-                    containerColor = FigmaTitle,
-                    contentColor = Color.White,
-                    disabledContainerColor = FigmaTitle.copy(alpha = 0.6f),
-                    disabledContentColor = Color.White
-                ),
-                onClick = { onAction(UpdateResultAction.Done) }
-            ) {
-                Text(
-                    text = "Готово",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+        if (state.isFinished) {
+            FinishedContent(state = state, onAction = onAction)
+        } else {
+            StreakContent(state = state)
         }
+
+        Spacer(Modifier.height(Spacing.xxxl))
+
+        PrimaryButton(
+            text = "Готово",
+            onClick = { onAction(UpdateResultAction.Done) },
+        )
+
+        Spacer(Modifier.height(Spacing.xl))
+    }
+}
+
+@Composable
+private fun StreakContent(state: UpdateResultState) {
+    val colors = BookechiTheme.colors
+
+    // 1) Тайл с огоньком.
+    FireTile()
+
+    Spacer(Modifier.height(Spacing.xl))
+
+    // 2) «{newStreakCount} дней подряд».
+    Text(
+        text = "${state.newStreakCount} ${pluralizeDays(state.newStreakCount)} подряд",
+        style = MaterialTheme.typography.headlineMedium,
+        color = colors.textPrimary,
+        textAlign = TextAlign.Center,
+    )
+
+    Spacer(Modifier.height(Spacing.md))
+
+    // 3) «Сегодня прочитано: {pagesDelta} страниц».
+    TodayReadLine(pagesDelta = state.pagesDelta)
+
+    Spacer(Modifier.height(Spacing.xxl))
+
+    // 4) Карточка прогресса.
+    ProgressCard(state = state)
+
+    Spacer(Modifier.height(Spacing.xxl))
+
+    // 5) Тёплая фраза курсивом.
+    Text(
+        text = "Хороший вечер для книги.",
+        style = MaterialTheme.typography.titleLarge.copy(fontStyle = FontStyle.Italic),
+        color = colors.textSecondary,
+        textAlign = TextAlign.Center,
+    )
+}
+
+@Composable
+private fun FinishedContent(
+    state: UpdateResultState,
+    onAction: (UpdateResultAction) -> Unit,
+) {
+    val colors = BookechiTheme.colors
+
+    FireTile()
+
+    Spacer(Modifier.height(Spacing.xl))
+
+    Text(
+        text = "Книга прочитана",
+        style = MaterialTheme.typography.headlineMedium,
+        color = colors.textPrimary,
+        textAlign = TextAlign.Center,
+    )
+
+    Spacer(Modifier.height(Spacing.sm))
+
+    Text(
+        text = "Книга переехала на полку «Прочитано».",
+        style = MaterialTheme.typography.bodyMedium,
+        color = colors.textSecondary,
+        textAlign = TextAlign.Center,
+    )
+
+    Spacer(Modifier.height(Spacing.xxl))
+
+    // Карточка прогресса до 100% + строка «Сегодня прочитано».
+    ProgressCard(state = state, finished = true)
+
+    Spacer(Modifier.height(Spacing.md))
+
+    TodayReadLine(pagesDelta = state.pagesDelta)
+
+    Spacer(Modifier.height(Spacing.xxl))
+
+    // Блок оценки.
+    SectionLabel(text = "Как вам книга?")
+
+    Spacer(Modifier.height(Spacing.md))
+
+    // TODO: persist rating & note (needs schema) — rating живёт только в State фичи.
+    RatingStars(
+        rating = state.rating,
+        onRate = { onAction(UpdateResultAction.SetRating(it)) },
+    )
+
+    Spacer(Modifier.height(Spacing.lg))
+
+    // TODO: persist rating & note (needs schema) — note живёт только в State фичи.
+    WarmTextField(
+        value = state.note,
+        onValueChange = { onAction(UpdateResultAction.SetNote(it)) },
+        label = "Заметка",
+        placeholder = "Заметка или любимая цитата — по желанию",
+    )
+}
+
+@Composable
+private fun FireTile() {
+    val colors = BookechiTheme.colors
+    Box(
+        modifier = Modifier
+            .size(72.dp)
+            .background(colors.accentSoft, DsShapes.tile),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Default.LocalFireDepartment,
+            contentDescription = null,
+            tint = colors.accent,
+            modifier = Modifier.size(36.dp),
+        )
+    }
+}
+
+@Composable
+private fun TodayReadLine(pagesDelta: Int) {
+    val colors = BookechiTheme.colors
+    val absPages = abs(pagesDelta)
+    Text(
+        text = buildAnnotatedString {
+            append("Сегодня прочитано: ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = colors.textPrimary)) {
+                append("$absPages")
+            }
+            append(" ${pluralizePages(absPages)}")
+        },
+        style = MaterialTheme.typography.bodyLarge,
+        color = colors.textSecondary,
+        textAlign = TextAlign.Center,
+    )
+}
+
+@Composable
+private fun ProgressCard(
+    state: UpdateResultState,
+    finished: Boolean = false,
+) {
+    val colors = BookechiTheme.colors
+
+    val total = state.allBookPages.coerceAtLeast(1)
+    val startPercent = (100f * state.startPages / total).roundToInt().coerceIn(0, 100)
+    val newPercent = if (finished) 100 else (100f * state.updatedPages / total).roundToInt().coerceIn(0, 100)
+    val newProgress = if (finished) 1f else (1f * state.updatedPages / total)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colors.surfaceElevated, DsShapes.card)
+            .border(1.dp, colors.stroke, DsShapes.card)
+            .padding(Spacing.xl),
+    ) {
+        Text(
+            text = buildAnnotatedString {
+                withStyle(SpanStyle(color = colors.textSecondary)) {
+                    append("$startPercent%")
+                }
+                append("  →  ")
+                withStyle(SpanStyle(color = colors.accentDeep, fontWeight = FontWeight.Bold)) {
+                    append("$newPercent%")
+                }
+            },
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+        )
+
+        Spacer(Modifier.height(Spacing.md))
+
+        ProgressBar(progress = newProgress, height = 10.dp)
     }
 }
 
 private fun pluralizePages(pages: Int): String {
     val mod100 = pages % 100
     val mod10 = pages % 10
-
     return when {
         mod100 in 11..14 -> "страниц"
         mod10 == 1 -> "страница"
@@ -275,17 +286,93 @@ private fun pluralizePages(pages: Int): String {
     }
 }
 
-@Preview(showBackground = true)
+private fun pluralizeDays(days: Int): String {
+    val mod100 = days % 100
+    val mod10 = days % 10
+    return when {
+        mod100 in 11..14 -> "дней"
+        mod10 == 1 -> "день"
+        mod10 in 2..4 -> "дня"
+        else -> "дней"
+    }
+}
+
+@Preview(name = "UpdateResult Streak Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
 @Composable
-private fun UpdateResultScreenPreview() {
-    UpdateResultScreenContent(
-        state = UpdateResultState(
-            pagesDelta = 15,
-            startPages = 54,
-            updatedPages = 15 + 54,
-            allBookPages = 256,
-            newStreakCount = 5,
-        ),
-        onAction = {}
-    )
+private fun UpdateResultStreakPreviewLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            UpdateResultScreenContent(
+                state = UpdateResultState(
+                    pagesDelta = 15,
+                    startPages = 54,
+                    updatedPages = 69,
+                    allBookPages = 256,
+                    newStreakCount = 5,
+                ),
+                onAction = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "UpdateResult Streak Dark", showBackground = true, backgroundColor = 0xFF1C1611)
+@Composable
+private fun UpdateResultStreakPreviewDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            UpdateResultScreenContent(
+                state = UpdateResultState(
+                    pagesDelta = 15,
+                    startPages = 54,
+                    updatedPages = 69,
+                    allBookPages = 256,
+                    newStreakCount = 5,
+                ),
+                onAction = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "UpdateResult Finished Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
+@Composable
+private fun UpdateResultFinishedPreviewLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            UpdateResultScreenContent(
+                state = UpdateResultState(
+                    pagesDelta = 32,
+                    startPages = 224,
+                    updatedPages = 256,
+                    allBookPages = 256,
+                    newStreakCount = 5,
+                    rating = 4,
+                    note = "",
+                ),
+                onAction = {},
+            )
+        }
+    }
+}
+
+@Preview(name = "UpdateResult Finished Dark", showBackground = true, backgroundColor = 0xFF1C1611)
+@Composable
+private fun UpdateResultFinishedPreviewDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            UpdateResultScreenContent(
+                state = UpdateResultState(
+                    pagesDelta = 32,
+                    startPages = 224,
+                    updatedPages = 256,
+                    allBookPages = 256,
+                    newStreakCount = 5,
+                    rating = 4,
+                    note = "Любимая цитата",
+                ),
+                onAction = {},
+            )
+        }
+    }
 }

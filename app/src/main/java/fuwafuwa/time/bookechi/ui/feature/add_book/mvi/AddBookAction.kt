@@ -22,4 +22,21 @@ sealed interface AddBookAction : Action {
     data class UpdateAllPages(val pages: Int) : AddBookAction
 
     data class UpdateReadingNow(val readingNow: Boolean) : AddBookAction
+
+    // Шаг поиска книги (мок-данные)
+    data class UpdateSearchQuery(val query: String) : AddBookAction
+
+    /** Выбор результата поиска → предзаполняет форму и переключает на режим Form. */
+    data class SelectSearchResult(
+        val title: String,
+        val author: String,
+        val pages: Int,
+        val hasCover: Boolean,
+    ) : AddBookAction
+
+    /** Открыть пустую форму вручную (fallback). */
+    data object EnterManually : AddBookAction
+
+    /** Вернуться к шагу поиска из формы. */
+    data object BackToSearch : AddBookAction
 }

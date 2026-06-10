@@ -43,6 +43,14 @@ class ProductivityModel(
         }
 
         scope.launch {
+            readingSessionRepository.getDailyStatsForCurrentWeek().collect { weekStats ->
+                updateState {
+                    copy(weeklyPagesRead = weekStats.sumOf { it.totalPagesRead })
+                }
+            }
+        }
+
+        scope.launch {
             bookRepository.getAllBooks().collect { books ->
                 updateState {
                     copy(

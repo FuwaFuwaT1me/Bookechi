@@ -2,6 +2,7 @@ package fuwafuwa.time.bookechi.ui.feature.book_details.di
 
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.data.repository.BookRepository
+import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsModel
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsState
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsViewModel
@@ -14,7 +15,8 @@ val bookDetailsModule = module {
         val state = BookDetailsState(book = book)
         val model = BookDetailsModel(
             defaultState = state,
-            bookRepository = get<BookRepository>()
+            bookRepository = get<BookRepository>(),
+            readingSessionRepository = get<ReadingSessionRepository>()
         )
         BookDetailsViewModel(model = model)
     }

@@ -1,191 +1,222 @@
 package fuwafuwa.time.bookechi.ui.feature.library.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
-import fuwafuwa.time.bookechi.base.ui.book.NewBookCover
+import fuwafuwa.time.bookechi.base.ui.ds.BookCover
+import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
+import fuwafuwa.time.bookechi.base.ui.ds.ProgressBar
+import fuwafuwa.time.bookechi.base.ui.ds.Spacing
+import fuwafuwa.time.bookechi.base.ui.ds.StatusChip
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.data.model.ReadingStatus
-import fuwafuwa.time.bookechi.ui.theme.FigmaBackground
-import fuwafuwa.time.bookechi.ui.theme.FigmaBackgroundStroke
-import fuwafuwa.time.bookechi.ui.theme.FigmaBookCover
-import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
-import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
+// Высота, зарезервированная под 2 строки названия (titleSmall) — чтобы низ
+// карточек в ряду выравнивался независимо от длины заголовка.
+private val TitleReservedHeight = 40.dp
+
+// Фиксированная высота мета-строки (ProgressBar+процент / StatusChip), чтобы
+// все ячейки сетки были одинаковой высоты.
+private val MetaReservedHeight = 28.dp
+
+// Размер круга с сердечком поверх обложки.
+private val FavoriteBadgeSize = 28.dp
+private val FavoriteIconSize = 16.dp
+
+/**
+ * Карточка книги в сетке «Библиотека».
+ *
+ * Раскладка строго вертикальная (Column) с детерминированной высотой:
+ * обложка держит соотношение 2:3 сама (DS [BookCover]); название резервирует
+ * место под 2 строки; мета-строка имеет фиксированную высоту. За счёт этого
+ * все карточки в ряду одной высоты, и LazyVerticalGrid не «едет».
+ */
 @Composable
 fun LibraryBookCard(
     book: Book,
     onClick: () -> Unit,
-    onEditClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
+    val colors = BookechiTheme.colors
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(FigmaBackground)
-            .border(
-                width = 1.dp,
-                color = FigmaBackgroundStroke,
-                shape = RoundedCornerShape(10.dp)
-            )
-            .clickable { onClick() }
-            .padding(10.dp)
+            .clip(DsShapes.card)
+            .background(colors.surfaceElevated, DsShapes.card)
+            .clickable(onClick = onClick)
+            .padding(Spacing.sm),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        // Обложка во всю ширину карточки + сердечко в правом верхнем углу.
+        Box(modifier = Modifier.fillMaxWidth()) {
+            BookCover(
+                coverPath = book.coverPath,
+                title = book.name,
+                author = book.author,
+                modifier = Modifier.fillMaxWidth(),
+                width = null,
+            )
+
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(FigmaBookCover)
+                    .align(Alignment.TopEnd)
+                    .padding(Spacing.sm)
+                    .size(FavoriteBadgeSize)
+                    .background(colors.surface.copy(alpha = 0.85f), CircleShape),
+                contentAlignment = Alignment.Center,
             ) {
-                NewBookCover(
-                    imageUri = book.coverPath?.toUri(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(0.7f)
+                Icon(
+                    imageVector = if (book.isFavorite) {
+                        Icons.Default.Favorite
+                    } else {
+                        Icons.Default.FavoriteBorder
+                    },
+                    contentDescription = null,
+                    tint = colors.accent,
+                    modifier = Modifier.size(FavoriteIconSize),
                 )
-            }
-
-            val tag = bookTag(book)
-            if (tag != null) {
-                Box(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFFF0DCC6))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = tag,
-                        color = FigmaTitle,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            if (book.isFavorite) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(22.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.7f))
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        tint = FigmaTitle,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(14.dp)
-                    )
-                }
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        // Название: 2 строки с зарезервированной высотой (одинаковый низ у карточек).
+        Text(
+            text = book.name,
+            style = MaterialTheme.typography.titleSmall.copy(fontFamily = FontFamily.Serif),
+            color = colors.textPrimary,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = TitleReservedHeight),
+        )
 
-        Row(
+        // Автор: одна строка.
+        Text(
+            text = book.author,
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textSecondary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = book.name,
-                    color = FigmaTitle,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = book.author,
-                    color = FigmaSubtitle,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+        )
 
-//            Spacer(modifier = Modifier.width(6.dp))
-//
-//            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-//                IconButton(
-//                    modifier = Modifier
-//                        .size(24.dp)
-//                    ,
-//                    onClick = onEditClick
-//                ) {
-//                    Icon(
-//                        imageVector = Icons.Default.MoreVert,
-//                        contentDescription = "More",
-//                        tint = FigmaTitle
-//                    )
-//                }
-//            }
+        // Мета-строка фиксированной высоты: прогресс для «Читаю», иначе статус-чип.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(MetaReservedHeight),
+            contentAlignment = Alignment.CenterStart,
+        ) {
+            if (book.readingStatus == ReadingStatus.Reading) {
+                val progress = if (book.pages > 0) {
+                    book.currentPage.toFloat() / book.pages.toFloat()
+                } else {
+                    0f
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    ProgressBar(
+                        progress = progress,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = "${(progress * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = colors.textSecondary,
+                    )
+                }
+            } else {
+                StatusChip(status = statusLabel(book.readingStatus))
+            }
         }
     }
 }
 
-private fun bookTag(book: Book): String? = when (book.readingStatus) {
-    ReadingStatus.None -> null
+private fun statusLabel(status: ReadingStatus): String = when (status) {
+    ReadingStatus.None -> "Не начата"
     ReadingStatus.Planned -> "В планах"
     ReadingStatus.Reading -> "Читаю"
-    ReadingStatus.Paused -> "Приостановлена"
+    ReadingStatus.Paused -> "Пауза"
     ReadingStatus.Dropped -> "Брошена"
-    ReadingStatus.Completed -> "Прочитана"
+    ReadingStatus.Completed -> "Прочитано"
 }
 
-@Preview
+@Preview(name = "LibraryBookCard Reading Light", showBackground = true, backgroundColor = 0xFFFFF9F6)
 @Composable
-private fun LibraryBookCardPreview() {
-    LibraryBookCard(
-        book = LibraryPreviewData.books().first().copy(
-            isFavorite = true,
-            readingStatus = ReadingStatus.Completed
-        ),
-        onClick = {},
-        onEditClick = {}
-    )
+private fun LibraryBookCardReadingPreviewLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.lg),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                LibraryBookCard(
+                    book = LibraryPreviewData.books()[0].copy(isFavorite = true),
+                    onClick = {},
+                    modifier = Modifier.weight(1f),
+                )
+                LibraryBookCard(
+                    book = LibraryPreviewData.books()[2].copy(readingStatus = ReadingStatus.Planned),
+                    onClick = {},
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
+}
+
+@Preview(name = "LibraryBookCard Reading Dark", showBackground = true, backgroundColor = 0xFF1C1611)
+@Composable
+private fun LibraryBookCardReadingPreviewDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Spacing.lg),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+            ) {
+                LibraryBookCard(
+                    book = LibraryPreviewData.books()[0].copy(isFavorite = true),
+                    onClick = {},
+                    modifier = Modifier.weight(1f),
+                )
+                LibraryBookCard(
+                    book = LibraryPreviewData.books()[2].copy(readingStatus = ReadingStatus.Planned),
+                    onClick = {},
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+    }
 }

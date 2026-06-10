@@ -6,6 +6,7 @@ import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
 import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent
+import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.AddBookMode
 import fuwafuwa.time.bookechi.utils.file.CacheHelper
 import kotlinx.coroutines.launch
 
@@ -26,17 +27,68 @@ class AddBookModel(
             is AddBookAction.UpdateCurrentPage -> updateState { copy(bookCurrentPage = action.page) }
             is AddBookAction.UpdateAllPages -> updateState { copy(bookPages = action.pages) }
             is AddBookAction.UpdateReadingNow -> updateState { copy(readingNow = action.readingNow) }
+            is AddBookAction.UpdateSearchQuery -> updateState { copy(searchQuery = action.query) }
+            is AddBookAction.SelectSearchResult -> selectSearchResult(action)
+            is AddBookAction.EnterManually -> enterManually()
+            is AddBookAction.BackToSearch -> updateState { copy(mode = AddBookMode.Search) }
+        }
+    }
+
+    private fun selectSearchResult(action: AddBookAction.SelectSearchResult) {
+        updateState {
+            copy(
+                mode = AddBookMode.Form,
+                bookName = action.title,
+                bookAuthor = action.author,
+                bookPages = action.pages,
+                bookCurrentPage = 0,
+                readingNow = false,
+                // Мок-поиск пока не отдаёт реальную обложку — только флаг «найдена».
+                // TODO: replace with Open Library API (загрузить cover по URL).
+                coverFromSearch = action.hasCover,
+                showValidationErrors = false,
+                bookCoverError = null,
+            )
+        }
+    }
+
+    private fun enterManually() {
+        updateState {
+            copy(
+                mode = AddBookMode.Form,
+                bookName = "",
+                bookAuthor = "",
+                bookPages = 0,
+                bookCurrentPage = 0,
+                readingNow = false,
+                bookCoverPath = null,
+                coverFromSearch = false,
+                showValidationErrors = false,
+                bookCoverError = null,
+            )
         }
     }
 
     private fun saveBook() {
+        val currentState = state.value
+        if (!currentState.isInputValid()) {
+            updateState {
+                copy(showValidationErrors = true)
+            }
+            return
+        }
+
         updateState {
-            copy(isBookCoverLoading = true, bookCoverError = null)
+            copy(
+                isBookCoverLoading = true,
+                bookCoverError = null,
+                showValidationErrors = false
+            )
         }
 
         val book = with(state.value) {
             Book(
-                name = bookName,
+                name = bookName.trim(),
                 author = bookAuthor,
                 coverPath = bookCoverPath,
                 pages = bookPages,
@@ -96,4 +148,8 @@ class AddBookModel(
             copy(bookCoverPath = null)
         }
     }
+}
+
+private fun AddBookState.isInputValid(): Boolean {
+    return bookName.trim().isNotEmpty() && bookPages > 0
 }

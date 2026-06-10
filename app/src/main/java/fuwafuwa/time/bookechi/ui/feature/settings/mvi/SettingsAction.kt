@@ -10,6 +10,10 @@ sealed interface SettingsAction : Action {
     data class SetNotifications(val enabled: Boolean) : SettingsAction
     data class SetReminderTime(val time: String) : SettingsAction
     data class SetLanguage(val language: AppLanguage) : SettingsAction
+
+    // Reading reminder («Напоминание о чтении»)
+    data class ToggleReminder(val enabled: Boolean) : SettingsAction
+    data class UpdateReminderTime(val time: String) : SettingsAction
     
     // Design preferences
     data class SetUseModernDesign(val enabled: Boolean) : SettingsAction

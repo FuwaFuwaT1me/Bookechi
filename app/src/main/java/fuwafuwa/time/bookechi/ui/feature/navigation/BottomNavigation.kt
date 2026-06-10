@@ -33,9 +33,7 @@ import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.library.ui.LibraryScreen
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityScreen
-import fuwafuwa.time.bookechi.ui.theme.BottomBarDivider
-import fuwafuwa.time.bookechi.ui.theme.FigmaBottomNavSelectedTab
-import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
 data class BottomNavItem(
     val label: String,
@@ -66,17 +64,18 @@ fun BottomNavigationBar(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+    val colors = BookechiTheme.colors
     NavigationBar(
         modifier = modifier
             .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
             .border(
                 width = 1.dp,
-                color = BottomBarDivider,
+                color = colors.stroke,
                 shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
             )
         ,
-        containerColor = Color.White,
-        tonalElevation = 6.dp,
+        containerColor = colors.surfaceElevated,
+        tonalElevation = 0.dp,
     ) {
         Row(
             modifier = Modifier
@@ -103,8 +102,8 @@ fun BottomNavigationBar(
                         }
                     },
                     navItem = navItem,
-                    selectedColor = FigmaBottomNavSelectedTab,
-                    unselectedColor = FigmaSubtitle
+                    selectedColor = colors.accentDeep,
+                    unselectedColor = colors.textSecondary
                 )
             }
         }

@@ -1,34 +1,51 @@
 package fuwafuwa.time.bookechi.ui.feature.library.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import fuwafuwa.time.bookechi.ui.theme.FigmaSubtitle
-import fuwafuwa.time.bookechi.ui.theme.FigmaTitle
+import fuwafuwa.time.bookechi.base.ui.ds.FilterChip
+import fuwafuwa.time.bookechi.base.ui.ds.Spacing
+import fuwafuwa.time.bookechi.data.model.Book
+import fuwafuwa.time.bookechi.data.model.ReadingStatus
+import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
-enum class LibraryFilter {
-    All,
-    Planned,
-    Reading,
-    Paused,
-    Dropped,
-    Completed,
-    Favorite
+/**
+ * Фильтры библиотеки. Paused/Dropped оставлены в enum для совместимости со
+ * статусами книг, но НЕ выводятся в ряду фильтров (см. [visibleFilters]).
+ */
+enum class LibraryFilter(val label: String) {
+    All("Все"),
+    Planned("В планах"),
+    Reading("Читаю"),
+    Completed("Прочитано"),
+    Favorite("Любимое"),
+    Paused("Приостановлено"),
+    Dropped("Брошено"),
+}
+
+/** Ровно 5 чипов в порядке макета. */
+val visibleFilters: List<LibraryFilter> = listOf(
+    LibraryFilter.All,
+    LibraryFilter.Planned,
+    LibraryFilter.Reading,
+    LibraryFilter.Completed,
+    LibraryFilter.Favorite,
+)
+
+fun List<Book>.filteredBy(filter: LibraryFilter): List<Book> = when (filter) {
+    LibraryFilter.All -> this
+    LibraryFilter.Reading -> filter { it.readingStatus == ReadingStatus.Reading }
+    LibraryFilter.Completed -> filter { it.readingStatus == ReadingStatus.Completed }
+    LibraryFilter.Planned -> filter { it.readingStatus == ReadingStatus.Planned }
+    LibraryFilter.Favorite -> filter { it.isFavorite }
+    LibraryFilter.Paused -> filter { it.readingStatus == ReadingStatus.Paused }
+    LibraryFilter.Dropped -> filter { it.readingStatus == ReadingStatus.Dropped }
 }
 
 @Composable
@@ -38,73 +55,45 @@ fun LibraryFiltersRow(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(horizontal = 0.dp)
 ) {
-    val filters = listOf(
-        "Все" to LibraryFilter.All,
-        "В планах" to LibraryFilter.Planned,
-        "Читаю" to LibraryFilter.Reading,
-        "Прочитано" to LibraryFilter.Completed,
-        "Любимое" to LibraryFilter.Favorite,
-        "Приостановлено" to LibraryFilter.Paused,
-        "Брошено" to LibraryFilter.Dropped,
-    )
-
     LazyRow(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         contentPadding = contentPadding
     ) {
-        items(filters, key = { it.second.name }) { (label, filter) ->
-            LibraryFilterChip(
-                label = label,
-                isSelected = activeFilter == filter,
-                onClick = { onFilterChange(filter) }
+        items(visibleFilters, key = { it.name }) { filter ->
+            FilterChip(
+                text = filter.label,
+                selected = activeFilter == filter,
+                onClick = { onFilterChange(filter) },
             )
         }
     }
 }
 
-@Preview
+@Preview(name = "LibraryFilters Light", showBackground = true, backgroundColor = 0xFFFFF9F6)
 @Composable
-private fun LibraryFiltersRowPreview() {
-    LibraryFiltersRow(
-        activeFilter = LibraryFilter.Reading,
-        onFilterChange = {},
-        contentPadding = PaddingValues(horizontal = 16.dp)
-    )
+private fun LibraryFiltersRowPreviewLight() {
+    BookechiTheme(darkTheme = false) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            LibraryFiltersRow(
+                activeFilter = LibraryFilter.Reading,
+                onFilterChange = {},
+                contentPadding = PaddingValues(Spacing.lg)
+            )
+        }
+    }
 }
 
-@Preview
+@Preview(name = "LibraryFilters Dark", showBackground = true, backgroundColor = 0xFF1C1611)
 @Composable
-private fun LibraryFilterChipPreview() {
-    LibraryFilterChip(
-        label = "Читаю",
-        isSelected = true,
-        onClick = {}
-    )
-}
-
-@Composable
-fun LibraryFilterChip(
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val background = if (isSelected) Color(0xFFF2C6A4) else Color(0xFFF3E6E1)
-    val textColor = if (isSelected) FigmaTitle else FigmaSubtitle
-
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(background)
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Text(
-            text = label,
-            color = textColor,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.SemiBold
-        )
+private fun LibraryFiltersRowPreviewDark() {
+    BookechiTheme(darkTheme = true) {
+        Surface(color = BookechiTheme.colors.canvas) {
+            LibraryFiltersRow(
+                activeFilter = LibraryFilter.All,
+                onFilterChange = {},
+                contentPadding = PaddingValues(Spacing.lg)
+            )
+        }
     }
 }

@@ -48,8 +48,8 @@ fun ActivityChartCell(
             .then(
                 if (isHighlighted) {
                     Modifier.border(
-                        width = 1.5.dp,
-                        color = colors.accent,
+                        width = 2.dp,
+                        color = colors.textPrimary,
                         shape = shape
                     )
                 } else if (cellData?.intensity == ActivityIntensity.NONE) {

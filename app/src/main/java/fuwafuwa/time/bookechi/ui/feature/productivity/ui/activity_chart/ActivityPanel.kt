@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -127,7 +126,11 @@ private fun HeatmapCard(
             color = colors.textPrimary,
         )
 
-        ActivityLegend()
+        Text(
+            text = chartSubtitle(state),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textSecondary,
+        )
 
         Spacer(modifier = Modifier.height(Spacing.sm))
 
@@ -163,28 +166,9 @@ private fun periodTitle(state: ProductivityState): String {
     }
 }
 
-@Composable
-private fun ActivityLegend() {
-    val colors = BookechiTheme.colors
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = "Меньше",
-            style = MaterialTheme.typography.labelSmall,
-            color = colors.textSecondary,
-        )
-
-        Spacer(modifier = Modifier.width(Spacing.sm))
-
-        ActivityChartLegend(config = ActivityChartConfig(cornerRadius = 2.dp))
-
-        Spacer(modifier = Modifier.width(Spacing.sm))
-
-        Text(
-            text = "Больше",
-            style = MaterialTheme.typography.labelSmall,
-            color = colors.textSecondary,
-        )
-    }
+private fun chartSubtitle(state: ProductivityState): String = when (state.activityChartTab) {
+    ActivityChartTab.MONTH -> "Страницы за каждый день — чем темнее, тем больше"
+    ActivityChartTab.YEAR -> "Итог каждого месяца в страницах"
 }
 
 @Preview(name = "ActivityPanel Month Light", showBackground = true, backgroundColor = 0xFFF4ECE1)

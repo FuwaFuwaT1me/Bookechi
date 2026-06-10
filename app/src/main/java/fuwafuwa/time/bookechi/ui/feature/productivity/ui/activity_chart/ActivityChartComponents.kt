@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,28 +42,35 @@ fun ActivityChartCell(
     val shape = RoundedCornerShape(config.cornerRadius)
     val isHighlighted = highlightDate != null && cellData?.date?.localDate == highlightDate
 
-    Box(
-        modifier = modifier
-            .clip(shape)
-            .background(color)
-            .then(
-                if (isHighlighted) {
-                    Modifier.border(
-                        width = 2.dp,
-                        color = colors.textPrimary,
-                        shape = shape
-                    )
-                } else if (cellData?.intensity == ActivityIntensity.NONE) {
-                    Modifier.border(
-                        width = 1.dp,
-                        color = colors.heatZeroStroke,
-                        shape = shape
-                    )
-                } else {
-                    Modifier
-                }
+    if (isHighlighted) {
+        // «Сегодня»: цвет активности → белая прослойка (фон карточки) → чёрная обводка.
+        val innerShape = RoundedCornerShape((config.cornerRadius.value - 2f).coerceAtLeast(2f).dp)
+        Box(
+            modifier = modifier
+                .border(2.dp, colors.textPrimary, shape)
+                .padding(2.5.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(innerShape)
+                    .background(color),
             )
-    )
+        }
+    } else {
+        Box(
+            modifier = modifier
+                .clip(shape)
+                .background(color)
+                .then(
+                    if (cellData?.intensity == ActivityIntensity.NONE) {
+                        Modifier.border(1.dp, colors.heatZeroStroke, shape)
+                    } else {
+                        Modifier
+                    }
+                )
+        )
+    }
 }
 
 @Composable

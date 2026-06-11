@@ -64,7 +64,7 @@ fun YearActivityChart(
     val today = LocalDate.now()
     val currentMonth = if (today.year == year) today.monthValue else 0
 
-    val barShape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
+    val barShape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp, bottomStart = 3.dp, bottomEnd = 3.dp)
     val labelStyle = MaterialTheme.typography.labelSmall.copy(
         fontSize = 10.sp,
         letterSpacing = 0.sp,
@@ -130,18 +130,18 @@ fun YearActivityChart(
                             val highlightShape = RoundedCornerShape(
                                 topStart = 8.dp,
                                 topEnd = 8.dp,
-                                bottomStart = 3.dp,
-                                bottomEnd = 3.dp,
+                                bottomStart = 4.dp,
+                                bottomEnd = 4.dp,
                             )
                             Box(
                                 modifier = barModifier
                                     .border(1.dp, colors.textPrimary, highlightShape)
-                                    .padding(3.5.dp),
+                                    .padding(2.5.dp),
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .clip(highlightShape)
+                                        .clip(barShape)
                                         .background(barBrush),
                                 )
                             }

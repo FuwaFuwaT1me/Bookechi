@@ -125,9 +125,14 @@ fun YearActivityChart(
                             modifier = barModifier.clip(barShape).background(colors.stroke),
                         )
                         isCurrent -> {
-                            // Текущий месяц: приятная полностью скруглённая обводка
-                            // (цвет → белая прослойка → чёрная обводка).
-                            val highlightShape = RoundedCornerShape(10.dp)
+                            // Текущий месяц: асимметричная обводка — низ слегка скруглён,
+                            // верх элегантно крупнее. Цвет → белая прослойка → чёрная обводка.
+                            val highlightShape = RoundedCornerShape(
+                                topStart = 8.dp,
+                                topEnd = 8.dp,
+                                bottomStart = 3.dp,
+                                bottomEnd = 3.dp,
+                            )
                             Box(
                                 modifier = barModifier
                                     .border(1.dp, colors.textPrimary, highlightShape)
@@ -151,8 +156,12 @@ fun YearActivityChart(
 
                 Text(
                     text = MONTH_SHORT[month - 1],
-                    style = labelStyle,
-                    color = colors.textSecondary,
+                    style = if (isCurrent) {
+                        labelStyle.copy(fontWeight = FontWeight.Bold)
+                    } else {
+                        labelStyle
+                    },
+                    color = if (isCurrent) colors.textPrimary else colors.textSecondary,
                     maxLines = 1,
                     textAlign = TextAlign.Center,
                 )
@@ -179,7 +188,7 @@ private fun buildMonthlyPages(
 /** «1207» -> «1 207» (разряды тысяч пробелом). */
 private fun formatPages(n: Int): String =
     n.toString().reversed().chunked(3).joinToString(" ").reversed()
-й
+
 @Preview(name = "YearActivityChart Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
 @Composable
 private fun YearActivityChartPreviewLight() {

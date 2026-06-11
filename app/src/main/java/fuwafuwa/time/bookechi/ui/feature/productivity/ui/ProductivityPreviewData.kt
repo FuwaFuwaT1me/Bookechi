@@ -26,9 +26,10 @@ object ProductivityPreviewData {
     }
 
     fun generateYearData(year: Int = 2026): List<DailyReadingStats> {
-        // Явный разброс месячных сумм (пик — 1207, как в макете), чтобы в превью
-        // была видна зависимость насыщенности столбика от активности месяца.
-        val monthlyTotals = listOf(120, 340, 80, 520, 260, 900, 1207, 430, 180, 60, 700, 300)
+        // Форма как в макете year chart: рост к пику в Мае (1207, «Лучший месяц»),
+        // текущий месяц Июн — небольшой, Июл..Дек ещё впереди (0). Насыщенность
+        // столбика зависит от активности месяца.
+        val monthlyTotals = listOf(905, 360, 580, 700, 1207, 220, 0, 0, 0, 0, 0, 0)
         return buildList {
             monthlyTotals.forEachIndexed { index, total ->
                 val month = index + 1

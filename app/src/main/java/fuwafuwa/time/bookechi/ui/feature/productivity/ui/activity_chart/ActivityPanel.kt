@@ -20,11 +20,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
 import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
+import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ActivityChartTab
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityState
@@ -44,6 +46,9 @@ fun ActivityPanel(
     ) {
         PeriodSwitcher(state, onToggleActivityChartSwitch)
         HeatmapCard(state)
+        if (state.activityChartTab == ActivityChartTab.YEAR) {
+            YearSummaryCard(state)
+        }
     }
 }
 
@@ -152,7 +157,6 @@ private fun HeatmapCard(
                 YearActivityChart(
                     year = state.currentYear,
                     sessions = state.sessions,
-                    config = ActivityChartConfig(cornerRadius = 10.dp),
                 )
             }
         }
@@ -170,6 +174,72 @@ private fun chartSubtitle(state: ProductivityState): String = when (state.activi
     ActivityChartTab.MONTH -> "Страницы за каждый день — чем темнее, тем больше"
     ActivityChartTab.YEAR -> "Итог каждого месяца в страницах"
 }
+
+/** Карточка «Итоги года» под годовым графиком (макет year chart). */
+@Composable
+private fun YearSummaryCard(state: ProductivityState) {
+    val colors = BookechiTheme.colors
+    val monthly = IntArray(12)
+    state.sessions.forEach { session ->
+        val date = session.localDate
+        if (date.year == state.currentYear) {
+            monthly[date.monthValue - 1] += session.totalPagesRead
+        }
+    }
+    val totalPages = monthly.sum()
+    val bestMonthIndex = monthly.indices.maxByOrNull { monthly[it] } ?: 0
+    val hasData = totalPages > 0
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colors.surfaceElevated, DsShapes.card)
+            .border(BorderStroke(1.dp, colors.stroke), DsShapes.card)
+            .padding(Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        SectionLabel(text = "Итоги года")
+        Spacer(modifier = Modifier.height(Spacing.xs))
+        YearSummaryRow(label = "Всего страниц", value = formatThousands(totalPages))
+        YearSummaryRow(label = "Книг закончено", value = state.booksRead.toString())
+        YearSummaryRow(
+            label = "Лучший месяц",
+            value = if (hasData) RU_MONTHS_FULL[bestMonthIndex] else "—",
+            emphasized = true,
+        )
+    }
+}
+
+@Composable
+private fun YearSummaryRow(label: String, value: String, emphasized: Boolean = false) {
+    val colors = BookechiTheme.colors
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.textSecondary,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = if (emphasized) FontWeight.Bold else FontWeight.SemiBold,
+            ),
+            color = colors.textPrimary,
+        )
+    }
+}
+
+private val RU_MONTHS_FULL = listOf(
+    "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+)
+
+private fun formatThousands(n: Int): String =
+    n.toString().reversed().chunked(3).joinToString(" ").reversed()
 
 @Preview(name = "ActivityPanel Month Light", showBackground = true, backgroundColor = 0xFFF4ECE1)
 @Composable
@@ -197,6 +267,7 @@ private fun PreviewActivityPanelYearDark() {
             ActivityPanel(
                 state = ProductivityState(
                     sessions = ProductivityPreviewData.generateYearData(),
+                    booksRead = 12,
                     activityChartTab = ActivityChartTab.YEAR,
                     currentYear = 2026,
                     currentMonth = 6,

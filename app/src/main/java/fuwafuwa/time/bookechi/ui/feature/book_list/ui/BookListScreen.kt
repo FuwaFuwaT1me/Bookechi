@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.ui.draw.clip
+import fuwafuwa.time.bookechi.ui.theme.LocalBottomBarHeight
 import fuwafuwa.time.bookechi.ui.theme.LocalThemeToggle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -161,7 +162,7 @@ private fun BookListContent(
             start = Spacing.lg,
             end = Spacing.lg,
             top = Spacing.lg,
-            bottom = 96.dp,
+            bottom = LocalBottomBarHeight.current + Spacing.lg,
         ),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {

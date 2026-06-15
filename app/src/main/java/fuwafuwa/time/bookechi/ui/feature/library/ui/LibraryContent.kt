@@ -29,6 +29,7 @@ import fuwafuwa.time.bookechi.ui.feature.library.mvi.AddingBookDraft
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.LibraryAction
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.LibraryState
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
+import fuwafuwa.time.bookechi.ui.theme.LocalBottomBarHeight
 
 @Composable
 fun LibraryContent(
@@ -119,6 +120,9 @@ fun LibraryContent(
                         onBookClick = { book ->
                             onAction(LibraryAction.NavigateToBookDetails(book))
                         },
+                        contentPadding = PaddingValues(
+                            bottom = LocalBottomBarHeight.current + Spacing.lg,
+                        ),
                     )
                 }
             }
@@ -129,7 +133,7 @@ fun LibraryContent(
                 onClick = { onAction(LibraryAction.OpenAddBookSheet) },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(bottom = Spacing.xxl)
+                    .padding(bottom = LocalBottomBarHeight.current + Spacing.md)
             )
         }
 

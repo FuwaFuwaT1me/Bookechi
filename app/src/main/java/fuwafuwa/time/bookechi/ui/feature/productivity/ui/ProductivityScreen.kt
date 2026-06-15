@@ -44,6 +44,7 @@ import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityState
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.ProductivityViewModel
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart.ActivityPanel
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
+import fuwafuwa.time.bookechi.ui.theme.LocalBottomBarHeight
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 
@@ -139,7 +140,7 @@ private fun ProductivityScreenPrivate(
             )
         }
 
-        Spacer(Modifier.height(82.dp))
+        Spacer(Modifier.height(LocalBottomBarHeight.current + Spacing.lg))
     }
 }
 

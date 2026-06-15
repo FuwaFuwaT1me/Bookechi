@@ -7,8 +7,10 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 /* ============================================================================
  * Семантические токены приложения, которых нет в Material ColorScheme
@@ -95,6 +97,13 @@ val LocalBookechiColors = staticCompositionLocalOf { LightBookechiColors }
 
 /** Колбэк переключения светлой/тёмной темы, прокидывается из MainActivity. */
 val LocalThemeToggle = staticCompositionLocalOf<() -> Unit> { {} }
+
+/**
+ * Высота плавающего нижнего бара (с системным инсетом), измеряется в MainActivity.
+ * Скроллируемые экраны используют её как нижний contentPadding, чтобы последние
+ * элементы не уходили под бар, а контент при этом скроллился ПОД ним (виден в углах).
+ */
+val LocalBottomBarHeight = compositionLocalOf { 0.dp }
 
 /** Доступ к семантическим токенам: BookechiTheme.colors.* */
 object BookechiTheme {

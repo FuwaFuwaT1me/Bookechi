@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -431,18 +430,20 @@ private fun ActiveBookHeroCard(
             .padding(Spacing.xl),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
+        val coverWidth = 96.dp
+        val coverHeight = coverWidth * 1.5f // обложка 2:3
         Row {
             BookCover(
                 coverPath = book.coverPath,
                 title = book.name,
                 author = book.author,
-                width = 96.dp,
+                width = coverWidth,
             )
             Spacer(Modifier.size(Spacing.lg))
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight(),
+                    .height(coverHeight),
             ) {
                 Text(
                     text = book.name,

@@ -76,26 +76,22 @@ fun BookCover(
                     .background(coverTintFor(title))
                     .padding(Spacing.md),
                 verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.Start,
             ) {
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = Color.White.copy(alpha = 0.95f),
-                        textAlign = TextAlign.Center,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                // Название — у верхнего-левого края обложки (как на книжной обложке).
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color.White.copy(alpha = 0.95f),
+                    textAlign = TextAlign.Start,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 Text(
                     text = author.uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White.copy(alpha = 0.75f),
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Start,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

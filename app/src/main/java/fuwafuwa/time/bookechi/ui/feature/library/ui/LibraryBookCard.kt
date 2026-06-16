@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -24,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,9 +44,8 @@ private val TitleReservedHeight = 40.dp
 // все ячейки сетки были одинаковой высоты.
 private val MetaReservedHeight = 28.dp
 
-// Размер круга с сердечком поверх обложки.
-private val FavoriteBadgeSize = 28.dp
-private val FavoriteIconSize = 16.dp
+// Размер иконки-сердечка поверх обложки.
+private val HeartIconSize = 20.dp
 
 /**
  * Карточка книги в сетке «Библиотека».
@@ -69,8 +68,8 @@ fun LibraryBookCard(
             .clip(DsShapes.card)
             .background(colors.surfaceElevated, DsShapes.card)
             .clickable(onClick = onClick)
-            .padding(Spacing.sm),
-        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+            .padding(Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
         // Обложка во всю ширину карточки + сердечко в правом верхнем углу.
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -82,31 +81,29 @@ fun LibraryBookCard(
                 width = null,
             )
 
-            Box(
+            // Сердечко — голая иконка поверх обложки (как в макете), без подложки-кружка.
+            Icon(
+                imageVector = if (book.isFavorite) {
+                    Icons.Default.Favorite
+                } else {
+                    Icons.Default.FavoriteBorder
+                },
+                contentDescription = null,
+                tint = if (book.isFavorite) colors.accent else colors.textSecondary,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(Spacing.sm)
-                    .size(FavoriteBadgeSize)
-                    .background(colors.surface.copy(alpha = 0.85f), CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = if (book.isFavorite) {
-                        Icons.Default.Favorite
-                    } else {
-                        Icons.Default.FavoriteBorder
-                    },
-                    contentDescription = null,
-                    tint = colors.accent,
-                    modifier = Modifier.size(FavoriteIconSize),
-                )
-            }
+                    .size(HeartIconSize),
+            )
         }
 
         // Название: 2 строки с зарезервированной высотой (одинаковый низ у карточек).
         Text(
             text = book.name,
-            style = MaterialTheme.typography.titleSmall.copy(fontFamily = FontFamily.Serif),
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+            ),
             color = colors.textPrimary,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
@@ -149,8 +146,8 @@ fun LibraryBookCard(
                     )
                     Text(
                         text = "${(progress * 100).toInt()}%",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = colors.textSecondary,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.accentDeep,
                     )
                 }
             } else {

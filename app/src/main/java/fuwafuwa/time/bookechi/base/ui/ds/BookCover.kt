@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -16,8 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,31 +76,58 @@ fun BookCover(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            Column(
+            // Матовый тёплый фон с вертикальным градиентом (светлее сверху → темнее
+            // снизу) + тонкая светлая линия-«корешок» слева, как в макете.
+            val base = coverTintFor(title)
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(coverTintFor(title))
-                    .padding(Spacing.md),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.Start,
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                lerp(base, Color.White, 0.12f),
+                                lerp(base, Color.Black, 0.16f),
+                            )
+                        )
+                    ),
             ) {
-                // Название — у верхнего-левого края обложки (как на книжной обложке).
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.White.copy(alpha = 0.95f),
-                    textAlign = TextAlign.Start,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
+                // Линия-«корешок» (имитация сгиба переплёта).
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .offset(x = 9.dp)
+                        .width(2.dp)
+                        .fillMaxHeight()
+                        .background(Color.White.copy(alpha = 0.12f)),
                 )
-                Text(
-                    text = author.uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.75f),
-                    textAlign = TextAlign.Start,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(Spacing.md),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.Start,
+                ) {
+                    // Название — у верхнего-левого края (serif bold, как на обложке).
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontFamily = FontFamily.Serif,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        color = Color.White.copy(alpha = 0.95f),
+                        textAlign = TextAlign.Start,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = author.uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.75f),
+                        textAlign = TextAlign.Start,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
     }

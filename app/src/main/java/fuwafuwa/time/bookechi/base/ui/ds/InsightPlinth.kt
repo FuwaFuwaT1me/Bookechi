@@ -16,31 +16,38 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
 /**
- * Инсайт-плашка на sageSoft (скругление 16): иконка огонька accent + текст titleSmall textPrimary.
+ * Инсайт/нудж-плашка (скругление 16): иконка + текст titleSmall.
+ * По умолчанию — sageSoft с огоньком (позитивный инсайт). Цвет фона/иконку можно
+ * переопределить (например тёплый нудж «ещё не отмечено»).
  */
 @Composable
 fun InsightPlinth(
     text: String,
     modifier: Modifier = Modifier,
+    backgroundColor: Color = BookechiTheme.colors.sageSoft,
+    icon: ImageVector = Icons.Default.LocalFireDepartment,
+    iconTint: Color = BookechiTheme.colors.accent,
 ) {
     val colors = BookechiTheme.colors
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(colors.sageSoft, DsShapes.plinth)
+            .background(backgroundColor, DsShapes.plinth)
             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = Icons.Default.LocalFireDepartment,
+            imageVector = icon,
             contentDescription = null,
-            tint = colors.accent,
+            tint = iconTint,
             modifier = Modifier.size(20.dp),
         )
         Text(

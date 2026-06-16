@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.ui.draw.clip
 import fuwafuwa.time.bookechi.ui.theme.LocalBottomBarHeight
@@ -502,12 +503,14 @@ private fun ActiveBookHeroCard(
             }
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-            QuickLogChip(text = "+ 10", onClick = onQuickLog)
-            QuickLogChip(text = "+ 25", onClick = onQuickLog)
-            QuickLogChip(text = "+ 50", onClick = onQuickLog)
-            QuickLogChip(text = "+", onClick = onQuickLog)
-        }
+        // Чипы быстрого лога временно убраны — прогресс отмечается кнопкой ниже.
+        // Оставлены в коде на будущее: для возврата раскомментировать.
+        // Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        //     QuickLogChip(text = "+ 10", onClick = onQuickLog)
+        //     QuickLogChip(text = "+ 25", onClick = onQuickLog)
+        //     QuickLogChip(text = "+ 50", onClick = onQuickLog)
+        //     QuickLogChip(text = "+", onClick = onQuickLog)
+        // }
 
         if (markedToday) {
             Text(
@@ -517,7 +520,12 @@ private fun ActiveBookHeroCard(
             )
             SecondaryButton(text = "Добавить ещё страницы", onClick = onMarkProgress)
         } else {
-            InsightPlinth(text = "Сегодняшние страницы ещё не отмечены — это займёт минуту")
+            InsightPlinth(
+                text = "Сегодняшние страницы ещё не отмечены — это займёт минуту",
+                backgroundColor = colors.accentSoft,
+                icon = Icons.Outlined.Edit,
+                iconTint = colors.accentDeep,
+            )
             PrimaryButton(text = "Отметить прогресс", onClick = onMarkProgress)
         }
     }

@@ -382,9 +382,13 @@ private fun ProgressCard(
 @Composable
 private fun ReadingHistorySparkline(recentSessionPages: List<Int>) {
     val colors = BookechiTheme.colors
-    // TODO: данные из ReadingSessionRepository.getSessionsForBook(bookId); пусто → дефолтный плейсхолдер.
-    val pages = recentSessionPages.takeLast(10)
-    val maxPages = (pages.maxOrNull() ?: 0).coerceAtLeast(1)
+    // TODO: данные из ReadingSessionRepository.getSessionsForBook(bookId).
+    val days = 10
+    val recent = recentSessionPages.takeLast(days)
+    val maxPages = (recent.maxOrNull() ?: 0).coerceAtLeast(1)
+    // Всегда окно из `days` дней: недостающие слева — пустые дни, чтобы при малом
+    // числе сессий столбик не растягивался на всю ширину.
+    val slots: List<Int> = List(days - recent.size) { 0 } + recent
 
     Column(
         modifier = Modifier
@@ -394,13 +398,19 @@ private fun ReadingHistorySparkline(recentSessionPages: List<Int>) {
             .border(1.dp, colors.stroke, DsShapes.card)
             .padding(Spacing.lg)
     ) {
-        if (pages.isEmpty()) {
+        if (recent.isEmpty()) {
             Text(
                 text = "Пока нет записей о чтении этой книги.",
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.textSecondary
             )
         } else {
+            val barShape = RoundedCornerShape(
+                topStart = 6.dp,
+                topEnd = 6.dp,
+                bottomStart = 4.dp,
+                bottomEnd = 4.dp
+            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -408,16 +418,26 @@ private fun ReadingHistorySparkline(recentSessionPages: List<Int>) {
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
-                pages.forEach { value ->
-                    val ratio = value.toFloat() / maxPages
-                    val heatColor = heatColorFor(ratio, colors.heatmap)
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(ratio.coerceIn(0.08f, 1f))
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(heatColor)
-                    )
+                slots.forEach { value ->
+                    if (value <= 0) {
+                        // Пустой день — тонкий стаб у базовой линии.
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(6.dp)
+                                .clip(barShape)
+                                .background(colors.stroke)
+                        )
+                    } else {
+                        val ratio = value.toFloat() / maxPages
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(ratio.coerceIn(0.12f, 1f))
+                                .clip(barShape)
+                                .background(heatColorFor(ratio, colors.heatmap))
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(Spacing.md))
@@ -426,7 +446,7 @@ private fun ReadingHistorySparkline(recentSessionPages: List<Int>) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Последние ${pages.size} дней",
+                    text = "Последние $days дней",
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textSecondary
                 )

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -438,7 +439,11 @@ private fun ActiveBookHeroCard(
                 width = 96.dp,
             )
             Spacer(Modifier.size(Spacing.lg))
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+            ) {
                 Text(
                     text = book.name,
                     style = MaterialTheme.typography.titleLarge,
@@ -454,7 +459,8 @@ private fun ActiveBookHeroCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.height(Spacing.md))
+                // Выталкиваем «стр. X/Y» + прогресс к нижней стороне обложки.
+                Spacer(Modifier.weight(1f))
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         text = "стр. ",

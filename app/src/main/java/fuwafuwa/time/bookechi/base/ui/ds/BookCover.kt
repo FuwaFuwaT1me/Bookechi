@@ -95,7 +95,7 @@ fun BookCover(
                 Box(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .offset(x = 9.dp)
+                        .offset(x = 8.dp)
                         .width(2.dp)
                         .fillMaxHeight()
                         .background(Color.White.copy(alpha = 0.12f)),
@@ -103,7 +103,12 @@ fun BookCover(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(Spacing.md),
+                        .padding(
+                            start = Spacing.lg,
+                            top = Spacing.sm,
+                            bottom = Spacing.sm,
+                            end = Spacing.sm,
+                        ),
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.Start,
                 ) {

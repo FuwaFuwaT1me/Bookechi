@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,9 +17,10 @@ import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
 /**
- * Сетка библиотеки: 2 фиксированные колонки, равные интервалы по обеим осям.
- * Карточки имеют детерминированную высоту (см. [LibraryBookCard]), поэтому
- * ячейки в ряду выравниваются по низу и раскладка не «едет».
+ * Сетка библиотеки (masonry): 2 колонки — Fixed(2) сам делит доступную ширину
+ * пополам минус интервал/паддинги. Карточки разной высоты укладываются «кладкой»
+ * без выравнивания по рядам, поэтому [LibraryBookCard] может иметь произвольную
+ * высоту (без фиксированных резервов).
  */
 @Composable
 fun LibraryBooksGrid(
@@ -28,10 +29,10 @@ fun LibraryBooksGrid(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(bottom = 96.dp),
 ) {
-    LazyVerticalGrid(
+    LazyVerticalStaggeredGrid(
         modifier = modifier.fillMaxSize(),
-        columns = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        columns = StaggeredGridCells.Fixed(2),
+        verticalItemSpacing = Spacing.md,
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         contentPadding = contentPadding,
     ) {

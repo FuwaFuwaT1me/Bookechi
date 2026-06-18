@@ -69,16 +69,16 @@ fun LibraryBookCard(
             .background(colors.surfaceElevated, DsShapes.card)
             .clickable(onClick = onClick)
             .padding(Spacing.md),
-        verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         // Обложка во всю ширину карточки + сердечко в правом верхнем углу.
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth()) {
             BookCover(
                 coverPath = book.coverPath,
                 title = book.name,
                 author = book.author,
-                modifier = Modifier.fillMaxWidth(),
                 width = null,
+                modifier = Modifier.weight(1f),
             )
 
             // Сердечко — голая иконка поверх обложки (как в макете), без подложки-кружка.
@@ -91,7 +91,7 @@ fun LibraryBookCard(
                 contentDescription = null,
                 tint = if (book.isFavorite) colors.accent else colors.textSecondary,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
+                    .align(Alignment.Top)
                     .padding(Spacing.sm)
                     .size(HeartIconSize),
             )
@@ -125,8 +125,7 @@ fun LibraryBookCard(
         // Мета-строка фиксированной высоты: прогресс для «Читаю», иначе статус-чип.
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(MetaReservedHeight),
+                .fillMaxWidth(),
             contentAlignment = Alignment.CenterStart,
         ) {
             if (book.readingStatus == ReadingStatus.Reading) {

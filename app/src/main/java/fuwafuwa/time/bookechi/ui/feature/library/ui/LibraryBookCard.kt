@@ -123,7 +123,7 @@ fun LibraryBookCard(
         Text(
             text = book.name,
             style = MaterialTheme.typography.titleSmall.copy(
-                fontFamily = FontFamily.Serif,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Bold,
             ),
             color = colors.textPrimary,

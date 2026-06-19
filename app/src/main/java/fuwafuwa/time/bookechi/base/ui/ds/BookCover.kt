@@ -125,7 +125,7 @@ fun BookCover(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleSmall.copy(
-                            fontFamily = FontFamily.Serif,
+                            fontFamily = FontFamily.SansSerif,
                             fontWeight = FontWeight.Bold,
                         ),
                         color = Color.White.copy(alpha = 0.95f),

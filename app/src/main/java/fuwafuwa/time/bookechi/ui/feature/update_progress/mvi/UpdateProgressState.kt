@@ -8,6 +8,7 @@ data class UpdateProgressState(
     val startPages: Int = 0,
     val updatedInputPages: Int = 0,
     val readingTimeMinutes: Int = 0,
+    val isReadingTimeSheetOpen: Boolean = false,
     val isSaving: Boolean = false,
     val error: String? = null
 ) : State

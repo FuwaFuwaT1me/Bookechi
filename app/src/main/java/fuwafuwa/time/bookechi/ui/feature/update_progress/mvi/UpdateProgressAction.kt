@@ -10,5 +10,8 @@ sealed interface UpdateProgressAction : Action {
     data class UpdatePageInputByPreset(val value: Int) : UpdateProgressAction
     data class UpdateReadingTime(val value: Int) : UpdateProgressAction
 
+    data object OpenReadingTimeSheet : UpdateProgressAction
+    data object CloseReadingTimeSheet : UpdateProgressAction
+
     data class SaveChanges(val value: Int) : UpdateProgressAction
 }

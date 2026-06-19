@@ -7,14 +7,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /*
- * Типографика Bookechi: тёплый editorial-стиль.
- * Заголовки и крупные числа — serif; тело и подписи — sans.
- *
- * Пока используется системный serif (Noto Serif) — это даёт нужный editorial-тон
- * без загрузки ассетов. Позже можно заменить на Fraunces/Lora через
- * downloadable Google Fonts (androidx.compose.ui:ui-text-google-fonts).
+ * Типографика Bookechi: ровный, чёткий sans-serif без засечек — единый простой
+ * шрифт для заголовков, крупных чисел и тела (различаются только весом).
  */
-private val Heading = FontFamily.Serif
+private val Heading = FontFamily.SansSerif
 private val Body = FontFamily.SansSerif
 
 val Typography = Typography(

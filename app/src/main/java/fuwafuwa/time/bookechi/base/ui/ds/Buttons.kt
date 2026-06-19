@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +38,7 @@ fun PrimaryButton(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 54.dp),
-        shape = CircleShape,
+        shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = colors.accent,
             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -49,7 +50,10 @@ fun PrimaryButton(
             vertical = Spacing.md,
         ),
     ) {
-        Text(text = text, style = MaterialTheme.typography.labelLarge)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium
+        )
     }
 }
 
@@ -68,7 +72,7 @@ fun SecondaryButton(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 54.dp),
-        shape = CircleShape,
+        shape = RoundedCornerShape(16.dp),
         border = BorderStroke(1.dp, colors.stroke),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = colors.surface,
@@ -92,7 +96,7 @@ private fun ButtonsPreviewLight() {
                 modifier = Modifier.padding(Spacing.lg),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                PrimaryButton(text = "Отметить прогресс", onClick = {})
+                PrimaryButton(text = "Обновить прогресс", onClick = {})
                 PrimaryButton(text = "Недоступно", onClick = {}, enabled = false)
                 SecondaryButton(text = "Отмена", onClick = {})
             }
@@ -109,7 +113,7 @@ private fun ButtonsPreviewDark() {
                 modifier = Modifier.padding(Spacing.lg),
                 verticalArrangement = Arrangement.spacedBy(Spacing.md),
             ) {
-                PrimaryButton(text = "Отметить прогресс", onClick = {})
+                PrimaryButton(text = "Обновить прогресс", onClick = {})
                 PrimaryButton(text = "Недоступно", onClick = {}, enabled = false)
                 SecondaryButton(text = "Отмена", onClick = {})
             }

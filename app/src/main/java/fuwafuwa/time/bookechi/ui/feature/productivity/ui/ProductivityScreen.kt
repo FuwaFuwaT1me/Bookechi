@@ -28,11 +28,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fuwafuwa.time.bookechi.BuildConfig
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.InsightPlinth
 import fuwafuwa.time.bookechi.base.ui.ds.MetricCard
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
@@ -149,12 +152,12 @@ private fun Header() {
     val colors = BookechiTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
         Text(
-            text = "Статистика чтения",
+            text = stringResource(R.string.prod_header_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = colors.textSecondary,
         )
         Text(
-            text = "Продуктивность",
+            text = stringResource(R.string.prod_header_title),
             style = MaterialTheme.typography.headlineLarge,
             color = colors.textPrimary,
         )
@@ -178,12 +181,12 @@ private fun MetricsGrid(state: ProductivityState) {
         ) {
             MetricCard(
                 value = books,
-                label = "книг прочитано",
+                label = stringResource(R.string.prod_metric_books_read),
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             )
             MetricCard(
                 value = pages,
-                label = "страниц прочитано",
+                label = stringResource(R.string.prod_metric_pages_read),
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             )
         }
@@ -193,12 +196,12 @@ private fun MetricsGrid(state: ProductivityState) {
         ) {
             MetricCard(
                 value = streak,
-                label = "дней без перерывов",
+                label = pluralStringResource(R.plurals.prod_metric_streak_label, state.dayStreak),
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             )
             MetricCard(
                 value = average,
-                label = "стр. в день в среднем",
+                label = stringResource(R.string.prod_metric_avg_per_day),
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             )
         }
@@ -208,7 +211,14 @@ private fun MetricsGrid(state: ProductivityState) {
 @Composable
 private fun Insight(state: ProductivityState) {
     if (state.dayStreak <= 0) return
-    InsightPlinth(text = "Личный рекорд серии: ${state.dayStreak} дней")
+    InsightPlinth(
+        text = pluralStringResource(
+            R.plurals.prod_insight_streak_record,
+            state.dayStreak,
+            state.dayStreak,
+        ),
+        backgroundColor = BookechiTheme.colors.accentSoft,
+    )
 }
 
 /** Форматирует число с пробелом как разделителем тысяч: 3480 -> «3 480». */
@@ -224,23 +234,25 @@ private fun formatAverage(value: Float): String {
     return String.format("%.1f", value).replace('.', ',')
 }
 
+@Composable
 private fun russianMonthName(month: Int): String = when (month) {
-    1 -> "Январь"
-    2 -> "Февраль"
-    3 -> "Март"
-    4 -> "Апрель"
-    5 -> "Май"
-    6 -> "Июнь"
-    7 -> "Июль"
-    8 -> "Август"
-    9 -> "Сентябрь"
-    10 -> "Октябрь"
-    11 -> "Ноябрь"
-    12 -> "Декабрь"
+    1 -> stringResource(R.string.prod_month_january)
+    2 -> stringResource(R.string.prod_month_february)
+    3 -> stringResource(R.string.prod_month_march)
+    4 -> stringResource(R.string.prod_month_april)
+    5 -> stringResource(R.string.prod_month_may)
+    6 -> stringResource(R.string.prod_month_june)
+    7 -> stringResource(R.string.prod_month_july)
+    8 -> stringResource(R.string.prod_month_august)
+    9 -> stringResource(R.string.prod_month_september)
+    10 -> stringResource(R.string.prod_month_october)
+    11 -> stringResource(R.string.prod_month_november)
+    12 -> stringResource(R.string.prod_month_december)
     else -> ""
 }
 
 /** «Июнь 2026». Если месяц вне диапазона — только год. */
+@Composable
 fun russianMonthYear(month: Int, year: Int): String {
     val name = russianMonthName(month)
     return if (name.isEmpty()) "$year" else "$name $year"

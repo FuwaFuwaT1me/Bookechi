@@ -1,29 +1,49 @@
 package fuwafuwa.time.bookechi.ui.feature.productivity.ui.activity_chart
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
 import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
 import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
@@ -46,7 +66,11 @@ fun ActivityPanel(
     ) {
         PeriodSwitcher(state, onToggleActivityChartSwitch)
         HeatmapCard(state)
-        if (state.activityChartTab == ActivityChartTab.YEAR) {
+        AnimatedVisibility(
+            visible = state.activityChartTab == ActivityChartTab.YEAR,
+            enter = fadeIn(tween(220)) + expandVertically(tween(280)),
+            exit = fadeOut(tween(160)) + shrinkVertically(tween(220)),
+        ) {
             YearSummaryCard(state)
         }
     }
@@ -62,51 +86,63 @@ private fun PeriodSwitcher(
     onSwitch: (Int) -> Unit
 ) {
     val colors = BookechiTheme.colors
-    val tabs = listOf("Месяц", "Год")
+    val tabs = listOf(
+        stringResource(R.string.prod_tab_month),
+        stringResource(R.string.prod_tab_year),
+    )
+    val selectedIndex = state.activityChartTab.ordinal
 
-    Row(
+    // Доля смещения бегунка: 0 — левый сегмент, 1 — правый. Анимируется.
+    val thumbFraction by animateFloatAsState(
+        targetValue = selectedIndex.toFloat(),
+        animationSpec = tween(durationMillis = 260),
+        label = "thumbFraction",
+    )
+
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
             .background(colors.chipBg, DsShapes.pill)
             .padding(Spacing.xs),
-        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
-        tabs.forEachIndexed { index, title ->
-            val selected = state.activityChartTab.ordinal == index
-            val segmentBg by animateColorAsState(
-                targetValue = if (selected) colors.surfaceElevated else colors.chipBg,
-                label = "segmentBg"
-            )
-            val textColor by animateColorAsState(
-                targetValue = if (selected) colors.accentDeep else colors.textSecondary,
-                label = "segmentText"
-            )
+        val thumbWidth = maxWidth / tabs.size
 
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .height(40.dp)
-                    .clip(DsShapes.pill)
-                    .background(segmentBg)
-                    .then(
-                        if (selected) {
-                            Modifier.border(BorderStroke(1.dp, colors.stroke), DsShapes.pill)
-                        } else {
-                            Modifier
-                        }
-                    )
-                    .clickable { onSwitch(index) },
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = textColor,
-                    textAlign = TextAlign.Center,
+        // Скользящий бегунок под активным сегментом.
+        Box(
+            modifier = Modifier
+                .width(thumbWidth)
+                .fillMaxHeight()
+                .offset(x = thumbWidth * thumbFraction)
+                .clip(DsShapes.pill)
+                .background(colors.surfaceElevated)
+                .border(BorderStroke(1.dp, colors.stroke), DsShapes.pill),
+        )
+
+        // Подписи поверх бегунка.
+        Row(modifier = Modifier.fillMaxSize()) {
+            tabs.forEachIndexed { index, title ->
+                val textColor by animateColorAsState(
+                    targetValue = if (selectedIndex == index) colors.accentDeep else colors.textSecondary,
+                    label = "segmentText",
                 )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) { onSwitch(index) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = textColor,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
     }
@@ -139,40 +175,51 @@ private fun HeatmapCard(
 
         Spacer(modifier = Modifier.height(Spacing.sm))
 
-        when (state.activityChartTab) {
-            ActivityChartTab.MONTH -> {
-                MonthActivityChart(
-                    year = state.currentYear,
-                    month = state.currentMonth,
-                    sessions = state.sessions,
-                    config = ActivityChartConfig(
-                        showSpacing = true,
-                        itemHorizontalSpacing = Spacing.xs,
-                        itemVerticalSpacing = Spacing.xs,
-                        cornerRadius = 6.dp,
-                    ),
-                )
-            }
-            ActivityChartTab.YEAR -> {
-                YearActivityChart(
-                    year = state.currentYear,
-                    sessions = state.sessions,
-                )
+        AnimatedContent(
+            targetState = state.activityChartTab,
+            transitionSpec = {
+                (fadeIn(tween(220)) togetherWith fadeOut(tween(180)))
+                    .using(SizeTransform(clip = false) { _, _ -> tween(300) })
+            },
+            label = "activityChart",
+        ) { tab ->
+            when (tab) {
+                ActivityChartTab.MONTH -> {
+                    MonthActivityChart(
+                        year = state.currentYear,
+                        month = state.currentMonth,
+                        sessions = state.sessions,
+                        config = ActivityChartConfig(
+                            showSpacing = true,
+                            itemHorizontalSpacing = Spacing.xs,
+                            itemVerticalSpacing = Spacing.xs,
+                            cornerRadius = 6.dp,
+                        ),
+                    )
+                }
+                ActivityChartTab.YEAR -> {
+                    YearActivityChart(
+                        year = state.currentYear,
+                        sessions = state.sessions,
+                    )
+                }
             }
         }
     }
 }
 
+@Composable
 private fun periodTitle(state: ProductivityState): String {
     return when (state.activityChartTab) {
         ActivityChartTab.MONTH -> russianMonthYear(state.currentMonth, state.currentYear)
-        ActivityChartTab.YEAR -> "${state.currentYear} год"
+        ActivityChartTab.YEAR -> stringResource(R.string.prod_year_title, state.currentYear)
     }
 }
 
+@Composable
 private fun chartSubtitle(state: ProductivityState): String = when (state.activityChartTab) {
-    ActivityChartTab.MONTH -> "Страницы за каждый день — чем темнее, тем больше"
-    ActivityChartTab.YEAR -> "Итог каждого месяца в страницах"
+    ActivityChartTab.MONTH -> stringResource(R.string.prod_subtitle_month)
+    ActivityChartTab.YEAR -> stringResource(R.string.prod_subtitle_year)
 }
 
 /** Карточка «Итоги года» под годовым графиком (макет year chart). */
@@ -198,13 +245,19 @@ private fun YearSummaryCard(state: ProductivityState) {
             .padding(Spacing.lg),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        SectionLabel(text = "Итоги года")
+        SectionLabel(text = stringResource(R.string.prod_year_summary_title))
         Spacer(modifier = Modifier.height(Spacing.xs))
-        YearSummaryRow(label = "Всего страниц", value = formatThousands(totalPages))
-        YearSummaryRow(label = "Книг закончено", value = state.booksRead.toString())
         YearSummaryRow(
-            label = "Лучший месяц",
-            value = if (hasData) RU_MONTHS_FULL[bestMonthIndex] else "—",
+            label = stringResource(R.string.prod_year_total_pages),
+            value = formatThousands(totalPages),
+        )
+        YearSummaryRow(
+            label = stringResource(R.string.prod_year_books_finished),
+            value = state.booksRead.toString(),
+        )
+        YearSummaryRow(
+            label = stringResource(R.string.prod_year_best_month),
+            value = if (hasData) fullMonthName(bestMonthIndex) else "—",
             emphasized = true,
         )
     }
@@ -233,10 +286,23 @@ private fun YearSummaryRow(label: String, value: String, emphasized: Boolean = f
     }
 }
 
-private val RU_MONTHS_FULL = listOf(
-    "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
-)
+/** Полное имя месяца по индексу 0..11. */
+@Composable
+private fun fullMonthName(index: Int): String = when (index) {
+    0 -> stringResource(R.string.prod_month_january)
+    1 -> stringResource(R.string.prod_month_february)
+    2 -> stringResource(R.string.prod_month_march)
+    3 -> stringResource(R.string.prod_month_april)
+    4 -> stringResource(R.string.prod_month_may)
+    5 -> stringResource(R.string.prod_month_june)
+    6 -> stringResource(R.string.prod_month_july)
+    7 -> stringResource(R.string.prod_month_august)
+    8 -> stringResource(R.string.prod_month_september)
+    9 -> stringResource(R.string.prod_month_october)
+    10 -> stringResource(R.string.prod_month_november)
+    11 -> stringResource(R.string.prod_month_december)
+    else -> ""
+}
 
 private fun formatThousands(n: Int): String =
     n.toString().reversed().chunked(3).joinToString(" ").reversed()

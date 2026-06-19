@@ -35,10 +35,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.book.NewBookCover
 import fuwafuwa.time.bookechi.base.ui.ds.BookCover
 import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
@@ -122,7 +125,11 @@ private fun AddBookScreenV2Content(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (isSearch) "Найти книгу" else "Добавить книгу",
+                            text = if (isSearch) {
+                                stringResource(R.string.addbook_title_search)
+                            } else {
+                                stringResource(R.string.addbook_title_add)
+                            },
                             color = colors.textPrimary,
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.weight(1f)
@@ -141,7 +148,7 @@ private fun AddBookScreenV2Content(
                                     )
                                 } else {
                                     Text(
-                                        text = "Сохранить",
+                                        text = stringResource(R.string.addbook_save),
                                         color = if (isRequiredInputValid) {
                                             colors.accent
                                         } else {
@@ -156,7 +163,7 @@ private fun AddBookScreenV2Content(
 
                     if (!isSearch && state.showValidationErrors && !isRequiredInputValid) {
                         Text(
-                            text = "Заполните обязательные поля",
+                            text = stringResource(R.string.addbook_fill_required_fields),
                             color = colors.fire,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier
@@ -198,14 +205,14 @@ private fun androidx.compose.foundation.lazy.LazyListScope.searchStep(
         WarmTextField(
             value = state.searchQuery,
             onValueChange = { onAction(AddBookAction.UpdateSearchQuery(it)) },
-            label = "Поиск",
-            placeholder = "Найти по названию или автору",
+            label = stringResource(R.string.addbook_search_label),
+            placeholder = stringResource(R.string.addbook_search_placeholder),
         )
     }
 
     item { Spacer(modifier = Modifier.height(Spacing.lg)) }
 
-    item { SectionLabel(text = "Результаты") }
+    item { SectionLabel(text = stringResource(R.string.addbook_results)) }
 
     item { Spacer(modifier = Modifier.height(Spacing.sm)) }
 
@@ -245,7 +252,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.searchStep(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
-                text = "Ввести вручную",
+                text = stringResource(R.string.addbook_enter_manually),
                 color = BookechiTheme.colors.accent,
                 style = MaterialTheme.typography.labelLarge,
             )
@@ -286,7 +293,12 @@ private fun SearchResultRow(
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "${result.author} · ${result.pages} стр.",
+                text = pluralStringResource(
+                    R.plurals.addbook_search_result_subtitle,
+                    result.pages,
+                    result.pages,
+                    result.author,
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.textSecondary,
             )
@@ -303,7 +315,7 @@ private fun SearchResultRow(
         ) {
             Icon(
                 imageVector = Icons.Filled.Add,
-                contentDescription = "Добавить",
+                contentDescription = stringResource(R.string.addbook_add),
                 tint = androidx.compose.ui.graphics.Color.White,
                 modifier = Modifier.size(20.dp),
             )
@@ -333,15 +345,15 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = if (state.coverFromSearch && state.bookCoverPath == null) {
-                            "Обложка найдена"
+                            stringResource(R.string.addbook_cover_found)
                         } else {
-                            "Обложка"
+                            stringResource(R.string.addbook_cover)
                         },
                         color = colors.textPrimary,
                         style = MaterialTheme.typography.titleSmall,
                     )
                     Text(
-                        text = "Нажмите, чтобы выбрать",
+                        text = stringResource(R.string.addbook_cover_tap_to_pick),
                         color = colors.textSecondary,
                         style = MaterialTheme.typography.bodySmall,
                     )
@@ -356,7 +368,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Сменить",
+                        text = stringResource(R.string.addbook_change),
                         color = colors.accent,
                         style = MaterialTheme.typography.bodySmall,
                     )
@@ -372,7 +384,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
                 if (state.bookCoverPath == null && state.coverFromSearch) {
                     BookCover(
                         coverPath = null,
-                        title = state.bookName.ifEmpty { "Обложка" },
+                        title = state.bookName.ifEmpty { stringResource(R.string.addbook_cover) },
                         author = state.bookAuthor,
                         width = 120.dp,
                     )
@@ -394,7 +406,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
                 ) {
                     TextButton(onClick = { onAction(AddBookAction.ClearBookCover) }) {
                         Text(
-                            text = "Удалить обложку",
+                            text = stringResource(R.string.addbook_remove_cover),
                             color = colors.textSecondary,
                             style = MaterialTheme.typography.bodySmall,
                         )
@@ -412,13 +424,13 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
             WarmTextField(
                 value = state.bookName,
                 onValueChange = { onAction(AddBookAction.UpdateBookName(it)) },
-                label = "Название книги",
-                placeholder = "Введите название",
+                label = stringResource(R.string.addbook_book_name_label),
+                placeholder = stringResource(R.string.addbook_book_name_placeholder),
             )
             if (bookNameHasError) {
                 Spacer(modifier = Modifier.height(Spacing.xs))
                 Text(
-                    text = "Введите название книги",
+                    text = stringResource(R.string.addbook_book_name_error),
                     color = colors.fire,
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -429,8 +441,8 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
             WarmTextField(
                 value = state.bookAuthor,
                 onValueChange = { onAction(AddBookAction.UpdateBookAuthor(it)) },
-                label = "Автор",
-                placeholder = "Введите автора",
+                label = stringResource(R.string.addbook_author_label),
+                placeholder = stringResource(R.string.addbook_author_placeholder),
             )
         }
     }
@@ -440,16 +452,16 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
     // Статус чтения + страницы
     item {
         WarmCard {
-            SectionLabel(text = "Статус")
+            SectionLabel(text = stringResource(R.string.addbook_status))
             Spacer(modifier = Modifier.height(Spacing.sm))
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 FilterChip(
-                    text = "Читаю",
+                    text = stringResource(R.string.addbook_status_reading),
                     selected = state.readingNow,
                     onClick = { onAction(AddBookAction.UpdateReadingNow(true)) },
                 )
                 FilterChip(
-                    text = "В планах",
+                    text = stringResource(R.string.addbook_status_planned),
                     selected = !state.readingNow,
                     onClick = { onAction(AddBookAction.UpdateReadingNow(false)) },
                 )
@@ -467,7 +479,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
                         onValueChange = { input ->
                             onAction(AddBookAction.UpdateCurrentPage(input.toIntOrZero()))
                         },
-                        label = "Текущая",
+                        label = stringResource(R.string.addbook_current_page_label),
                         placeholder = "",
                         keyboardType = KeyboardType.Number,
                         modifier = Modifier.weight(1f)
@@ -479,7 +491,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
                     onValueChange = { input ->
                         onAction(AddBookAction.UpdateAllPages(input.toIntOrZero()))
                     },
-                    label = "Всего страниц",
+                    label = stringResource(R.string.addbook_total_pages_label),
                     placeholder = "",
                     keyboardType = KeyboardType.Number,
                     modifier = Modifier.weight(1f)
@@ -488,7 +500,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
             if (pagesHasError) {
                 Spacer(modifier = Modifier.height(Spacing.xs))
                 Text(
-                    text = "Укажите количество страниц",
+                    text = stringResource(R.string.addbook_pages_error),
                     color = colors.fire,
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -500,7 +512,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
         item { Spacer(modifier = Modifier.height(Spacing.lg)) }
         item {
             Text(
-                text = state.bookCoverError ?: "Ошибка сохранения",
+                text = state.bookCoverError ?: stringResource(R.string.addbook_save_error),
                 color = colors.fire,
                 style = MaterialTheme.typography.bodySmall,
             )
@@ -511,7 +523,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.formStep(
 
     item {
         PrimaryButton(
-            text = "Назад к поиску",
+            text = stringResource(R.string.addbook_back_to_search),
             onClick = { onAction(AddBookAction.BackToSearch) },
         )
     }

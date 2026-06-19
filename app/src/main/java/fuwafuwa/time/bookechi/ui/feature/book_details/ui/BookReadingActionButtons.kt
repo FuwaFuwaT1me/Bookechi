@@ -11,8 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.BookDetailsAction
 import fuwafuwa.time.bookechi.ui.theme.BlueMain
@@ -30,7 +32,7 @@ fun BookReadingActionButtons(
     when (readingStatus) {
         ReadingStatus.None -> {
             ActionButton(
-                text = "Начать читать",
+                text = stringResource(R.string.details_action_start_reading),
                 color = BlueMain,
                 onClick = { onAction(BookDetailsAction.StartReading) },
                 modifier = modifier
@@ -46,7 +48,7 @@ fun BookReadingActionButtons(
 
         ReadingStatus.Paused -> {
             ActionButton(
-                text = "Возобновить чтение",
+                text = stringResource(R.string.details_action_resume_reading),
                 color = GreenButton,
                 onClick = { onAction(BookDetailsAction.ResumeReading) },
                 modifier = modifier
@@ -55,7 +57,7 @@ fun BookReadingActionButtons(
 
         ReadingStatus.Dropped -> {
             ActionButton(
-                text = "Начать читать снова",
+                text = stringResource(R.string.details_action_start_reading_again),
                 color = BlueMain,
                 onClick = { onAction(BookDetailsAction.StartReadingAgain) },
                 modifier = modifier
@@ -113,7 +115,7 @@ private fun ReadingInProgressButtons(
             ),
             onClick = { onAction(BookDetailsAction.PauseReading) }
         ) {
-            Text("Приостановить")
+            Text(stringResource(R.string.details_action_pause))
         }
 
         Button(
@@ -127,7 +129,7 @@ private fun ReadingInProgressButtons(
             ),
             onClick = { onAction(BookDetailsAction.FinishReading) }
         ) {
-            Text("Закончить")
+            Text(stringResource(R.string.details_action_finish))
         }
     }
 }

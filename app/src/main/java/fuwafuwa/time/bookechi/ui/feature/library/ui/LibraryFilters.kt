@@ -7,8 +7,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.annotation.StringRes
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.FilterChip
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.data.model.Book
@@ -19,14 +22,14 @@ import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
  * Фильтры библиотеки. Paused/Dropped оставлены в enum для совместимости со
  * статусами книг, но НЕ выводятся в ряду фильтров (см. [visibleFilters]).
  */
-enum class LibraryFilter(val label: String) {
-    All("Все"),
-    Planned("В планах"),
-    Reading("Читаю"),
-    Completed("Прочитано"),
-    Favorite("Любимое"),
-    Paused("Приостановлено"),
-    Dropped("Брошено"),
+enum class LibraryFilter(@StringRes val labelRes: Int) {
+    All(R.string.lib_filter_all),
+    Planned(R.string.lib_filter_planned),
+    Reading(R.string.lib_filter_reading),
+    Completed(R.string.lib_filter_completed),
+    Favorite(R.string.lib_filter_favorite),
+    Paused(R.string.lib_filter_paused),
+    Dropped(R.string.lib_filter_dropped),
 }
 
 /** Ровно 5 чипов в порядке макета. */
@@ -62,7 +65,7 @@ fun LibraryFiltersRow(
     ) {
         items(visibleFilters, key = { it.name }) { filter ->
             FilterChip(
-                text = filter.label,
+                text = stringResource(filter.labelRes),
                 selected = activeFilter == filter,
                 onClick = { onFilterChange(filter) },
             )

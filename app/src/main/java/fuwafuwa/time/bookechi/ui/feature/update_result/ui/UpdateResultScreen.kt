@@ -24,6 +24,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -32,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
 import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
 import fuwafuwa.time.bookechi.base.ui.ds.ProgressBar
@@ -93,7 +96,7 @@ private fun UpdateResultScreenContent(
         Spacer(Modifier.height(Spacing.xxxl))
 
         PrimaryButton(
-            text = "Готово",
+            text = stringResource(R.string.update_done),
             onClick = { onAction(UpdateResultAction.Done) },
         )
 
@@ -112,7 +115,11 @@ private fun StreakContent(state: UpdateResultState) {
 
     // 2) «{newStreakCount} дней подряд».
     Text(
-        text = "${state.newStreakCount} ${pluralizeDays(state.newStreakCount)} подряд",
+        text = pluralStringResource(
+            R.plurals.update_streak_days_in_row,
+            state.newStreakCount,
+            state.newStreakCount,
+        ),
         style = MaterialTheme.typography.headlineMedium,
         color = colors.textPrimary,
         textAlign = TextAlign.Center,
@@ -132,7 +139,7 @@ private fun StreakContent(state: UpdateResultState) {
 
     // 5) Тёплая фраза курсивом.
     Text(
-        text = "Хороший вечер для книги.",
+        text = stringResource(R.string.update_cozy_phrase),
         style = MaterialTheme.typography.titleLarge.copy(fontStyle = FontStyle.Italic),
         color = colors.textSecondary,
         textAlign = TextAlign.Center,
@@ -151,7 +158,7 @@ private fun FinishedContent(
     Spacer(Modifier.height(Spacing.xl))
 
     Text(
-        text = "Книга прочитана",
+        text = stringResource(R.string.update_book_finished_title),
         style = MaterialTheme.typography.headlineMedium,
         color = colors.textPrimary,
         textAlign = TextAlign.Center,
@@ -160,7 +167,7 @@ private fun FinishedContent(
     Spacer(Modifier.height(Spacing.sm))
 
     Text(
-        text = "Книга переехала на полку «Прочитано».",
+        text = stringResource(R.string.update_book_finished_subtitle),
         style = MaterialTheme.typography.bodyMedium,
         color = colors.textSecondary,
         textAlign = TextAlign.Center,
@@ -178,7 +185,7 @@ private fun FinishedContent(
     Spacer(Modifier.height(Spacing.xxl))
 
     // Блок оценки.
-    SectionLabel(text = "Как вам книга?")
+    SectionLabel(text = stringResource(R.string.update_rating_label))
 
     Spacer(Modifier.height(Spacing.md))
 
@@ -194,8 +201,8 @@ private fun FinishedContent(
     WarmTextField(
         value = state.note,
         onValueChange = { onAction(UpdateResultAction.SetNote(it)) },
-        label = "Заметка",
-        placeholder = "Заметка или любимая цитата — по желанию",
+        label = stringResource(R.string.update_note_label),
+        placeholder = stringResource(R.string.update_note_placeholder),
     )
 }
 
@@ -221,13 +228,14 @@ private fun FireTile() {
 private fun TodayReadLine(pagesDelta: Int) {
     val colors = BookechiTheme.colors
     val absPages = abs(pagesDelta)
+    val prefix = stringResource(R.string.update_today_read_prefix)
+    val pagesPhrase = pluralStringResource(R.plurals.update_pages_count, absPages, absPages)
     Text(
         text = buildAnnotatedString {
-            append("Сегодня прочитано: ")
+            append(prefix)
             withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = colors.textPrimary)) {
-                append("$absPages")
+                append(pagesPhrase)
             }
-            append(" ${pluralizePages(absPages)}")
         },
         style = MaterialTheme.typography.bodyLarge,
         color = colors.textSecondary,
@@ -272,28 +280,6 @@ private fun ProgressCard(
         Spacer(Modifier.height(Spacing.md))
 
         ProgressBar(progress = newProgress, height = 10.dp)
-    }
-}
-
-private fun pluralizePages(pages: Int): String {
-    val mod100 = pages % 100
-    val mod10 = pages % 10
-    return when {
-        mod100 in 11..14 -> "страниц"
-        mod10 == 1 -> "страница"
-        mod10 in 2..4 -> "страницы"
-        else -> "страниц"
-    }
-}
-
-private fun pluralizeDays(days: Int): String {
-    val mod100 = days % 100
-    val mod10 = days % 10
-    return when {
-        mod100 in 11..14 -> "дней"
-        mod10 == 1 -> "день"
-        mod10 in 2..4 -> "дня"
-        else -> "дней"
     }
 }
 

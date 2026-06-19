@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.book.BookCoverShowcase
 import fuwafuwa.time.bookechi.ui.feature.add_book.mvi.AddBookState
 import fuwafuwa.time.bookechi.ui.theme.BlueMainDark
@@ -191,7 +192,7 @@ private fun ColumnScope.Tabs() {
             ),
             onClick = {
                 enabledTab = 1
-                Toast.makeText(context, "будет давать добавлять обложку с любым соотношением сторон", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.addbook_custom_cover_toast), Toast.LENGTH_SHORT).show()
             }
         ) {
             Text(

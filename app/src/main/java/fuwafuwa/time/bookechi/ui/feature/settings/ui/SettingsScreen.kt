@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -54,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
 import fuwafuwa.time.bookechi.base.ui.ds.FilterChip
 import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
@@ -330,13 +332,12 @@ private fun ReadingReminderSection(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(Spacing.xs)) {
             Text(
-                text = "Напоминание о чтении",
+                text = stringResource(R.string.settings_reminder_title),
                 style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
                 color = colors.textPrimary,
             )
             Text(
-                text = "Вечером, когда дела стихают, — самое время для пары глав. " +
-                    "Напомним мягко, один раз в день.",
+                text = stringResource(R.string.settings_reminder_subtitle),
                 style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
                 color = colors.textSecondary,
             )
@@ -350,7 +351,7 @@ private fun ReadingReminderSection(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Напоминать каждый день",
+                text = stringResource(R.string.settings_reminder_daily_toggle),
                 style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
                 color = colors.textPrimary,
                 modifier = Modifier.weight(1f)
@@ -367,7 +368,7 @@ private fun ReadingReminderSection(
             )
         }
 
-        SectionLabel(text = "Время")
+        SectionLabel(text = stringResource(R.string.settings_reminder_time_label))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -384,15 +385,15 @@ private fun ReadingReminderSection(
 
         Text(
             text = if (enabled) {
-                "Хорошо: в $reminderTime напомним о чтении."
+                stringResource(R.string.settings_reminder_status_on, reminderTime)
             } else {
-                "Напоминания выключены — включите, чтобы выбрать время."
+                stringResource(R.string.settings_reminder_status_off)
             },
             style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
             color = colors.textSecondary,
         )
 
-        PrimaryButton(text = "Готово", onClick = onDone)
+        PrimaryButton(text = stringResource(R.string.settings_reminder_done), onClick = onDone)
     }
 }
 

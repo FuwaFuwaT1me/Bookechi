@@ -1,3 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Bookechi</string>
+
+    <!-- Home / book list -->
+    <string name="home_error_generic">Something went wrong</string>
+    <string name="home_empty_title">Add your first book</string>
+    <string name="home_empty_subtitle">It will show up here, and every evening you read will add to your collection.</string>
+    <string name="home_empty_cta">Add a book</string>
+    <string name="home_what_reading_now">What are you reading now?</string>
+    <string name="home_more_reading_planned">Also reading and planned</string>
+    <string name="home_greeting">Good evening, Ivan</string>
+    <string name="home_greeting_question">What are we reading today?</string>
+    <string name="home_toggle_theme">Toggle theme</string>
+    <string name="home_streak_comeback_title">Welcome back</string>
+    <string name="home_streak_comeback_subtitle">Your streak is paused. A couple of pages and it starts over</string>
+    <string name="home_streak_start_title">Start your streak today</string>
+    <string name="home_streak_start_subtitle">Mark your reading to start a streak</string>
+    <string name="home_streak_marked_subtitle">Already marked today</string>
+    <string name="home_streak_continue_subtitle">Mark your reading to keep the streak going</string>
+    <string name="home_reminders_cd">Reminders</string>
+    <string name="home_page_prefix">"p. "</string>
+    <string name="home_add_more_pages">Add more pages</string>
+    <string name="home_pages_not_marked">Today\'s pages aren\'t marked yet — it takes a minute</string>
+    <string name="home_mark_progress">Mark progress</string>
+    <string name="home_action_continue">Continue</string>
+    <string name="home_action_start">Start</string>
+    <string name="home_status_reading">Reading</string>
+    <string name="home_status_planned">Planned</string>
+    <string name="home_status_completed">Finished</string>
+    <string name="home_status_paused">Paused</string>
+    <string name="home_status_dropped">Dropped</string>
+    <string name="home_status_none">No status</string>
+    <string name="home_weekday_mon">Mon</string>
+    <string name="home_weekday_tue">Tue</string>
+    <string name="home_weekday_wed">Wed</string>
+    <string name="home_weekday_thu">Thu</string>
+    <string name="home_weekday_fri">Fri</string>
+    <string name="home_weekday_sat">Sat</string>
+    <string name="home_weekday_sun">Sun</string>
+    <string name="home_reminder_title">Reading reminder</string>
+    <string name="home_reminder_description">In the evening, when things settle down, is the perfect time for a couple of chapters. We\'ll remind you gently, once a day.</string>
+    <string name="home_reminder_daily">Remind me every day</string>
+    <string name="home_reminder_time_label">Time</string>
+    <string name="home_reminder_custom">Custom…</string>
+    <string name="home_reminder_enabled_hint">Got it: we\'ll remind you to read at %1$s.</string>
+    <string name="home_reminder_disabled_hint">Reminders are off.</string>
+    <string name="home_reminder_done">Done</string>
+    <string name="home_reminder_custom_time_title">Custom time</string>
+    <string name="home_reminder_cancel">Cancel</string>
+
+    <plurals name="home_streak_days_in_row">
+        <item quantity="one">%1$d day in a row</item>
+        <item quantity="other">%1$d days in a row</item>
+    </plurals>
+    <plurals name="home_pace_days_left">
+        <item quantity="one">At your pace — about %1$d day left to finish</item>
+        <item quantity="other">At your pace — about %1$d days left to finish</item>
+    </plurals>
+    <plurals name="home_marked_today_pages">
+        <item quantity="one">✓ Marked today · +%1$d page</item>
+        <item quantity="other">✓ Marked today · +%1$d pages</item>
+    </plurals>
+    <plurals name="home_status_with_pages">
+        <item quantity="one">%1$s · %2$d page</item>
+        <item quantity="other">%1$s · %2$d pages</item>
+    </plurals>
+
+    <!-- Library -->
+    <string name="lib_title">Library</string>
+    <string name="lib_add_book">Add book</string>
+    <string name="lib_edit_book">Edit book</string>
+    <string name="lib_save">Save</string>
+    <string name="lib_delete">Delete</string>
+    <string name="lib_keep">Keep</string>
+    <string name="lib_delete_book">Delete book</string>
+    <string name="lib_delete_dialog_title">Delete book?</string>
+    <string name="lib_delete_dialog_message">“%1$s” will disappear from your library. This can’t be undone.</string>
+    <string name="lib_empty_title">Your library is empty</string>
+    <string name="lib_empty_subtitle">Add a book — paper, ebook, anything you like.</string>
+    <string name="lib_empty_category">No books in this category yet.</string>
+    <string name="lib_favorite">Favorite</string>
+    <string name="lib_add_to_favorites">Add to favorites</string>
+    <string name="lib_filter_all">All</string>
+    <string name="lib_filter_planned">Planned</string>
+    <string name="lib_filter_reading">Reading</string>
+    <string name="lib_filter_completed">Finished</string>
+    <string name="lib_filter_favorite">Favorites</string>
+    <string name="lib_filter_paused">Paused</string>
+    <string name="lib_filter_dropped">Dropped</string>
+    <string name="lib_status_none">Not started</string>
+    <string name="lib_status_planned">Planned</string>
+    <string name="lib_status_reading">Reading</string>
+    <string name="lib_status_paused">Paused</string>
+    <string name="lib_status_dropped">Dropped</string>
+    <string name="lib_status_completed">Finished</string>
+    <string name="lib_field_name">Title</string>
+    <string name="lib_field_name_placeholder">For example, “Norwegian Wood”</string>
+    <string name="lib_field_author">Author</string>
+    <string name="lib_field_author_placeholder">Author’s name</string>
+    <string name="lib_field_total_pages">Total pages</string>
+    <string name="lib_field_current_page">Current page</string>
+    <string name="lib_error_name">Enter the book title</string>
+    <string name="lib_error_pages">Enter the number of pages</string>
+    <string name="lib_section_status">Status</string>
+    <string name="lib_cover">Cover</string>
+    <string name="lib_cover_add">Add cover</string>
+    <string name="lib_cover_added">Cover added</string>
+    <string name="lib_cover_hint">A photo or from the catalog — if you like</string>
+    <string name="lib_cover_remove">Remove cover</string>
+    <string name="lib_cover_pick">Pick a cover</string>
+    <string name="lib_cover_caption">Add a cover: a photo or from the catalog</string>
+
+    <plurals name="lib_books_count">
+        <item quantity="one">%1$d book</item>
+        <item quantity="other">%1$d books</item>
+    </plurals>
+
+    <!-- Productivity -->
+    <string name="prod_header_subtitle">Reading stats</string>
+    <string name="prod_header_title">Productivity</string>
+    <string name="prod_metric_books_read">books read</string>
+    <string name="prod_metric_pages_read">pages read</string>
+    <string name="prod_metric_avg_per_day">pages per day on average</string>
+    <string name="prod_tab_month">Month</string>
+    <string name="prod_tab_year">Year</string>
+    <string name="prod_year_title">%1$d</string>
+    <string name="prod_subtitle_month">Pages each day — the darker, the more</string>
+    <string name="prod_subtitle_year">Each month\'s total in pages</string>
+    <string name="prod_year_summary_title">Year in review</string>
+    <string name="prod_year_total_pages">Total pages</string>
+    <string name="prod_year_books_finished">Books finished</string>
+    <string name="prod_year_best_month">Best month</string>
+    <string name="prod_month_january">January</string>
+    <string name="prod_month_february">February</string>
+    <string name="prod_month_march">March</string>
+    <string name="prod_month_april">April</string>
+    <string name="prod_month_may">May</string>
+    <string name="prod_month_june">June</string>
+    <string name="prod_month_july">July</string>
+    <string name="prod_month_august">August</string>
+    <string name="prod_month_september">September</string>
+    <string name="prod_month_october">October</string>
+    <string name="prod_month_november">November</string>
+    <string name="prod_month_december">December</string>
+    <string name="prod_month_short_jan">Jan</string>
+    <string name="prod_month_short_feb">Feb</string>
+    <string name="prod_month_short_mar">Mar</string>
+    <string name="prod_month_short_apr">Apr</string>
+    <string name="prod_month_short_may">May</string>
+    <string name="prod_month_short_jun">Jun</string>
+    <string name="prod_month_short_jul">Jul</string>
+    <string name="prod_month_short_aug">Aug</string>
+    <string name="prod_month_short_sep">Sep</string>
+    <string name="prod_month_short_oct">Oct</string>
+    <string name="prod_month_short_nov">Nov</string>
+    <string name="prod_month_short_dec">Dec</string>
+    <string name="prod_weekday_mon">Mon</string>
+    <string name="prod_weekday_tue">Tue</string>
+    <string name="prod_weekday_wed">Wed</string>
+    <string name="prod_weekday_thu">Thu</string>
+    <string name="prod_weekday_fri">Fri</string>
+    <string name="prod_weekday_sat">Sat</string>
+    <string name="prod_weekday_sun">Sun</string>
+
+    <plurals name="prod_metric_streak_label">
+        <item quantity="one">day without breaks</item>
+        <item quantity="other">days without breaks</item>
+    </plurals>
+    <plurals name="prod_insight_streak_record">
+        <item quantity="one">Personal streak record: %1$d day</item>
+        <item quantity="other">Personal streak record: %1$d days</item>
+    </plurals>
+
+    <!-- Book details -->
+    <string name="details_error_title">Couldn\'t load the book</string>
+    <string name="details_error_subtitle">Try going back</string>
+    <string name="details_back">Back</string>
+    <string name="details_edit">Edit</string>
+    <string name="details_favorite_remove">Remove from favorites</string>
+    <string name="details_favorite_add">Add to favorites</string>
+    <string name="details_mark_progress">Log progress</string>
+    <string name="details_reading_history">Reading history</string>
+    <string name="details_quotes_and_notes">Quotes &amp; notes</string>
+    <string name="details_quotes_empty_title">Your quotes will appear here</string>
+    <string name="details_quotes_empty_subtitle">Save your favorite lines and notes right while you read.</string>
+    <string name="details_page_of">p. %1$d / %2$d</string>
+    <string name="details_no_reading_records">No reading records for this book yet.</string>
+    <string name="details_pages_short">%1$d p.</string>
+    <string name="details_page">p. %1$d</string>
+    <string name="details_status_none">Not started</string>
+    <string name="details_status_planned">Planned</string>
+    <string name="details_status_reading">Reading</string>
+    <string name="details_status_paused">Paused</string>
+    <string name="details_status_dropped">Dropped</string>
+    <string name="details_status_completed">Finished</string>
+    <string name="details_pace_finished">Book read to the end</string>
+    <string name="details_action_start_reading">Start reading</string>
+    <string name="details_action_resume_reading">Resume reading</string>
+    <string name="details_action_start_reading_again">Start reading again</string>
+    <string name="details_action_pause">Pause</string>
+    <string name="details_action_finish">Finish</string>
+
+    <plurals name="details_last_days">
+        <item quantity="one">Last %1$d day</item>
+        <item quantity="other">Last %1$d days</item>
+    </plurals>
+    <plurals name="details_pace_forecast">
+        <item quantity="one">At your pace — about %1$d day to the end</item>
+        <item quantity="other">At your pace — about %1$d days to the end</item>
+    </plurals>
+
+    <!-- Add book -->
+    <string name="addbook_title_search">Find a book</string>
+    <string name="addbook_title_add">Add a book</string>
+    <string name="addbook_save">Save</string>
+    <string name="addbook_fill_required_fields">Please fill in the required fields</string>
+    <string name="addbook_search_label">Search</string>
+    <string name="addbook_search_placeholder">Search by title or author</string>
+    <string name="addbook_results">Results</string>
+    <string name="addbook_enter_manually">Enter manually</string>
+    <string name="addbook_add">Add</string>
+    <string name="addbook_cover_found">Cover found</string>
+    <string name="addbook_cover">Cover</string>
+    <string name="addbook_cover_tap_to_pick">Tap to choose</string>
+    <string name="addbook_change">Change</string>
+    <string name="addbook_remove_cover">Remove cover</string>
+    <string name="addbook_book_name_label">Book title</string>
+    <string name="addbook_book_name_placeholder">Enter a title</string>
+    <string name="addbook_book_name_error">Enter the book title</string>
+    <string name="addbook_author_label">Author</string>
+    <string name="addbook_author_placeholder">Enter the author</string>
+    <string name="addbook_status">Status</string>
+    <string name="addbook_status_reading">Reading</string>
+    <string name="addbook_status_planned">Want to read</string>
+    <string name="addbook_current_page_label">Current</string>
+    <string name="addbook_total_pages_label">Total pages</string>
+    <string name="addbook_pages_error">Enter the number of pages</string>
+    <string name="addbook_save_error">Failed to save</string>
+    <string name="addbook_back_to_search">Back to search</string>
+    <string name="addbook_custom_cover_toast">Will let you add a cover with any aspect ratio</string>
+
+    <plurals name="addbook_search_result_subtitle">
+        <item quantity="one">%2$s · %1$d page</item>
+        <item quantity="other">%2$s · %1$d pages</item>
+    </plurals>
+
+    <!-- Update progress / result -->
+    <string name="update_done">Done</string>
+    <string name="update_cozy_phrase">A good evening for a book.</string>
+    <string name="update_book_finished_title">Book finished</string>
+    <string name="update_book_finished_subtitle">The book has moved to the Read shelf.</string>
+    <string name="update_rating_label">How was the book?</string>
+    <string name="update_note_label">Note</string>
+    <string name="update_note_placeholder">A note or a favorite quote — optional</string>
+    <string name="update_today_read_prefix">"Read today: "</string>
+    <string name="update_progress_title">Where did you stop today?</string>
+    <string name="update_progress_subtitle">Read up to page</string>
+    <string name="update_save_progress">Save progress</string>
+    <string name="update_back">Back</string>
+    <string name="update_now_page_of">now — p. %1$d / %2$d · %3$d%%</string>
+    <string name="update_slash_total">/ %1$d</string>
+    <string name="update_page_short">p. %1$d</string>
+    <string name="update_reading_time_label">Reading time, min — optional</string>
+
+    <plurals name="update_streak_days_in_row">
+        <item quantity="one">%1$d day in a row</item>
+        <item quantity="other">%1$d days in a row</item>
+    </plurals>
+    <plurals name="update_pages_count">
+        <item quantity="one">%1$d page</item>
+        <item quantity="other">%1$d pages</item>
+    </plurals>
+    <plurals name="update_book_total_pages">
+        <item quantity="one">The book has only %1$d page.</item>
+        <item quantity="other">The book has only %1$d pages.</item>
+    </plurals>
+    <plurals name="update_read_today_pages">
+        <item quantity="one">+%1$d page</item>
+        <item quantity="other">+%1$d pages</item>
+    </plurals>
+
+    <!-- Settings -->
+    <string name="settings_reminder_title">Reading reminder</string>
+    <string name="settings_reminder_subtitle">In the evening, when things settle down, it\'s the perfect time for a couple of chapters. We\'ll remind you gently, once a day.</string>
+    <string name="settings_reminder_daily_toggle">Remind me every day</string>
+    <string name="settings_reminder_time_label">Time</string>
+    <string name="settings_reminder_status_on">Got it: we\'ll remind you to read at %1$s.</string>
+    <string name="settings_reminder_status_off">Reminders are off — turn them on to pick a time.</string>
+    <string name="settings_reminder_done">Done</string>
+
+    <!-- Design system / navigation -->
+    <string name="ds_weekly_goal_eyebrow">This week</string>
+    <string name="ds_weekly_goal_done">Weekly goal reached</string>
+    <string name="ds_nav_activity">Activity</string>
+    <string name="ds_nav_productivity">Productivity</string>
+    <string name="ds_nav_library">Library</string>
+
+    <plurals name="ds_weekly_goal_target_pages">
+        <item quantity="one">" / %1$d page"</item>
+        <item quantity="other">" / %1$d pages"</item>
+    </plurals>
+    <plurals name="ds_weekly_goal_remaining">
+        <item quantity="one">%1$d page left — about one evening</item>
+        <item quantity="other">%1$d pages left — about one evening</item>
+    </plurals>
+
+    <!-- Date helpers -->
+    <string name="date_weekday_mon_short">Mon</string>
+    <string name="date_weekday_tue_short">Tue</string>
+    <string name="date_weekday_wed_short">Wed</string>
+    <string name="date_weekday_thu_short">Thu</string>
+    <string name="date_weekday_fri_short">Fri</string>
+    <string name="date_weekday_sat_short">Sat</string>
+    <string name="date_weekday_sun_short">Sun</string>
 </resources>

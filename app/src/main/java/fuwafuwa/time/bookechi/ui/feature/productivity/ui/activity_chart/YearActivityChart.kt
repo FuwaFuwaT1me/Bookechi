@@ -21,11 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
 import fuwafuwa.time.bookechi.base.ui.chart.getRelativeActivityIntensity
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
@@ -36,11 +38,23 @@ import java.time.LocalDate
 
 private const val MONTHS_IN_YEAR = 12
 
-/** Краткие 3-буквенные подписи месяцев под столбиками. */
-private val MONTH_SHORT = listOf(
-    "Янв", "Фев", "Мар", "Апр", "Май", "Июн",
-    "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек",
-)
+/** Краткая 3-буквенная подпись месяца под столбиком (индекс 0..11). */
+@Composable
+private fun monthShortName(index: Int): String = when (index) {
+    0 -> stringResource(R.string.prod_month_short_jan)
+    1 -> stringResource(R.string.prod_month_short_feb)
+    2 -> stringResource(R.string.prod_month_short_mar)
+    3 -> stringResource(R.string.prod_month_short_apr)
+    4 -> stringResource(R.string.prod_month_short_may)
+    5 -> stringResource(R.string.prod_month_short_jun)
+    6 -> stringResource(R.string.prod_month_short_jul)
+    7 -> stringResource(R.string.prod_month_short_aug)
+    8 -> stringResource(R.string.prod_month_short_sep)
+    9 -> stringResource(R.string.prod_month_short_oct)
+    10 -> stringResource(R.string.prod_month_short_nov)
+    11 -> stringResource(R.string.prod_month_short_dec)
+    else -> ""
+}
 
 private val BAR_AREA_HEIGHT = 130.dp
 
@@ -155,7 +169,7 @@ fun YearActivityChart(
                 Spacer(Modifier.height(Spacing.xs))
 
                 Text(
-                    text = MONTH_SHORT[month - 1],
+                    text = monthShortName(month - 1),
                     style = if (isCurrent) {
                         labelStyle.copy(fontWeight = FontWeight.Bold)
                     } else {

@@ -15,8 +15,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
@@ -38,7 +40,7 @@ fun LibraryAddBookFab(
     ) {
         Icon(
             imageVector = Icons.Default.Add,
-            contentDescription = "Добавить книгу",
+            contentDescription = stringResource(R.string.lib_add_book),
             tint = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.size(28.dp),
         )

@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.LocalFireDepartment
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Text
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.library.ui.LibraryScreen
@@ -49,24 +52,24 @@ import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityScreen
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
 data class BottomNavItem(
-    val label: String,
+    @StringRes val labelRes: Int,
     val icon: ImageVector,
     val route: Screen,
 )
 
 val BottomNavItems = listOf(
     BottomNavItem(
-        label = "Активность",
+        labelRes = R.string.ds_nav_activity,
         icon = Icons.Rounded.LocalFireDepartment,
         route = BookListScreen
     ),
     BottomNavItem(
-        label = "Продуктивность",
+        labelRes = R.string.ds_nav_productivity,
         icon = Icons.AutoMirrored.Rounded.TrendingUp,
         route = ProductivityScreen
     ),
     BottomNavItem(
-        label = "Библиотека",
+        labelRes = R.string.ds_nav_library,
         icon = Icons.Rounded.CollectionsBookmark,
         route = LibraryScreen
     ),
@@ -159,6 +162,7 @@ private fun NavigationItem(
         }
     }
 
+    val label = stringResource(navItem.labelRes)
     Column(
         modifier = Modifier
             .clip(RoundedCornerShape(14.dp))
@@ -175,7 +179,7 @@ private fun NavigationItem(
                 },
             imageVector = navItem.icon,
             tint = color,
-            contentDescription = navItem.label,
+            contentDescription = label,
         )
 
         Spacer(Modifier.height(2.dp))
@@ -184,7 +188,7 @@ private fun NavigationItem(
             modifier = Modifier
                 .padding(horizontal = 4.dp)
             ,
-            text = navItem.label,
+            text = label,
             fontSize = 12.sp,
             color = color,
             fontWeight = FontWeight.SemiBold

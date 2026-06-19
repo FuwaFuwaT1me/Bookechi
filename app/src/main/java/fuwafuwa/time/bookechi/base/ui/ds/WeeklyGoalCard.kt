@@ -15,8 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
 /**
@@ -50,7 +53,7 @@ fun WeeklyGoalCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            SectionLabel(text = "На этой неделе")
+            SectionLabel(text = stringResource(R.string.ds_weekly_goal_eyebrow))
             Text(
                 text = "$percent%",
                 style = MaterialTheme.typography.labelLarge,
@@ -67,7 +70,7 @@ fun WeeklyGoalCard(
                 color = colors.textPrimary,
             )
             Text(
-                text = " / $pagesTarget стр.",
+                text = pluralStringResource(R.plurals.ds_weekly_goal_target_pages, pagesTarget, pagesTarget),
                 style = MaterialTheme.typography.titleMedium,
                 color = colors.textSecondary,
                 modifier = Modifier.padding(bottom = Spacing.xs + 2.dp),
@@ -76,9 +79,9 @@ fun WeeklyGoalCard(
         ProgressBar(progress = progress)
         Text(
             text = if (remaining > 0) {
-                "Осталось $remaining стр. — примерно один вечер"
+                pluralStringResource(R.plurals.ds_weekly_goal_remaining, remaining, remaining)
             } else {
-                "Цель недели выполнена"
+                stringResource(R.string.ds_weekly_goal_done)
             },
             style = MaterialTheme.typography.bodySmall,
             color = colors.textSecondary,

@@ -26,8 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
 import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
@@ -66,7 +68,7 @@ fun BoxScope.EditBookBottomSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Редактировать книгу",
+                    text = stringResource(R.string.lib_edit_book),
                     style = MaterialTheme.typography.headlineSmall,
                     color = colors.textPrimary,
                     modifier = Modifier.weight(1f),
@@ -77,7 +79,7 @@ fun BoxScope.EditBookBottomSheet(
                     } else {
                         Icons.Default.FavoriteBorder
                     },
-                    contentDescription = "В избранное",
+                    contentDescription = stringResource(R.string.lib_add_to_favorites),
                     tint = colors.accent,
                     modifier = Modifier
                         .size(28.dp)
@@ -111,8 +113,8 @@ fun BoxScope.EditBookBottomSheet(
             WarmTextField(
                 value = book.name,
                 onValueChange = { onAction(LibraryAction.UpdateBook(book.copy(name = it))) },
-                label = "Название",
-                placeholder = "Например, «Норвежский лес»",
+                label = stringResource(R.string.lib_field_name),
+                placeholder = stringResource(R.string.lib_field_name_placeholder),
             )
         }
 
@@ -122,8 +124,8 @@ fun BoxScope.EditBookBottomSheet(
             WarmTextField(
                 value = book.author,
                 onValueChange = { onAction(LibraryAction.UpdateBook(book.copy(author = it))) },
-                label = "Автор",
-                placeholder = "Имя автора",
+                label = stringResource(R.string.lib_field_author),
+                placeholder = stringResource(R.string.lib_field_author_placeholder),
             )
         }
 
@@ -137,7 +139,7 @@ fun BoxScope.EditBookBottomSheet(
                     val current = book.currentPage.coerceAtMost(if (pages > 0) pages else book.currentPage)
                     onAction(LibraryAction.UpdateBook(book.copy(pages = pages, currentPage = current)))
                 },
-                label = "Всего страниц",
+                label = stringResource(R.string.lib_field_total_pages),
                 placeholder = "320",
                 keyboardType = KeyboardType.Number,
             )
@@ -146,7 +148,7 @@ fun BoxScope.EditBookBottomSheet(
         item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
         item {
-            SectionLabel(text = "Статус", modifier = Modifier.padding(bottom = Spacing.sm))
+            SectionLabel(text = stringResource(R.string.lib_section_status), modifier = Modifier.padding(bottom = Spacing.sm))
         }
 
         item {
@@ -177,7 +179,7 @@ fun BoxScope.EditBookBottomSheet(
                         val clamped = if (book.pages > 0) raw.coerceAtMost(book.pages) else raw
                         onAction(LibraryAction.UpdateBook(book.copy(currentPage = clamped)))
                     },
-                    label = "Текущая страница",
+                    label = stringResource(R.string.lib_field_current_page),
                     placeholder = "0",
                     keyboardType = KeyboardType.Number,
                 )
@@ -188,7 +190,7 @@ fun BoxScope.EditBookBottomSheet(
 
         item {
             PrimaryButton(
-                text = "Сохранить",
+                text = stringResource(R.string.lib_save),
                 onClick = { onAction(LibraryAction.CancelEditingBook) },
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -202,7 +204,7 @@ fun BoxScope.EditBookBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = "Удалить книгу",
+                    text = stringResource(R.string.lib_delete_book),
                     style = MaterialTheme.typography.labelLarge,
                     color = colors.accentDeep,
                 )
@@ -216,14 +218,14 @@ fun BoxScope.EditBookBottomSheet(
             containerColor = colors.surface,
             title = {
                 Text(
-                    text = "Удалить книгу?",
+                    text = stringResource(R.string.lib_delete_dialog_title),
                     style = MaterialTheme.typography.titleLarge,
                     color = colors.textPrimary,
                 )
             },
             text = {
                 Text(
-                    text = "«${book.name}» исчезнет из библиотеки. Это действие необратимо.",
+                    text = stringResource(R.string.lib_delete_dialog_message, book.name),
                     style = MaterialTheme.typography.bodyMedium,
                     color = colors.textSecondary,
                 )
@@ -233,12 +235,12 @@ fun BoxScope.EditBookBottomSheet(
                     showDeleteDialog = false
                     onAction(LibraryAction.DeleteBook(book))
                 }) {
-                    Text(text = "Удалить", color = colors.accentDeep)
+                    Text(text = stringResource(R.string.lib_delete), color = colors.accentDeep)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text(text = "Оставить", color = colors.textSecondary)
+                    Text(text = stringResource(R.string.lib_keep), color = colors.textSecondary)
                 }
             },
         )

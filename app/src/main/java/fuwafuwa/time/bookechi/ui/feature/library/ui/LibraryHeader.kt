@@ -9,7 +9,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
@@ -28,28 +31,16 @@ fun LibraryHeader(
         verticalArrangement = Arrangement.spacedBy(Spacing.xs),
     ) {
         Text(
-            text = booksCountLabel(booksCount),
+            text = pluralStringResource(R.plurals.lib_books_count, booksCount, booksCount),
             style = MaterialTheme.typography.bodyMedium,
             color = colors.textSecondary,
         )
         Text(
-            text = "Библиотека",
+            text = stringResource(R.string.lib_title),
             style = MaterialTheme.typography.headlineLarge,
             color = colors.textPrimary,
         )
     }
-}
-
-private fun booksCountLabel(count: Int): String {
-    val mod100 = count % 100
-    val mod10 = count % 10
-    val word = when {
-        mod100 in 11..14 -> "книг"
-        mod10 == 1 -> "книга"
-        mod10 in 2..4 -> "книги"
-        else -> "книг"
-    }
-    return "$count $word"
 }
 
 @Preview(name = "LibraryHeader Light", showBackground = true, backgroundColor = 0xFFFFF9F6)

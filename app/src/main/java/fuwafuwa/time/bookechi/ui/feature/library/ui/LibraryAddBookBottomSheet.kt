@@ -13,8 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
 import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
@@ -44,7 +46,7 @@ fun BoxScope.LibraryAddBookBottomSheet(
         containerColor = colors.canvas,
         header = {
             Text(
-                text = "Добавить книгу",
+                text = stringResource(R.string.lib_add_book),
                 style = MaterialTheme.typography.headlineSmall,
                 color = colors.textPrimary,
                 modifier = Modifier.padding(horizontal = Spacing.xl, vertical = Spacing.md),
@@ -73,11 +75,11 @@ fun BoxScope.LibraryAddBookBottomSheet(
                 WarmTextField(
                     value = draft.name,
                     onValueChange = { onAction(LibraryAction.UpdateAddingBookName(it)) },
-                    label = "Название",
-                    placeholder = "Например, «Норвежский лес»",
+                    label = stringResource(R.string.lib_field_name),
+                    placeholder = stringResource(R.string.lib_field_name_placeholder),
                 )
                 if (draft.nameError) {
-                    FieldError(text = "Введите название книги")
+                    FieldError(text = stringResource(R.string.lib_error_name))
                 }
             }
         }
@@ -88,8 +90,8 @@ fun BoxScope.LibraryAddBookBottomSheet(
             WarmTextField(
                 value = draft.author,
                 onValueChange = { onAction(LibraryAction.UpdateAddingBookAuthor(it)) },
-                label = "Автор",
-                placeholder = "Имя автора",
+                label = stringResource(R.string.lib_field_author),
+                placeholder = stringResource(R.string.lib_field_author_placeholder),
             )
         }
 
@@ -100,12 +102,12 @@ fun BoxScope.LibraryAddBookBottomSheet(
                 WarmTextField(
                     value = draft.pages,
                     onValueChange = { onAction(LibraryAction.UpdateAddingBookAllPages(it)) },
-                    label = "Всего страниц",
+                    label = stringResource(R.string.lib_field_total_pages),
                     placeholder = "320",
                     keyboardType = KeyboardType.Number,
                 )
                 if (draft.pagesError) {
-                    FieldError(text = "Укажите количество страниц")
+                    FieldError(text = stringResource(R.string.lib_error_pages))
                 }
             }
         }
@@ -113,7 +115,7 @@ fun BoxScope.LibraryAddBookBottomSheet(
         item { Spacer(modifier = Modifier.height(Spacing.xl)) }
 
         item {
-            SectionLabel(text = "Статус", modifier = Modifier.padding(bottom = Spacing.sm))
+            SectionLabel(text = stringResource(R.string.lib_section_status), modifier = Modifier.padding(bottom = Spacing.sm))
         }
 
         item {
@@ -129,7 +131,7 @@ fun BoxScope.LibraryAddBookBottomSheet(
                 WarmTextField(
                     value = draft.currentPage,
                     onValueChange = { onAction(LibraryAction.UpdateAddingBookCurrentPage(it)) },
-                    label = "Текущая страница",
+                    label = stringResource(R.string.lib_field_current_page),
                     placeholder = "0",
                     keyboardType = KeyboardType.Number,
                 )
@@ -145,7 +147,7 @@ fun BoxScope.LibraryAddBookBottomSheet(
 
         item {
             PrimaryButton(
-                text = "Добавить книгу",
+                text = stringResource(R.string.lib_add_book),
                 onClick = { onAction(LibraryAction.SaveAddingBook) },
                 enabled = !draft.isSaving && !draft.isCoverLoading,
                 modifier = Modifier.fillMaxWidth(),

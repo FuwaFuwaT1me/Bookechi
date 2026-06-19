@@ -14,9 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.time.Date
 import fuwafuwa.time.bookechi.base.time.getDaysInMonth
 import fuwafuwa.time.bookechi.base.ui.chart.ActivityChartConfig
@@ -30,7 +32,17 @@ import java.time.LocalDate
 
 private const val DAYS_IN_WEEK = 7
 
-private val WEEKDAY_LABELS = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+/** Подписи дней недели (Пн..Вс) для шапки месячной сетки. */
+@Composable
+private fun weekdayLabels(): List<String> = listOf(
+    stringResource(R.string.prod_weekday_mon),
+    stringResource(R.string.prod_weekday_tue),
+    stringResource(R.string.prod_weekday_wed),
+    stringResource(R.string.prod_weekday_thu),
+    stringResource(R.string.prod_weekday_fri),
+    stringResource(R.string.prod_weekday_sat),
+    stringResource(R.string.prod_weekday_sun),
+)
 
 /**
  * Месячный график активности — календарная сетка (макет «05 Продуктивность — месяц»).
@@ -69,7 +81,7 @@ fun MonthActivityChart(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(cellSpacing),
         ) {
-            WEEKDAY_LABELS.forEach { label ->
+            weekdayLabels().forEach { label ->
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelSmall,

@@ -27,6 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.FilterChip
 import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
 import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
@@ -64,13 +66,12 @@ fun ReminderBottomSheet(
             verticalArrangement = Arrangement.spacedBy(Spacing.lg),
         ) {
             Text(
-                text = "Напоминание о чтении",
+                text = stringResource(R.string.home_reminder_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = colors.textPrimary,
             )
             Text(
-                text = "Вечером, когда дела стихают, — самое время для пары глав. " +
-                    "Напомним мягко, один раз в день.",
+                text = stringResource(R.string.home_reminder_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.textSecondary,
             )
@@ -81,7 +82,7 @@ fun ReminderBottomSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "Напоминать каждый день",
+                    text = stringResource(R.string.home_reminder_daily),
                     style = MaterialTheme.typography.titleMedium,
                     color = colors.textPrimary,
                 )
@@ -99,7 +100,7 @@ fun ReminderBottomSheet(
                 )
             }
 
-            SectionLabel(text = "Время")
+            SectionLabel(text = stringResource(R.string.home_reminder_time_label))
 
             Row(
                 modifier = Modifier
@@ -115,21 +116,21 @@ fun ReminderBottomSheet(
                     )
                 }
                 FilterChip(
-                    text = if (isCustom) time else "Своё…",
+                    text = if (isCustom) time else stringResource(R.string.home_reminder_custom),
                     selected = isCustom,
                     onClick = { showTimePicker = true },
                 )
             }
 
             Text(
-                text = if (enabled) "Хорошо: в $time напомним о чтении."
-                else "Напоминания выключены.",
+                text = if (enabled) stringResource(R.string.home_reminder_enabled_hint, time)
+                else stringResource(R.string.home_reminder_disabled_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.textSecondary,
             )
 
             PrimaryButton(
-                text = "Готово",
+                text = stringResource(R.string.home_reminder_done),
                 onClick = onDismiss,
             )
         }
@@ -169,7 +170,7 @@ private fun ReminderTimePickerDialog(
         containerColor = colors.surfaceElevated,
         title = {
             Text(
-                text = "Своё время",
+                text = stringResource(R.string.home_reminder_custom_time_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = colors.textPrimary,
             )
@@ -182,12 +183,12 @@ private fun ReminderTimePickerDialog(
                 val formatted = "%02d:%02d".format(pickerState.hour, pickerState.minute)
                 onConfirm(formatted)
             }) {
-                Text(text = "Готово", color = colors.accentDeep)
+                Text(text = stringResource(R.string.home_reminder_done), color = colors.accentDeep)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(text = "Отмена", color = colors.textSecondary)
+                Text(text = stringResource(R.string.home_reminder_cancel), color = colors.textSecondary)
             }
         },
     )

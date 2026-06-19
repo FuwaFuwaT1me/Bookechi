@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Home / book list -->
+    <string name="home_error_generic">Что-то пошло не так</string>
+    <string name="home_empty_title">Добавьте первую книгу</string>
+    <string name="home_empty_subtitle">Она появится здесь, и каждый прочитанный вечер будет в копилке.</string>
+    <string name="home_empty_cta">Добавить книгу</string>
+    <string name="home_what_reading_now">Что читаете сейчас?</string>
+    <string name="home_more_reading_planned">Ещё в чтении и планах</string>
+    <string name="home_greeting">Добрый вечер, Иван</string>
+    <string name="home_greeting_question">Что читаем сегодня?</string>
+    <string name="home_toggle_theme">Переключить тему</string>
+    <string name="home_streak_comeback_title">С возвращением</string>
+    <string name="home_streak_comeback_subtitle">Серия на паузе. Пара страниц — и она начнётся заново</string>
+    <string name="home_streak_start_title">Начните серию сегодня</string>
+    <string name="home_streak_start_subtitle">Отметьте чтение, чтобы запустить серию</string>
+    <string name="home_streak_marked_subtitle">Сегодня уже отмечено</string>
+    <string name="home_streak_continue_subtitle">Отметьте чтение, чтобы продолжить серию</string>
+    <string name="home_reminders_cd">Напоминания</string>
+    <string name="home_page_prefix">"стр. "</string>
+    <string name="home_add_more_pages">Добавить ещё страницы</string>
+    <string name="home_pages_not_marked">Сегодняшние страницы ещё не отмечены — это займёт минуту</string>
+    <string name="home_mark_progress">Отметить прогресс</string>
+    <string name="home_action_continue">Дальше</string>
+    <string name="home_action_start">Начать</string>
+    <string name="home_status_reading">Читаю</string>
+    <string name="home_status_planned">В планах</string>
+    <string name="home_status_completed">Прочитано</string>
+    <string name="home_status_paused">Пауза</string>
+    <string name="home_status_dropped">Брошено</string>
+    <string name="home_status_none">Без статуса</string>
+    <string name="home_weekday_mon">Пн</string>
+    <string name="home_weekday_tue">Вт</string>
+    <string name="home_weekday_wed">Ср</string>
+    <string name="home_weekday_thu">Чт</string>
+    <string name="home_weekday_fri">Пт</string>
+    <string name="home_weekday_sat">Сб</string>
+    <string name="home_weekday_sun">Вс</string>
+    <string name="home_reminder_title">Напоминание о чтении</string>
+    <string name="home_reminder_description">Вечером, когда дела стихают, — самое время для пары глав. Напомним мягко, один раз в день.</string>
+    <string name="home_reminder_daily">Напоминать каждый день</string>
+    <string name="home_reminder_time_label">Время</string>
+    <string name="home_reminder_custom">Своё…</string>
+    <string name="home_reminder_enabled_hint">Хорошо: в %1$s напомним о чтении.</string>
+    <string name="home_reminder_disabled_hint">Напоминания выключены.</string>
+    <string name="home_reminder_done">Готово</string>
+    <string name="home_reminder_custom_time_title">Своё время</string>
+    <string name="home_reminder_cancel">Отмена</string>
+
+    <plurals name="home_streak_days_in_row">
+        <item quantity="one">%1$d день подряд</item>
+        <item quantity="few">%1$d дня подряд</item>
+        <item quantity="many">%1$d дней подряд</item>
+        <item quantity="other">%1$d дней подряд</item>
+    </plurals>
+    <plurals name="home_pace_days_left">
+        <item quantity="one">При твоём темпе — около %1$d дня до конца</item>
+        <item quantity="few">При твоём темпе — около %1$d дней до конца</item>
+        <item quantity="many">При твоём темпе — около %1$d дней до конца</item>
+        <item quantity="other">При твоём темпе — около %1$d дней до конца</item>
+    </plurals>
+    <plurals name="home_marked_today_pages">
+        <item quantity="one">✓ Отмечено сегодня · +%1$d стр.</item>
+        <item quantity="few">✓ Отмечено сегодня · +%1$d стр.</item>
+        <item quantity="many">✓ Отмечено сегодня · +%1$d стр.</item>
+        <item quantity="other">✓ Отмечено сегодня · +%1$d стр.</item>
+    </plurals>
+    <plurals name="home_status_with_pages">
+        <item quantity="one">%1$s · %2$d стр.</item>
+        <item quantity="few">%1$s · %2$d стр.</item>
+        <item quantity="many">%1$s · %2$d стр.</item>
+        <item quantity="other">%1$s · %2$d стр.</item>
+    </plurals>
+
+    <!-- Library -->
+    <string name="lib_title">Библиотека</string>
+    <string name="lib_add_book">Добавить книгу</string>
+    <string name="lib_edit_book">Редактировать книгу</string>
+    <string name="lib_save">Сохранить</string>
+    <string name="lib_delete">Удалить</string>
+    <string name="lib_keep">Оставить</string>
+    <string name="lib_delete_book">Удалить книгу</string>
+    <string name="lib_delete_dialog_title">Удалить книгу?</string>
+    <string name="lib_delete_dialog_message">«%1$s» исчезнет из библиотеки. Это действие необратимо.</string>
+    <string name="lib_empty_title">Библиотека пуста</string>
+    <string name="lib_empty_subtitle">Добавьте книгу — бумажную, электронную, какую угодно.</string>
+    <string name="lib_empty_category">Книг в этой категории пока нет.</string>
+    <string name="lib_favorite">Избранное</string>
+    <string name="lib_add_to_favorites">В избранное</string>
+    <string name="lib_filter_all">Все</string>
+    <string name="lib_filter_planned">В планах</string>
+    <string name="lib_filter_reading">Читаю</string>
+    <string name="lib_filter_completed">Прочитано</string>
+    <string name="lib_filter_favorite">Любимое</string>
+    <string name="lib_filter_paused">Приостановлено</string>
+    <string name="lib_filter_dropped">Брошено</string>
+    <string name="lib_status_none">Не начата</string>
+    <string name="lib_status_planned">В планах</string>
+    <string name="lib_status_reading">Читаю</string>
+    <string name="lib_status_paused">Пауза</string>
+    <string name="lib_status_dropped">Брошена</string>
+    <string name="lib_status_completed">Прочитано</string>
+    <string name="lib_field_name">Название</string>
+    <string name="lib_field_name_placeholder">Например, «Норвежский лес»</string>
+    <string name="lib_field_author">Автор</string>
+    <string name="lib_field_author_placeholder">Имя автора</string>
+    <string name="lib_field_total_pages">Всего страниц</string>
+    <string name="lib_field_current_page">Текущая страница</string>
+    <string name="lib_error_name">Введите название книги</string>
+    <string name="lib_error_pages">Укажите количество страниц</string>
+    <string name="lib_section_status">Статус</string>
+    <string name="lib_cover">Обложка</string>
+    <string name="lib_cover_add">Добавить обложку</string>
+    <string name="lib_cover_added">Обложка добавлена</string>
+    <string name="lib_cover_hint">Фото или из каталога — по желанию</string>
+    <string name="lib_cover_remove">Убрать обложку</string>
+    <string name="lib_cover_pick">Выбрать обложку</string>
+    <string name="lib_cover_caption">Добавьте обложку: фото или из каталога</string>
+
+    <plurals name="lib_books_count">
+        <item quantity="one">%1$d книга</item>
+        <item quantity="few">%1$d книги</item>
+        <item quantity="many">%1$d книг</item>
+        <item quantity="other">%1$d книг</item>
+    </plurals>
+
+    <!-- Productivity -->
+    <string name="prod_header_subtitle">Статистика чтения</string>
+    <string name="prod_header_title">Продуктивность</string>
+    <string name="prod_metric_books_read">книг прочитано</string>
+    <string name="prod_metric_pages_read">страниц прочитано</string>
+    <string name="prod_metric_avg_per_day">стр. в день в среднем</string>
+    <string name="prod_tab_month">Месяц</string>
+    <string name="prod_tab_year">Год</string>
+    <string name="prod_year_title">%1$d год</string>
+    <string name="prod_subtitle_month">Страницы за каждый день — чем темнее, тем больше</string>
+    <string name="prod_subtitle_year">Итог каждого месяца в страницах</string>
+    <string name="prod_year_summary_title">Итоги года</string>
+    <string name="prod_year_total_pages">Всего страниц</string>
+    <string name="prod_year_books_finished">Книг закончено</string>
+    <string name="prod_year_best_month">Лучший месяц</string>
+    <string name="prod_month_january">Январь</string>
+    <string name="prod_month_february">Февраль</string>
+    <string name="prod_month_march">Март</string>
+    <string name="prod_month_april">Апрель</string>
+    <string name="prod_month_may">Май</string>
+    <string name="prod_month_june">Июнь</string>
+    <string name="prod_month_july">Июль</string>
+    <string name="prod_month_august">Август</string>
+    <string name="prod_month_september">Сентябрь</string>
+    <string name="prod_month_october">Октябрь</string>
+    <string name="prod_month_november">Ноябрь</string>
+    <string name="prod_month_december">Декабрь</string>
+    <string name="prod_month_short_jan">Янв</string>
+    <string name="prod_month_short_feb">Фев</string>
+    <string name="prod_month_short_mar">Мар</string>
+    <string name="prod_month_short_apr">Апр</string>
+    <string name="prod_month_short_may">Май</string>
+    <string name="prod_month_short_jun">Июн</string>
+    <string name="prod_month_short_jul">Июл</string>
+    <string name="prod_month_short_aug">Авг</string>
+    <string name="prod_month_short_sep">Сен</string>
+    <string name="prod_month_short_oct">Окт</string>
+    <string name="prod_month_short_nov">Ноя</string>
+    <string name="prod_month_short_dec">Дек</string>
+    <string name="prod_weekday_mon">Пн</string>
+    <string name="prod_weekday_tue">Вт</string>
+    <string name="prod_weekday_wed">Ср</string>
+    <string name="prod_weekday_thu">Чт</string>
+    <string name="prod_weekday_fri">Пт</string>
+    <string name="prod_weekday_sat">Сб</string>
+    <string name="prod_weekday_sun">Вс</string>
+
+    <plurals name="prod_metric_streak_label">
+        <item quantity="one">день без перерывов</item>
+        <item quantity="few">дня без перерывов</item>
+        <item quantity="many">дней без перерывов</item>
+        <item quantity="other">дней без перерывов</item>
+    </plurals>
+    <plurals name="prod_insight_streak_record">
+        <item quantity="one">Личный рекорд серии: %1$d день</item>
+        <item quantity="few">Личный рекорд серии: %1$d дня</item>
+        <item quantity="many">Личный рекорд серии: %1$d дней</item>
+        <item quantity="other">Личный рекорд серии: %1$d дней</item>
+    </plurals>
+
+    <!-- Book details -->
+    <string name="details_error_title">Не удалось загрузить книгу</string>
+    <string name="details_error_subtitle">Попробуйте вернуться назад</string>
+    <string name="details_back">Назад</string>
+    <string name="details_edit">Редактировать</string>
+    <string name="details_favorite_remove">Убрать из избранного</string>
+    <string name="details_favorite_add">В избранное</string>
+    <string name="details_mark_progress">Отметить прогресс</string>
+    <string name="details_reading_history">История чтения</string>
+    <string name="details_quotes_and_notes">Цитаты и заметки</string>
+    <string name="details_quotes_empty_title">Здесь будут ваши цитаты</string>
+    <string name="details_quotes_empty_subtitle">Сохраняйте любимые строки и заметки прямо во время чтения.</string>
+    <string name="details_page_of">стр. %1$d / %2$d</string>
+    <string name="details_no_reading_records">Пока нет записей о чтении этой книги.</string>
+    <string name="details_pages_short">%1$d стр.</string>
+    <string name="details_page">стр. %1$d</string>
+    <string name="details_status_none">Не начата</string>
+    <string name="details_status_planned">В планах</string>
+    <string name="details_status_reading">Читаю</string>
+    <string name="details_status_paused">На паузе</string>
+    <string name="details_status_dropped">Брошена</string>
+    <string name="details_status_completed">Прочитано</string>
+    <string name="details_pace_finished">Книга прочитана до конца</string>
+    <string name="details_action_start_reading">Начать читать</string>
+    <string name="details_action_resume_reading">Возобновить чтение</string>
+    <string name="details_action_start_reading_again">Начать читать снова</string>
+    <string name="details_action_pause">Приостановить</string>
+    <string name="details_action_finish">Закончить</string>
+
+    <plurals name="details_last_days">
+        <item quantity="one">Последний %1$d день</item>
+        <item quantity="few">Последние %1$d дня</item>
+        <item quantity="many">Последние %1$d дней</item>
+        <item quantity="other">Последние %1$d дней</item>
+    </plurals>
+    <plurals name="details_pace_forecast">
+        <item quantity="one">При твоём темпе — около %1$d дня до конца</item>
+        <item quantity="few">При твоём темпе — около %1$d дней до конца</item>
+        <item quantity="many">При твоём темпе — около %1$d дней до конца</item>
+        <item quantity="other">При твоём темпе — около %1$d дней до конца</item>
+    </plurals>
+
+    <!-- Add book -->
+    <string name="addbook_title_search">Найти книгу</string>
+    <string name="addbook_title_add">Добавить книгу</string>
+    <string name="addbook_save">Сохранить</string>
+    <string name="addbook_fill_required_fields">Заполните обязательные поля</string>
+    <string name="addbook_search_label">Поиск</string>
+    <string name="addbook_search_placeholder">Найти по названию или автору</string>
+    <string name="addbook_results">Результаты</string>
+    <string name="addbook_enter_manually">Ввести вручную</string>
+    <string name="addbook_add">Добавить</string>
+    <string name="addbook_cover_found">Обложка найдена</string>
+    <string name="addbook_cover">Обложка</string>
+    <string name="addbook_cover_tap_to_pick">Нажмите, чтобы выбрать</string>
+    <string name="addbook_change">Сменить</string>
+    <string name="addbook_remove_cover">Удалить обложку</string>
+    <string name="addbook_book_name_label">Название книги</string>
+    <string name="addbook_book_name_placeholder">Введите название</string>
+    <string name="addbook_book_name_error">Введите название книги</string>
+    <string name="addbook_author_label">Автор</string>
+    <string name="addbook_author_placeholder">Введите автора</string>
+    <string name="addbook_status">Статус</string>
+    <string name="addbook_status_reading">Читаю</string>
+    <string name="addbook_status_planned">В планах</string>
+    <string name="addbook_current_page_label">Текущая</string>
+    <string name="addbook_total_pages_label">Всего страниц</string>
+    <string name="addbook_pages_error">Укажите количество страниц</string>
+    <string name="addbook_save_error">Ошибка сохранения</string>
+    <string name="addbook_back_to_search">Назад к поиску</string>
+    <string name="addbook_custom_cover_toast">будет давать добавлять обложку с любым соотношением сторон</string>
+
+    <plurals name="addbook_search_result_subtitle">
+        <item quantity="one">%2$s · %1$d стр.</item>
+        <item quantity="few">%2$s · %1$d стр.</item>
+        <item quantity="many">%2$s · %1$d стр.</item>
+        <item quantity="other">%2$s · %1$d стр.</item>
+    </plurals>
+
+    <!-- Update progress / result -->
+    <string name="update_done">Готово</string>
+    <string name="update_cozy_phrase">Хороший вечер для книги.</string>
+    <string name="update_book_finished_title">Книга прочитана</string>
+    <string name="update_book_finished_subtitle">Книга переехала на полку «Прочитано».</string>
+    <string name="update_rating_label">Как вам книга?</string>
+    <string name="update_note_label">Заметка</string>
+    <string name="update_note_placeholder">Заметка или любимая цитата — по желанию</string>
+    <string name="update_today_read_prefix">"Сегодня прочитано: "</string>
+    <string name="update_progress_title">Где остановились сегодня?</string>
+    <string name="update_progress_subtitle">Дочитал до страницы</string>
+    <string name="update_save_progress">Сохранить прогресс</string>
+    <string name="update_back">Назад</string>
+    <string name="update_now_page_of">сейчас — стр. %1$d / %2$d · %3$d%%</string>
+    <string name="update_slash_total">/ %1$d</string>
+    <string name="update_page_short">стр. %1$d</string>
+    <string name="update_reading_time_label">Время чтения, мин — необязательно</string>
+
+    <plurals name="update_streak_days_in_row">
+        <item quantity="one">%1$d день подряд</item>
+        <item quantity="few">%1$d дня подряд</item>
+        <item quantity="many">%1$d дней подряд</item>
+        <item quantity="other">%1$d дней подряд</item>
+    </plurals>
+    <plurals name="update_pages_count">
+        <item quantity="one">%1$d страница</item>
+        <item quantity="few">%1$d страницы</item>
+        <item quantity="many">%1$d страниц</item>
+        <item quantity="other">%1$d страниц</item>
+    </plurals>
+    <plurals name="update_book_total_pages">
+        <item quantity="one">В книге всего %1$d страница.</item>
+        <item quantity="few">В книге всего %1$d страницы.</item>
+        <item quantity="many">В книге всего %1$d страниц.</item>
+        <item quantity="other">В книге всего %1$d страниц.</item>
+    </plurals>
+    <plurals name="update_read_today_pages">
+        <item quantity="one">+%1$d страницу</item>
+        <item quantity="few">+%1$d страницы</item>
+        <item quantity="many">+%1$d страниц</item>
+        <item quantity="other">+%1$d страниц</item>
+    </plurals>
+
+    <!-- Settings -->
+    <string name="settings_reminder_title">Напоминание о чтении</string>
+    <string name="settings_reminder_subtitle">Вечером, когда дела стихают, — самое время для пары глав. Напомним мягко, один раз в день.</string>
+    <string name="settings_reminder_daily_toggle">Напоминать каждый день</string>
+    <string name="settings_reminder_time_label">Время</string>
+    <string name="settings_reminder_status_on">Хорошо: в %1$s напомним о чтении.</string>
+    <string name="settings_reminder_status_off">Напоминания выключены — включите, чтобы выбрать время.</string>
+    <string name="settings_reminder_done">Готово</string>
+
+    <!-- Design system / navigation -->
+    <string name="ds_weekly_goal_eyebrow">На этой неделе</string>
+    <string name="ds_weekly_goal_done">Цель недели выполнена</string>
+    <string name="ds_nav_activity">Активность</string>
+    <string name="ds_nav_productivity">Продуктивность</string>
+    <string name="ds_nav_library">Библиотека</string>
+
+    <plurals name="ds_weekly_goal_target_pages">
+        <item quantity="one">" / %1$d стр."</item>
+        <item quantity="few">" / %1$d стр."</item>
+        <item quantity="many">" / %1$d стр."</item>
+        <item quantity="other">" / %1$d стр."</item>
+    </plurals>
+    <plurals name="ds_weekly_goal_remaining">
+        <item quantity="one">Осталось %1$d стр. — примерно один вечер</item>
+        <item quantity="few">Осталось %1$d стр. — примерно один вечер</item>
+        <item quantity="many">Осталось %1$d стр. — примерно один вечер</item>
+        <item quantity="other">Осталось %1$d стр. — примерно один вечер</item>
+    </plurals>
+
+    <!-- Date helpers -->
+    <string name="date_weekday_mon_short">Пн</string>
+    <string name="date_weekday_tue_short">Вт</string>
+    <string name="date_weekday_wed_short">Ср</string>
+    <string name="date_weekday_thu_short">Чт</string>
+    <string name="date_weekday_fri_short">Пт</string>
+    <string name="date_weekday_sat_short">Сб</string>
+    <string name="date_weekday_sun_short">Вс</string>
+</resources>

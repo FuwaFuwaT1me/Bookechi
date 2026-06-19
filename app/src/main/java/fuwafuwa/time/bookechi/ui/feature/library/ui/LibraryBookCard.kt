@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -19,49 +17,63 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.BookCover
+import fuwafuwa.time.bookechi.base.ui.ds.CornerBadgeSpec
+import fuwafuwa.time.bookechi.base.ui.ds.CoverCornerCutoutShape
 import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
 import fuwafuwa.time.bookechi.base.ui.ds.ProgressBar
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.base.ui.ds.StatusChip
+import fuwafuwa.time.bookechi.base.ui.ds.badgeShape
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
-// Высота, зарезервированная под 2 строки названия (titleSmall) — чтобы низ
-// карточек в ряду выравнивался независимо от длины заголовка.
-private val TitleReservedHeight = 40.dp
+// Скругление обложки (совпадает с DsShapes.cover).
+private val CoverRadius = 12.dp
 
-// Фиксированная высота мета-строки (ProgressBar+процент / StatusChip), чтобы
-// все ячейки сетки были одинаковой высоты.
-private val MetaReservedHeight = 28.dp
+// Бейдж-лайк, влитый в верхний правый угол обложки: верх-правый угол скруглён как
+// угол обложки, верх-левый и низ-правый — мелкое скругление, низ-левый — большой
+// полукруг внутрь обложки. Вокруг бейджа в обложке вырезан гладкий «ров» (gap).
+private val FavoriteBadge = CornerBadgeSpec(
+    size = 40.dp,
+    gap = 5.dp,
+    cornerOuter = CoverRadius,
+    cornerSmall = 8.dp,
+    cornerInner = 22.dp,
+)
 
-// Размер иконки-сердечка поверх обложки.
+// Размер сердечка внутри бейджа.
 private val HeartIconSize = 20.dp
 
 /**
- * Карточка книги в сетке «Библиотека».
+ * Карточка книги в сетке «Библиотека» (masonry, произвольная высота).
  *
- * Раскладка строго вертикальная (Column) с детерминированной высотой:
- * обложка держит соотношение 2:3 сама (DS [BookCover]); название резервирует
- * место под 2 строки; мета-строка имеет фиксированную высоту. За счёт этого
- * все карточки в ряду одной высоты, и LazyVerticalGrid не «едет».
+ * Обложка во всю ширину карточки с гладким вырезом в верхнем правом углу, в
+ * который вложен бейдж-лайк. Ниже — название (serif), автор и мета-строка
+ * (прогресс для «Читаю», иначе статус-чип).
  */
 @Composable
 fun LibraryBookCard(
     book: Book,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onToggleFavorite: () -> Unit = {},
 ) {
     val colors = BookechiTheme.colors
+    val coverShape = remember { CoverCornerCutoutShape(CoverRadius, FavoriteBadge) }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -71,33 +83,43 @@ fun LibraryBookCard(
             .padding(Spacing.md),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
-        // Обложка во всю ширину карточки + сердечко в правом верхнем углу.
-        Row(modifier = Modifier.fillMaxWidth()) {
+        // Обложка с вырезом + бейдж-лайк, влитый в верхний правый угол.
+        Box(modifier = Modifier.fillMaxWidth()) {
             BookCover(
                 coverPath = book.coverPath,
                 title = book.name,
                 author = book.author,
                 width = null,
-                modifier = Modifier.weight(1f),
+                shape = coverShape,
+                titleEndInset = FavoriteBadge.size,
+                modifier = Modifier.fillMaxWidth(),
             )
 
-            // Сердечко — голая иконка поверх обложки (как в макете), без подложки-кружка.
-            Icon(
-                imageVector = if (book.isFavorite) {
-                    Icons.Default.Favorite
-                } else {
-                    Icons.Default.FavoriteBorder
-                },
-                contentDescription = null,
-                tint = if (book.isFavorite) colors.accent else colors.textSecondary,
+            val badgeColor = if (book.isFavorite) colors.accent else colors.accentSoft
+            val heartTint = if (book.isFavorite) Color.White else colors.accentDeep
+            Box(
                 modifier = Modifier
-                    .align(Alignment.Top)
-                    .padding(Spacing.sm)
-                    .size(HeartIconSize),
-            )
+                    .align(Alignment.TopEnd)
+                    .size(FavoriteBadge.size)
+                    .clip(FavoriteBadge.badgeShape())
+                    .background(badgeColor)
+                    .clickable(onClick = onToggleFavorite),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = if (book.isFavorite) {
+                        Icons.Default.Favorite
+                    } else {
+                        Icons.Default.FavoriteBorder
+                    },
+                    contentDescription = stringResource(R.string.lib_favorite),
+                    tint = heartTint,
+                    modifier = Modifier.size(HeartIconSize),
+                )
+            }
         }
 
-        // Название: 2 строки с зарезервированной высотой (одинаковый низ у карточек).
+        // Название: до 2 строк, serif bold.
         Text(
             text = book.name,
             style = MaterialTheme.typography.titleSmall.copy(
@@ -107,9 +129,7 @@ fun LibraryBookCard(
             color = colors.textPrimary,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = TitleReservedHeight),
+            modifier = Modifier.fillMaxWidth(),
         )
 
         // Автор: одна строка.
@@ -122,10 +142,9 @@ fun LibraryBookCard(
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // Мета-строка фиксированной высоты: прогресс для «Читаю», иначе статус-чип.
+        // Мета-строка: прогресс для «Читаю», иначе статус-чип.
         Box(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.CenterStart,
         ) {
             if (book.readingStatus == ReadingStatus.Reading) {
@@ -156,13 +175,14 @@ fun LibraryBookCard(
     }
 }
 
+@Composable
 private fun statusLabel(status: ReadingStatus): String = when (status) {
-    ReadingStatus.None -> "Не начата"
-    ReadingStatus.Planned -> "В планах"
-    ReadingStatus.Reading -> "Читаю"
-    ReadingStatus.Paused -> "Пауза"
-    ReadingStatus.Dropped -> "Брошена"
-    ReadingStatus.Completed -> "Прочитано"
+    ReadingStatus.None -> stringResource(R.string.lib_status_none)
+    ReadingStatus.Planned -> stringResource(R.string.lib_status_planned)
+    ReadingStatus.Reading -> stringResource(R.string.lib_status_reading)
+    ReadingStatus.Paused -> stringResource(R.string.lib_status_paused)
+    ReadingStatus.Dropped -> stringResource(R.string.lib_status_dropped)
+    ReadingStatus.Completed -> stringResource(R.string.lib_status_completed)
 }
 
 @Preview(name = "LibraryBookCard Reading Light", showBackground = true, backgroundColor = 0xFFFFF9F6)

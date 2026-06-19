@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
@@ -43,7 +44,11 @@ private val WarmCoverTints = listOf(
     Color(0xFF8C6E54),
 )
 
-private fun coverTintFor(title: String): Color {
+/**
+ * Тёплый матовый оттенок книги по hashCode(title). Используется и для плейсхолдера
+ * обложки, и для тёплого градиента-фона карточек в списках.
+ */
+fun coverTintFor(title: String): Color {
     val index = ((title.hashCode() % WarmCoverTints.size) + WarmCoverTints.size) % WarmCoverTints.size
     return WarmCoverTints[index]
 }
@@ -61,12 +66,14 @@ fun BookCover(
     author: String,
     modifier: Modifier = Modifier,
     width: Dp? = 96.dp,
+    shape: Shape = DsShapes.cover,
+    titleEndInset: Dp = 0.dp,
 ) {
     Box(
         modifier = modifier
             .then(if (width != null) Modifier.width(width) else Modifier)
             .aspectRatio(2f / 3f)
-            .clip(DsShapes.cover),
+            .clip(shape),
     ) {
         if (coverPath != null) {
             AsyncImage(
@@ -113,6 +120,8 @@ fun BookCover(
                     horizontalAlignment = Alignment.Start,
                 ) {
                     // Название — у верхнего-левого края (serif bold, как на обложке).
+                    // Справа резервируем место под вырез/бейдж (titleEndInset),
+                    // чтобы текст не уходил под кнопку лайка и не обрезался.
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleSmall.copy(
@@ -123,6 +132,7 @@ fun BookCover(
                         textAlign = TextAlign.Start,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(end = titleEndInset),
                     )
                     Text(
                         text = author.uppercase(),

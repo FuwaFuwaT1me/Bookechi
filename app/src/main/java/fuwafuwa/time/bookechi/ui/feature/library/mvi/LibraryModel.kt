@@ -102,6 +102,14 @@ class LibraryModel(
                 }
             }
 
+            is LibraryAction.ToggleFavorite -> {
+                scope.launch {
+                    bookRepository.updateBook(
+                        action.book.copy(isFavorite = !action.book.isFavorite)
+                    )
+                }
+            }
+
             is LibraryAction.CancelEditingBook -> {
                 updateState {
                     copy(

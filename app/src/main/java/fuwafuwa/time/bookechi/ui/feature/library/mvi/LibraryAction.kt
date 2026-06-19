@@ -22,6 +22,7 @@ sealed interface LibraryAction : Action {
 
     data class EditBook(val book: Book) : LibraryAction
     data class UpdateBook(val book: Book) : LibraryAction
+    data class ToggleFavorite(val book: Book) : LibraryAction
     data class DeleteBook(val book: Book) : LibraryAction
     data object CancelEditingBook : LibraryAction
 

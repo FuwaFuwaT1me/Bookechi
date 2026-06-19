@@ -27,6 +27,7 @@ fun LibraryBooksGrid(
     books: List<Book>,
     onBookClick: (Book) -> Unit,
     modifier: Modifier = Modifier,
+    onToggleFavorite: (Book) -> Unit = {},
     contentPadding: PaddingValues = PaddingValues(bottom = 96.dp),
 ) {
     LazyVerticalStaggeredGrid(
@@ -40,6 +41,7 @@ fun LibraryBooksGrid(
             LibraryBookCard(
                 book = book,
                 onClick = { onBookClick(book) },
+                onToggleFavorite = { onToggleFavorite(book) },
             )
         }
     }

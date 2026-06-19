@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import fuwafuwa.time.bookechi.ui.theme.LocalBottomBarHeight
 import fuwafuwa.time.bookechi.ui.theme.LocalThemeToggle
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,9 +37,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,7 +62,7 @@ import fuwafuwa.time.bookechi.base.ui.ds.SecondaryButton
 import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.base.ui.ds.StatusChip
-import fuwafuwa.time.bookechi.base.ui.ds.WeeklyGoalCard
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.mvi.ui.Screen
@@ -73,7 +78,16 @@ import kotlin.math.ceil
 data object BookListScreen : Screen
 
 /** Подписи дней недели Пн..Вс под weekDayStreaks. */
-private val WeekDayLabels = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+@Composable
+private fun weekDayLabels(): List<String> = listOf(
+    stringResource(R.string.home_weekday_mon),
+    stringResource(R.string.home_weekday_tue),
+    stringResource(R.string.home_weekday_wed),
+    stringResource(R.string.home_weekday_thu),
+    stringResource(R.string.home_weekday_fri),
+    stringResource(R.string.home_weekday_sat),
+    stringResource(R.string.home_weekday_sun),
+)
 
 /** Среднее число страниц в день для прогноза, когда нет точных данных. */
 private const val DEFAULT_PAGES_PER_DAY = 25 // TODO: compute from reading sessions average
@@ -118,7 +132,7 @@ private fun BookListScreenPrivate(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "Что-то пошло не так",
+                        text = stringResource(R.string.home_error_generic),
                         style = MaterialTheme.typography.bodyLarge,
                         color = colors.textSecondary,
                     )
@@ -179,21 +193,14 @@ private fun BookListContent(
             )
         }
 
-        item {
-            WeeklyGoalCard(
-                pagesRead = state.weeklyPagesRead,
-                pagesTarget = state.weeklyPagesTarget,
-            )
-        }
-
         when {
             !hasBooks -> {
                 item {
                     EmptyState(
                         icon = Icons.AutoMirrored.Outlined.MenuBook,
-                        title = "Добавьте первую книгу",
-                        subtitle = "Она появится здесь, и каждый прочитанный вечер будет в копилке.",
-                        ctaText = "Добавить книгу",
+                        title = stringResource(R.string.home_empty_title),
+                        subtitle = stringResource(R.string.home_empty_subtitle),
+                        ctaText = stringResource(R.string.home_empty_cta),
                         onCta = { onAction(BookListAction.NavigateToAddBook) },
                     )
                 }
@@ -202,16 +209,16 @@ private fun BookListContent(
             activeBook == null -> {
                 item {
                     Text(
-                        text = "Что читаете сейчас?",
+                        text = stringResource(R.string.home_what_reading_now),
                         style = MaterialTheme.typography.headlineSmall,
                         color = BookechiTheme.colors.textPrimary,
                     )
                 }
                 items(items = plannedBooks, key = { it.id }) { book ->
-                    PlannedBookRow(
+                    BookListRow(
                         book = book,
-                        onStart = { onAction(BookListAction.NavigateToEditBook(book)) },
                         onClick = { onAction(BookListAction.NavigateToBookDetails(book)) },
+                        onAction = { onAction(BookListAction.NavigateToEditBook(book)) },
                     )
                 }
             }
@@ -222,17 +229,19 @@ private fun BookListContent(
                         book = activeBook,
                         markedToday = markedToday,
                         pagesReadToday = state.pagesReadToday,
+                        onClick = { onAction(BookListAction.NavigateToBookDetails(activeBook)) },
                         onQuickLog = { onAction(BookListAction.NavigateToEditBook(activeBook)) },
                         onMarkProgress = { onAction(BookListAction.NavigateToEditBook(activeBook)) },
                     )
                 }
 
                 if (restBooks.isNotEmpty()) {
-                    item { SectionLabel(text = "Ещё в чтении и планах") }
+                    item { SectionLabel(text = stringResource(R.string.home_more_reading_planned)) }
                     items(items = restBooks, key = { it.id }) { book ->
-                        CompactBookRow(
+                        BookListRow(
                             book = book,
                             onClick = { onAction(BookListAction.NavigateToBookDetails(book)) },
+                            onAction = { onAction(BookListAction.NavigateToEditBook(book)) },
                         )
                     }
                 }
@@ -253,20 +262,20 @@ private fun HomeHeader(onToggleTheme: () -> Unit) {
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Добрый вечер, Иван",
+                text = stringResource(R.string.home_greeting),
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.textSecondary,
             )
             Spacer(Modifier.height(Spacing.xs))
             Text(
-                text = "Что читаем сегодня?",
+                text = stringResource(R.string.home_greeting_question),
                 style = MaterialTheme.typography.headlineMedium,
                 color = colors.textPrimary,
             )
         }
         CircleIconButton(
             icon = if (colors.isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
-            contentDescription = "Переключить тему",
+            contentDescription = stringResource(R.string.home_toggle_theme),
             onClick = LocalThemeToggle.current,
         )
     }
@@ -315,20 +324,28 @@ private fun StreakCard(
     val subtitle: String
     when {
         isComeback -> {
-            title = "С возвращением"
-            subtitle = "Серия на паузе. Пара страниц — и она начнётся заново"
+            title = stringResource(R.string.home_streak_comeback_title)
+            subtitle = stringResource(R.string.home_streak_comeback_subtitle)
         }
         !hasBooks -> {
-            title = "Начните серию сегодня"
-            subtitle = "Отметьте чтение, чтобы запустить серию"
+            title = stringResource(R.string.home_streak_start_title)
+            subtitle = stringResource(R.string.home_streak_start_subtitle)
         }
         markedToday -> {
-            title = "${state.totalDaysWithStreak} дней подряд"
-            subtitle = "Сегодня уже отмечено"
+            title = pluralStringResource(
+                R.plurals.home_streak_days_in_row,
+                state.totalDaysWithStreak,
+                state.totalDaysWithStreak,
+            )
+            subtitle = stringResource(R.string.home_streak_marked_subtitle)
         }
         else -> {
-            title = "${state.totalDaysWithStreak} дней подряд"
-            subtitle = "Отметьте чтение, чтобы продолжить серию"
+            title = pluralStringResource(
+                R.plurals.home_streak_days_in_row,
+                state.totalDaysWithStreak,
+                state.totalDaysWithStreak,
+            )
+            subtitle = stringResource(R.string.home_streak_continue_subtitle)
         }
     }
 
@@ -378,12 +395,13 @@ private fun StreakCard(
             }
             CircleIconButton(
                 icon = Icons.Outlined.NotificationsNone,
-                contentDescription = "Напоминания",
+                contentDescription = stringResource(R.string.home_reminders_cd),
                 onClick = onBellClick,
                 modifier = Modifier.size(36.dp),
             )
         }
 
+        val dayLabels = weekDayLabels()
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -396,7 +414,7 @@ private fun StreakCard(
                     else -> DayState.Empty
                 }
                 DayDot(
-                    label = WeekDayLabels.getOrElse(index) { "" },
+                    label = dayLabels.getOrElse(index) { "" },
                     state = dayState,
                 )
             }
@@ -412,6 +430,7 @@ private fun ActiveBookHeroCard(
     book: Book,
     markedToday: Boolean,
     pagesReadToday: Int,
+    onClick: () -> Unit,
     onQuickLog: () -> Unit,
     onMarkProgress: () -> Unit,
 ) {
@@ -427,6 +446,8 @@ private fun ActiveBookHeroCard(
             .fillMaxWidth()
             .background(colors.surfaceElevated, DsShapes.hero)
             .border(BorderStroke(1.dp, colors.stroke), DsShapes.hero)
+            .clip(DsShapes.hero)
+            .clickable(onClick = onClick)
             .padding(Spacing.xl),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
     ) {
@@ -464,7 +485,7 @@ private fun ActiveBookHeroCard(
                 Spacer(Modifier.weight(1f))
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
-                        text = "стр. ",
+                        text = stringResource(R.string.home_page_prefix),
                         style = MaterialTheme.typography.titleSmall,
                         color = colors.textSecondary,
                     )
@@ -503,7 +524,11 @@ private fun ActiveBookHeroCard(
                 )
                 Spacer(Modifier.size(Spacing.xs))
                 Text(
-                    text = "При твоём темпе — около $daysLeft дней до конца",
+                    text = pluralStringResource(
+                        R.plurals.home_pace_days_left,
+                        daysLeft,
+                        daysLeft,
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textSecondary,
                 )
@@ -521,139 +546,168 @@ private fun ActiveBookHeroCard(
 
         if (markedToday) {
             Text(
-                text = "✓ Отмечено сегодня · +$pagesReadToday стр.",
+                text = pluralStringResource(
+                    R.plurals.home_marked_today_pages,
+                    pagesReadToday,
+                    pagesReadToday,
+                ),
                 style = MaterialTheme.typography.titleSmall,
-                color = colors.sage,
+                color = colors.accentDeep,
             )
-            SecondaryButton(text = "Добавить ещё страницы", onClick = onMarkProgress)
+            SecondaryButton(text = stringResource(R.string.home_add_more_pages), onClick = onMarkProgress)
         } else {
             InsightPlinth(
-                text = "Сегодняшние страницы ещё не отмечены — это займёт минуту",
+                text = stringResource(R.string.home_pages_not_marked),
                 backgroundColor = colors.accentSoft,
                 icon = Icons.Outlined.Edit,
                 iconTint = colors.accentDeep,
             )
-            PrimaryButton(text = "Отметить прогресс", onClick = onMarkProgress)
+            PrimaryButton(text = stringResource(R.string.home_mark_progress), onClick = onMarkProgress)
         }
     }
 }
 
 /* ----------------------------------------------------------------------------
- * Компактные строки списка
+ * Строка списка: карточка с обложкой, названием/автором, прогресс/статус
+ * и таблеткой-действием («Дальше» для читаемых, «Начать» для остальных).
  * ------------------------------------------------------------------------- */
+private val RowCoverWidth = 80.dp
+
+// Палитра приглушённых тонов (тёплые + холодные) для градиента-фона карточек.
+// Каждой книге достаётся свой тон детерминированно по названию — как в дизайне,
+// где у карточек есть и персиковые, и голубоватые/сероватые оттенки.
+// strength — сила подмешивания к фону: у холодных тонов меньше, чтобы они были
+// лёгкими, а не «агрессивными».
+private data class CardTint(val color: Color, val strength: Float)
+
+private val CardTints = listOf(
+    CardTint(Color(0xFFC97A53), 0.40f), // персик
+    CardTint(Color(0xFFB5764F), 0.40f), // терракота
+    CardTint(Color(0xFFC68A86), 0.40f), // пыльная роза
+    CardTint(Color(0xFFB0766E), 0.40f), // глиняно-розовый
+    CardTint(Color(0xFFC79A52), 0.38f), // медовый
+    CardTint(Color(0xFFBE8090), 0.40f), // приглушённый розовый
+    CardTint(Color(0xFF6E8497), 0.20f), // пыльно-голубой — легче
+    CardTint(Color(0xFF7C8A6E), 0.22f), // шалфей — легче
+)
+
+private fun cardTintFor(title: String): CardTint {
+    val index = ((title.hashCode() % CardTints.size) + CardTints.size) % CardTints.size
+    return CardTints[index]
+}
+
 @Composable
-private fun CompactBookRow(
+private fun BookListRow(
     book: Book,
     onClick: () -> Unit,
+    onAction: () -> Unit,
 ) {
     val colors = BookechiTheme.colors
     val safePages = book.pages.coerceAtLeast(1)
     val progress = (book.currentPage.toFloat() / safePages).coerceIn(0f, 1f)
     val isReading = book.readingStatus == ReadingStatus.Reading || book.currentPage > 0
+    val actionLabel = if (isReading) stringResource(R.string.home_action_continue)
+        else stringResource(R.string.home_action_start)
+    val coverHeight = RowCoverWidth * 1.5f // обложка 2:3
+
+    // Градиент уникален для каждой книги: свой приглушённый тон (CardTints по
+    // названию) слева → surfaceElevated справа. Тон адаптивен к теме (мешается с
+    // surfaceElevated). Контур ниже не даёт карточке сливаться с фоном.
+    val tint = cardTintFor(book.name)
+    val cardBrush = Brush.horizontalGradient(
+        0f to lerp(colors.surfaceElevated, tint.color, tint.strength),
+        0.55f to colors.surfaceElevated,
+    )
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(colors.surface, DsShapes.card)
+            .shadow(elevation = 3.dp, shape = DsShapes.card, clip = false)
+            .background(cardBrush, DsShapes.card)
             .border(BorderStroke(1.dp, colors.stroke), DsShapes.card)
+            .clip(DsShapes.card)
             .clickable(onClick = onClick)
-            .padding(Spacing.md),
+            .padding(Spacing.lg),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BookCover(
             coverPath = book.coverPath,
             title = book.name,
             author = book.author,
-            width = 44.dp,
+            width = RowCoverWidth,
         )
         Spacer(Modifier.size(Spacing.md))
-        Column(modifier = Modifier.weight(1f)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .height(coverHeight),
+        ) {
             Text(
                 text = book.name,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleLarge,
                 color = colors.textPrimary,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
+            Spacer(Modifier.height(Spacing.xs))
             Text(
                 text = book.author,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = colors.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            // Прижимаем прогресс/статус к нижней стороне карточки (как у обложки).
+            Spacer(Modifier.weight(1f))
             if (isReading) {
-                Spacer(Modifier.height(Spacing.sm))
-                ProgressBar(progress = progress, height = 6.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                ) {
+                    ProgressBar(
+                        progress = progress,
+                        modifier = Modifier.weight(1f),
+                        height = 6.dp,
+                    )
+                    Text(
+                        text = "${(progress * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.accentDeep,
+                    )
+                }
+            } else {
+                StatusChip(
+                    status = pluralStringResource(
+                        R.plurals.home_status_with_pages,
+                        book.pages,
+                        statusLabel(book.readingStatus),
+                        book.pages,
+                    ),
+                )
             }
         }
-        if (!isReading) {
-            Spacer(Modifier.size(Spacing.sm))
-            StatusChip(status = statusLabel(book.readingStatus))
-        }
-    }
-}
-
-@Composable
-private fun PlannedBookRow(
-    book: Book,
-    onStart: () -> Unit,
-    onClick: () -> Unit,
-) {
-    val colors = BookechiTheme.colors
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colors.surface, DsShapes.card)
-            .border(BorderStroke(1.dp, colors.stroke), DsShapes.card)
-            .clickable(onClick = onClick)
-            .padding(Spacing.md),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        BookCover(
-            coverPath = book.coverPath,
-            title = book.name,
-            author = book.author,
-            width = 44.dp,
-        )
         Spacer(Modifier.size(Spacing.md))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = book.name,
-                style = MaterialTheme.typography.titleSmall,
-                color = colors.textPrimary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = book.author,
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textSecondary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        Spacer(Modifier.size(Spacing.sm))
         Text(
-            text = "Начать",
-            style = MaterialTheme.typography.titleSmall,
-            color = colors.accent,
+            text = actionLabel,
+            style = MaterialTheme.typography.labelLarge,
+            color = Color.White,
             modifier = Modifier
                 .clip(CircleShape)
-                .background(colors.accentSoft)
-                .clickable(onClick = onStart)
+                .background(colors.accent)
+                .clickable(onClick = onAction)
                 .padding(horizontal = Spacing.lg, vertical = Spacing.sm),
         )
     }
 }
 
+@Composable
 private fun statusLabel(status: ReadingStatus): String = when (status) {
-    ReadingStatus.Reading -> "Читаю"
-    ReadingStatus.Planned -> "В планах"
-    ReadingStatus.Completed -> "Прочитано"
-    ReadingStatus.Paused -> "Пауза"
-    ReadingStatus.Dropped -> "Брошено"
-    ReadingStatus.None -> "Без статуса"
+    ReadingStatus.Reading -> stringResource(R.string.home_status_reading)
+    ReadingStatus.Planned -> stringResource(R.string.home_status_planned)
+    ReadingStatus.Completed -> stringResource(R.string.home_status_completed)
+    ReadingStatus.Paused -> stringResource(R.string.home_status_paused)
+    ReadingStatus.Dropped -> stringResource(R.string.home_status_dropped)
+    ReadingStatus.None -> stringResource(R.string.home_status_none)
 }
 
 /* ----------------------------------------------------------------------------

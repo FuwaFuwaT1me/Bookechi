@@ -38,11 +38,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.BookCover
 import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
 import fuwafuwa.time.bookechi.base.ui.ds.EmptyState
@@ -108,6 +111,9 @@ private fun BookDetailsScreenV2Content(
                 )
             }
         }
+
+        // Лист редактирования метаданных книги.
+        BookDetailsEditSheet(state = state, onAction = onAction)
     }
 }
 
@@ -122,20 +128,20 @@ private fun ErrorContent(onBack: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Не удалось загрузить книгу",
+            text = stringResource(R.string.details_error_title),
             style = MaterialTheme.typography.headlineSmall,
             color = colors.textPrimary,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(Spacing.md))
         Text(
-            text = "Попробуйте вернуться назад",
+            text = stringResource(R.string.details_error_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = colors.textSecondary,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(Spacing.xl))
-        PrimaryButton(text = "Назад", onClick = onBack)
+        PrimaryButton(text = stringResource(R.string.details_back), onClick = onBack)
     }
 }
 
@@ -162,7 +168,7 @@ private fun BookDetailsContent(
         TopBar(
             isFavorite = book.isFavorite,
             onBackClick = { onAction(BookDetailsAction.NavigateBack) },
-            onEditClick = { /* TODO wire to edit_book */ },
+            onEditClick = { onAction(BookDetailsAction.OpenEdit) },
             onFavoriteClick = { onAction(BookDetailsAction.ToggleFavorite) }
         )
 
@@ -181,19 +187,19 @@ private fun BookDetailsContent(
         Spacer(modifier = Modifier.height(Spacing.lg))
 
         PrimaryButton(
-            text = "Отметить прогресс",
+            text = stringResource(R.string.details_mark_progress),
             onClick = { onAction(BookDetailsAction.NavigateToUpdateProgress) }
         )
 
         Spacer(modifier = Modifier.height(Spacing.xxl))
 
-        SectionLabel(text = "История чтения")
+        SectionLabel(text = stringResource(R.string.details_reading_history))
         Spacer(modifier = Modifier.height(Spacing.md))
         ReadingHistorySparkline(recentSessionPages = recentSessionPages)
 
         Spacer(modifier = Modifier.height(Spacing.xxl))
 
-        SectionLabel(text = "Цитаты и заметки")
+        SectionLabel(text = stringResource(R.string.details_quotes_and_notes))
         Spacer(modifier = Modifier.height(Spacing.md))
 
         if (rating > 0) {
@@ -204,8 +210,8 @@ private fun BookDetailsContent(
         if (quotes.isEmpty()) {
             EmptyState(
                 icon = Icons.Default.FormatQuote,
-                title = "Здесь будут ваши цитаты",
-                subtitle = "Сохраняйте любимые строки и заметки прямо во время чтения.",
+                title = stringResource(R.string.details_quotes_empty_title),
+                subtitle = stringResource(R.string.details_quotes_empty_subtitle),
                 ctaText = null,
                 onCta = null
             )
@@ -235,7 +241,7 @@ private fun TopBar(
     ) {
         CircleIconButton(
             icon = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Назад",
+            contentDescription = stringResource(R.string.details_back),
             onClick = onBackClick
         )
 
@@ -243,7 +249,7 @@ private fun TopBar(
 
         CircleIconButton(
             icon = Icons.Default.Edit,
-            contentDescription = "Редактировать",
+            contentDescription = stringResource(R.string.details_edit),
             onClick = onEditClick
         )
 
@@ -251,7 +257,7 @@ private fun TopBar(
 
         CircleIconButton(
             icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-            contentDescription = if (isFavorite) "Убрать из избранного" else "В избранное",
+            contentDescription = if (isFavorite) stringResource(R.string.details_favorite_remove) else stringResource(R.string.details_favorite_add),
             onClick = onFavoriteClick,
             tint = if (isFavorite) colors.accent else colors.textSecondary
         )
@@ -343,7 +349,7 @@ private fun ProgressCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "стр. $currentPage / $totalPages",
+                text = stringResource(R.string.details_page_of, currentPage, totalPages),
                 style = MaterialTheme.typography.titleSmall,
                 color = colors.textPrimary
             )
@@ -400,7 +406,7 @@ private fun ReadingHistorySparkline(recentSessionPages: List<Int>) {
     ) {
         if (recent.isEmpty()) {
             Text(
-                text = "Пока нет записей о чтении этой книги.",
+                text = stringResource(R.string.details_no_reading_records),
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.textSecondary
             )
@@ -446,12 +452,12 @@ private fun ReadingHistorySparkline(recentSessionPages: List<Int>) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Последние $days дней",
+                    text = pluralStringResource(R.plurals.details_last_days, days, days),
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textSecondary
                 )
                 Text(
-                    text = "$maxPages стр.",
+                    text = stringResource(R.string.details_pages_short, maxPages),
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textSecondary
                 )
@@ -478,7 +484,7 @@ private fun QuoteCard(quote: BookQuote) {
         )
         Spacer(modifier = Modifier.height(Spacing.sm))
         Text(
-            text = "стр. ${quote.page}",
+            text = stringResource(R.string.details_page, quote.page),
             style = MaterialTheme.typography.bodySmall,
             color = colors.textSecondary
         )
@@ -493,22 +499,24 @@ private fun heatColorFor(ratio: Float, heatmap: List<androidx.compose.ui.graphic
     return heatmap[index]
 }
 
+@Composable
 private fun readingStatusLabel(status: ReadingStatus): String = when (status) {
-    ReadingStatus.None -> "Не начата"
-    ReadingStatus.Planned -> "В планах"
-    ReadingStatus.Reading -> "Читаю"
-    ReadingStatus.Paused -> "На паузе"
-    ReadingStatus.Dropped -> "Брошена"
-    ReadingStatus.Completed -> "Прочитано"
+    ReadingStatus.None -> stringResource(R.string.details_status_none)
+    ReadingStatus.Planned -> stringResource(R.string.details_status_planned)
+    ReadingStatus.Reading -> stringResource(R.string.details_status_reading)
+    ReadingStatus.Paused -> stringResource(R.string.details_status_paused)
+    ReadingStatus.Dropped -> stringResource(R.string.details_status_dropped)
+    ReadingStatus.Completed -> stringResource(R.string.details_status_completed)
 }
 
+@Composable
 private fun paceForecast(currentPage: Int, totalPages: Int): String {
     val remaining = (totalPages - currentPage).coerceAtLeast(0)
-    if (remaining == 0) return "Книга прочитана до конца"
+    if (remaining == 0) return stringResource(R.string.details_pace_finished)
     // Грубая эвристика темпа: ~25 стр/день. TODO: считать средний темп из сессий.
     val perDay = 25
     val days = ceil(remaining.toFloat() / perDay).toInt().coerceAtLeast(1)
-    return "При твоём темпе — около $days дней до конца"
+    return pluralStringResource(R.plurals.details_pace_forecast, days, days)
 }
 
 /* ---------------------------- Previews ---------------------------- */

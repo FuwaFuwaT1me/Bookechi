@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.book_details.mvi
 
+import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
@@ -49,7 +50,31 @@ class BookDetailsModel(
             is BookDetailsAction.StartReadingAgain -> scope.launch {
                 handleUpdateReadingStatus(ReadingStatus.Reading)
             }
+            is BookDetailsAction.OpenEdit -> updateState { copy(isEditing = true) }
+            is BookDetailsAction.CloseEdit -> updateState { copy(isEditing = false) }
+            is BookDetailsAction.UpdateBook -> scope.launch {
+                handleUpdateBook(action.book)
+            }
+            is BookDetailsAction.DeleteBook -> scope.launch {
+                handleDeleteBook()
+            }
         }
+    }
+
+    private suspend fun handleUpdateBook(book: Book) {
+        withContext(Dispatchers.IO) {
+            bookRepository.updateBook(book)
+        }
+        updateState { copy(book = book) }
+    }
+
+    private suspend fun handleDeleteBook() {
+        val book = state.value.book ?: return
+        withContext(Dispatchers.IO) {
+            bookRepository.deleteBook(book)
+        }
+        updateState { copy(isEditing = false) }
+        sendNavigationEvent(BaseNavigationEvent.NavigateBack)
     }
 
     /**

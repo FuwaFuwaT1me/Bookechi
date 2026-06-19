@@ -31,4 +31,6 @@ data class BookDetailsState(
      * TODO: persist quotes & rating (needs Book/schema extension).
      */
     val rating: Int = 0,
+    /** Открыт ли лист редактирования метаданных книги. */
+    val isEditing: Boolean = false,
 ) : State

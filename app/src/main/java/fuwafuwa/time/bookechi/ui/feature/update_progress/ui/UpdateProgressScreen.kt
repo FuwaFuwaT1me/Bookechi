@@ -1,5 +1,8 @@
 package fuwafuwa.time.bookechi.ui.feature.update_progress.ui
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,7 +26,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.Icon
@@ -32,23 +42,31 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.BookCover
+import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
 import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.base.ui.ds.WarmTextField
@@ -101,12 +119,16 @@ private fun UpdateProgressScreenContent(
 
         Spacer(Modifier.height(Spacing.xl))
 
-        BookMiniInfo(book = state.book)
+        ProgressHeader(
+            book = state.book,
+            inputPages = state.updatedInputPages,
+            modifier = Modifier.fillMaxWidth(),
+        )
 
         Spacer(Modifier.height(Spacing.xxxl))
 
         Text(
-            text = "Где остановились сегодня?",
+            text = stringResource(R.string.update_progress_title),
             style = MaterialTheme.typography.headlineMedium,
             color = colors.textPrimary,
         )
@@ -114,7 +136,7 @@ private fun UpdateProgressScreenContent(
         Spacer(Modifier.height(Spacing.xs))
 
         Text(
-            text = "Дочитал до страницы",
+            text = stringResource(R.string.update_progress_subtitle),
             style = MaterialTheme.typography.bodySmall,
             color = colors.textSecondary,
         )
@@ -131,7 +153,11 @@ private fun UpdateProgressScreenContent(
         if (overLimit) {
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = "В книге всего ${state.book.pages} страниц.",
+                text = pluralStringResource(
+                    R.plurals.update_book_total_pages,
+                    state.book.pages,
+                    state.book.pages,
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = colors.accentDeep,
             )
@@ -163,7 +189,7 @@ private fun UpdateProgressScreenContent(
         Spacer(Modifier.height(Spacing.xxxl))
 
         PrimaryButton(
-            text = "Сохранить прогресс",
+            text = stringResource(R.string.update_save_progress),
             enabled = isValidProgress(state) && !state.isSaving,
             onClick = { onAction(UpdateProgressAction.SaveChanges(state.updatedInputPages)) },
         )
@@ -187,46 +213,163 @@ private fun BackButton(
     ) {
         Icon(
             imageVector = Icons.Default.ArrowBackIosNew,
-            contentDescription = "Назад",
+            contentDescription = stringResource(R.string.update_back),
             tint = colors.textPrimary,
             modifier = Modifier.size(18.dp),
         )
     }
 }
 
+/**
+ * Центрированная шапка: крупная обложка с заливкой прогресса, ниже название и
+ * строка с сохранённым прогрессом «сейчас — стр. X / Y · Z%».
+ */
 @Composable
-private fun BookMiniInfo(
+private fun ProgressHeader(
     book: Book,
+    inputPages: Int,
     modifier: Modifier = Modifier,
 ) {
     val colors = BookechiTheme.colors
-    val percent = if (book.pages > 0) (book.currentPage * 100) / book.pages else 0
+    val savedPercent = if (book.pages > 0) (book.currentPage * 100) / book.pages else 0
+    val fraction = if (book.pages > 0) inputPages.toFloat() / book.pages.toFloat() else 0f
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        BookCover(
-            coverPath = book.coverPath,
-            title = book.name,
-            author = book.author,
-            width = 64.dp,
+        ProgressCover(book = book, fraction = fraction)
+
+        Spacer(Modifier.height(Spacing.lg))
+
+        Text(
+            text = book.name,
+            style = MaterialTheme.typography.titleLarge,
+            color = colors.textPrimary,
+            textAlign = TextAlign.Center,
         )
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            text = stringResource(
+                R.string.update_now_page_of,
+                book.currentPage,
+                book.pages,
+                savedPercent,
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.textSecondary,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
 
-        Spacer(Modifier.size(Spacing.lg))
+private val CoverWidth = 124.dp
 
-        Column {
-            Text(
-                text = book.name,
-                style = MaterialTheme.typography.titleLarge,
-                color = colors.textPrimary,
-            )
-            Spacer(Modifier.height(Spacing.xs))
-            Text(
-                text = "сейчас — стр. ${book.currentPage} / ${book.pages} · $percent%",
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textSecondary,
-            )
+/**
+ * Обложка с «заливкой прогресса»: вся обложка обесцвечена и притушена (ч/б,
+ * пониженная непрозрачность), а прочитанная часть снизу до [fraction] показана в
+ * полном цвете. На границе — линия и бейдж с процентом. Граница анимируется.
+ */
+@Composable
+private fun ProgressCover(
+    book: Book,
+    fraction: Float,
+    modifier: Modifier = Modifier,
+) {
+    val colors = BookechiTheme.colors
+    val coverHeight = CoverWidth * 1.5f
+    val animFraction by animateFloatAsState(
+        targetValue = fraction.coerceIn(0f, 1f),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow,
+        ),
+        label = "coverFill",
+    )
+    // Палитра ч/б + затемнение для непрочитанной части (живёт всё время, статична).
+    val dimPaint = remember {
+        Paint().apply {
+            colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
+            alpha = 0.45f
+        }
+    }
+    val percent = (animFraction * 100f).roundToInt()
+    val hasPages = book.pages > 0
+
+    Box(
+        modifier = modifier.size(width = CoverWidth, height = coverHeight),
+    ) {
+        // Внутренний слой обрезается формой обложки (заливка/ч-б/линия не вылезают
+        // за скругления). Бейдж рисуем снаружи — он может выходить за край.
+        Box(modifier = Modifier.matchParentSize().clip(DsShapes.cover)) {
+            if (hasPages) {
+                // База: обесцвеченная и тусклая обложка целиком.
+                BookCover(
+                    coverPath = book.coverPath,
+                    title = book.name,
+                    author = book.author,
+                    width = CoverWidth,
+                    modifier = Modifier.drawWithContent {
+                        drawIntoCanvas { canvas ->
+                            canvas.saveLayer(Rect(Offset.Zero, size), dimPaint)
+                            drawContent()
+                            canvas.restore()
+                        }
+                    },
+                )
+                // Полноцветная прочитанная часть снизу до animFraction.
+                BookCover(
+                    coverPath = book.coverPath,
+                    title = book.name,
+                    author = book.author,
+                    width = CoverWidth,
+                    modifier = Modifier.drawWithContent {
+                        clipRect(top = size.height * (1f - animFraction)) {
+                            this@drawWithContent.drawContent()
+                        }
+                    },
+                )
+                // Линия-граница заливки.
+                if (animFraction > 0.001f && animFraction < 0.999f) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(2.dp)
+                            .offset(y = coverHeight * (1f - animFraction) - 1.dp)
+                            .background(colors.accent),
+                    )
+                }
+            } else {
+                // Нет данных о страницах — просто обложка без заливки.
+                BookCover(
+                    coverPath = book.coverPath,
+                    title = book.name,
+                    author = book.author,
+                    width = CoverWidth,
+                )
+            }
+        }
+
+        // Бейдж с процентом — поверх границы, вне клипа (не обрезается на краях).
+        // Показываем и на 100% (когда вся обложка залита).
+        if (hasPages && animFraction > 0.001f) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = coverHeight * (1f - animFraction) - 11.dp)
+                    .height(22.dp)
+                    .clip(CircleShape)
+                    .background(colors.accent)
+                    .padding(horizontal = Spacing.sm),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "$percent%",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
     }
 }
@@ -290,7 +433,7 @@ private fun PageCounter(
         )
         Spacer(Modifier.width(Spacing.md))
         Text(
-            text = "/ $total",
+            text = stringResource(R.string.update_slash_total, total),
             style = MaterialTheme.typography.titleLarge.copy(fontSize = 30.sp),
             color = colors.textSecondary,
             modifier = Modifier.padding(bottom = Spacing.md),
@@ -375,7 +518,7 @@ private fun ProgressSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "стр. $startPages",
+                text = stringResource(R.string.update_page_short, startPages),
                 style = MaterialTheme.typography.bodySmall,
                 color = colors.textSecondary,
             )
@@ -388,17 +531,6 @@ private fun ProgressSlider(
     }
 }
 
-private fun pagesPlural(count: Int): String {
-    val mod100 = count % 100
-    val mod10 = count % 10
-    return when {
-        mod100 in 11..14 -> "страниц"
-        mod10 == 1 -> "страницу"
-        mod10 in 2..4 -> "страницы"
-        else -> "страниц"
-    }
-}
-
 @Composable
 private fun ReadTodayCounter(
     startPages: Int,
@@ -407,15 +539,17 @@ private fun ReadTodayCounter(
 ) {
     val colors = BookechiTheme.colors
     val read = (updatedInputPages - startPages).coerceAtLeast(0)
+    val prefix = stringResource(R.string.update_today_read_prefix)
+    val readPhrase = pluralStringResource(R.plurals.update_read_today_pages, read, read)
 
     Text(
         modifier = modifier,
         text = buildAnnotatedString {
-            append("Прочитано сегодня: ")
+            append(prefix)
             withStyle(
                 SpanStyle(color = colors.accent, fontWeight = FontWeight.Bold),
             ) {
-                append("+$read ${pagesPlural(read)}")
+                append(readPhrase)
             }
         },
         style = MaterialTheme.typography.bodyLarge,
@@ -432,7 +566,7 @@ private fun ReadingTimeField(
     val colors = BookechiTheme.colors
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Время чтения, мин — необязательно",
+            text = stringResource(R.string.update_reading_time_label),
             style = MaterialTheme.typography.labelMedium,
             color = colors.textSecondary,
         )

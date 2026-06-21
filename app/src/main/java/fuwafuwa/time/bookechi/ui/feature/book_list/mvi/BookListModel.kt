@@ -1,6 +1,7 @@
 package fuwafuwa.time.bookechi.ui.feature.book_list.mvi
 
 import fuwafuwa.time.bookechi.data.model.Book
+import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.data.preferences.AppPreferences
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
@@ -10,6 +11,7 @@ import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.NavigateToBookDetails
 import fuwafuwa.time.bookechi.ui.feature.settings.mvi.NavigateToSettings
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.NavigateToUpdateProgress
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -34,10 +36,20 @@ class BookListModel(
         }
 
         scope.launch {
-            bookRepository.getAllBooks().collect { books ->
+            // Сортируем книги по «дате обновления»: сначала статус «Читаю», затем
+            // по последней дате чтения (последняя прочитанная — первой/главной).
+            combine(
+                bookRepository.getAllBooks(),
+                readingSessionRepository.getLastReadDates(),
+            ) { books, lastRead ->
+                books.sortedWith(
+                    compareByDescending<Book> { it.readingStatus == ReadingStatus.Reading }
+                        .thenByDescending { lastRead[it.id] ?: "" }
+                )
+            }.collect { sortedBooks ->
                 updateState {
                     copy(
-                        books = books,
+                        books = sortedBooks,
                         isLoading = false,
                         error = null
                     )

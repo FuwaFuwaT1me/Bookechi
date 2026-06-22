@@ -141,16 +141,31 @@
     return cells;
   }
 
+  const SPEED = 38; // pages / hour — keeps time derived from pages consistently
+  function minutesFor(pages) { return Math.max(0, Math.round((pages / SPEED) * 60)); }
+
   function monthSummary() {
     const y = TODAY.getFullYear(), m = TODAY.getMonth();
-    let total = 0, best = 0, bestDay = 0, streak = 0, bestStreak = 0;
+    let total = 0, best = 0, bestDay = 0, streak = 0, bestStreak = 0, sessions = 0;
     for (let d = 1; d <= TODAY.getDate(); d++) {
       const p = pagesOn(new Date(y, m, d));
-      if (p > 0) { total += p; streak += 1; bestStreak = Math.max(bestStreak, streak); }
+      if (p > 0) { total += p; streak += 1; bestStreak = Math.max(bestStreak, streak); sessions += 1; }
       else streak = 0;
       if (p > best) { best = p; bestDay = d; }
     }
-    return { total, best, bestDay, bestStreak };
+    const totalMin = minutesFor(total);
+    const avgSession = sessions ? Math.round(totalMin / sessions) : 0;
+    return { total, best, bestDay, bestStreak, sessions, totalMin, avgSession };
+  }
+
+  // minutes read for each of the last 7 days (oldest → newest)
+  function weekMinutes() {
+    const out = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(TODAY); d.setDate(TODAY.getDate() - i);
+      out.push(minutesFor(Math.max(0, pagesOn(d))));
+    }
+    return out;
   }
 
   // year: 12 aggregated months
@@ -170,15 +185,66 @@
     const months = yearGrid().filter(m => m.total >= 0);
     const total = months.reduce((s, m) => s + m.total, 0);
     const best = months.reduce((a, b) => (b.total > a.total ? b : a), months[0]);
-    return { total, bestMonth: best.label, months: months.length };
+    return { total, bestMonth: best.label, months: months.length, totalMin: minutesFor(total) };
   }
 
   function greeting() {
     return 'Добрый вечер, Иван';
   }
 
+  // Reading sessions log (deterministic, derived from books)
+  function sessionLog(books, onlyBookId) {
+    if (onlyBookId) {
+      const b = books.find(x => x.id === onlyBookId);
+      return b ? buildSessions([b]) : [];
+    }
+    const reading = books.filter(b => b.status === 'reading');
+    const finished = books.filter(b => b.status === 'finished').slice(0, 2);
+    return buildSessions(reading.concat(finished));
+  }
+  function buildSessions(src) {
+    const out = [];
+    src.forEach((b, bi) => {
+      let pos = b.current;
+      const nDays = 2 + Math.round(seeded(bi * 7 + 3) * 4);
+      for (let i = 0; i < nDays && pos > 0; i++) {
+        const chunk = 14 + Math.round(seeded(bi * 13 + i * 5) * 40);
+        const from = Math.max(0, pos - chunk);
+        if (from === pos) break;
+        out.push({
+          id: 'sess' + b.id + '_' + i,
+          bookId: b.id, title: b.title, author: b.author, cover: b.cover,
+          from, to: pos, mins: minutesFor(pos - from),
+          pct: Math.round((pos - from) / b.pages * 100),
+          dayOffset: i,
+          time: ['21:30', '08:15', '22:05', '13:40', '20:50', '19:10'][(bi + i) % 6],
+          isCurrent: i === 0 && b.status === 'reading',
+        });
+        pos = from;
+      }
+    });
+    out.sort((a, b) => a.dayOffset - b.dayOffset);
+    return out;
+  }
+  function dayLabel(off) {
+    if (off === 0) return 'Сегодня';
+    if (off === 1) return 'Вчера';
+    return 'На этой неделе';
+  }
+  function periodSummary(books) {
+    const log = sessionLog(books);
+    const sumW = log.reduce((a, s) => ({ n: a.n + 1, p: a.p + (s.to - s.from), m: a.m + s.mins }), { n: 0, p: 0, m: 0 });
+    const fin = books.filter(b => b.status === 'finished').length;
+    return {
+      'Неделя': { sessions: sumW.n, pages: sumW.p, mins: sumW.m, delta: 18, deltaLabel: 'к прошлой неделе' },
+      'Месяц': { sessions: sumW.n * 3 + 5, pages: sumW.p * 3 + 120, mins: sumW.m * 3 + 400, delta: 9, deltaLabel: 'к прошлому месяцу' },
+      'Всё время': { sessions: 148, pages: 8480, mins: 5520, delta: null, deltaLabel: fin + ' книг · с марта 2024' },
+    };
+  }
+
   window.BK_DATA = {
     SCENARIOS, TODAY, MONTHS_RU, MONTHS_RU_SHORT, WEEKDAYS_RU, COVER_TONES, SEARCH_BOOKS,
     monthGrid, monthSummary, yearGrid, yearSummary, pagesOn, levelFor, greeting, sessionsFor,
+    minutesFor, weekMinutes, sessionLog, dayLabel, periodSummary,
   };
 })();

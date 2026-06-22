@@ -6,7 +6,8 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "serif": "Lora",
   "scenario": "Наполненный",
   "radius": 24,
-  "goalStyle": "Полоса"
+  "goalStyle": "Полоса",
+  "coverStyle": "Заливка"
 }/*EDITMODE-END*/;
 
 const SERIF_STACKS = {
@@ -35,13 +36,14 @@ function App() {
   const [tab, setTab] = useAState('home');
   const [overlay, setOverlay] = useAState(null);
   const [bookCardId, setBookCardId] = useAState(null);
+  const [journal, setJournal] = useAState(null); // null | {} (all) | {bookId, title}
   const [reminder, setReminder] = useAState({ on: true, time: '21:00' });
   const scale = useScale();
 
   // scenario switch resets demo data
   useAEffect(() => {
     const make = BK_DATA.SCENARIOS[t.scenario];
-    if (make) { setState(make()); setOverlay(null); setBookCardId(null); }
+    if (make) { setState(make()); setOverlay(null); setBookCardId(null); setJournal(null); }
   }, [t.scenario]);
 
   const patchBooks = (fn) => setState((s) => ({ ...s, books: fn(s.books) }));
@@ -55,9 +57,10 @@ function App() {
   };
 
   const app = {
-    state, tab, overlay, bookCardId, reminder,
+    state, tab, overlay, bookCardId, reminder, journal,
     dark: t.dark,
     goalStyle: t.goalStyle || 'Полоса',
+    coverStyle: t.coverStyle || 'Заливка',
     toggleTheme: () => setTweak('dark', !t.dark),
     setTab, setReminder,
     closeOverlay: () => setOverlay(null),
@@ -72,6 +75,17 @@ function App() {
 
     openBook: (book) => setBookCardId(book.id),
     closeBook: () => setBookCardId(null),
+
+    openJournal: () => setJournal({}),
+    openBookJournal: (book) => setJournal({ bookId: book.id, title: book.title }),
+    closeJournal: () => setJournal(null),
+    openEditSession: (s) => setOverlay({ type: 'editSession', session: s }),
+    askDeleteSession: (s) => setOverlay({ type: 'delSession', session: s }),
+    deleteSession: (s) => {
+      // roll the book back to the session's start page
+      patchBooks((books) => books.map((b) => (b.id === s.bookId ? { ...b, current: s.from } : b)));
+      setOverlay(null);
+    },
 
     makeActive,
     startReading: (book) => {
@@ -192,6 +206,9 @@ function App() {
               <GoalSheet app={app} />
               <ProgressScreen app={app} />
               <SuccessScreen app={app} />
+              <JournalScreen app={app} />
+              <SessionEditSheet app={app} />
+              <SessionDeleteDialog app={app} />
             </div>
           </div>
         </AndroidDevice>
@@ -206,6 +223,10 @@ function App() {
         <TweakRadio label="Стиль" value={t.goalStyle || 'Полоса'}
           options={['Полоса', 'Кольцо', 'Минимум']}
           onChange={(v) => setTweak('goalStyle', v)} />
+        <TweakSection label="Экран прогресса" />
+        <TweakRadio label="Обложка" value={t.coverStyle || 'Заливка'}
+          options={['Заливка', 'Рамка']}
+          onChange={(v) => setTweak('coverStyle', v)} />
         <TweakSection label="Тема" />
         <TweakToggle label="Тёмная тема" value={t.dark} onChange={(v) => setTweak('dark', v)} />
         <TweakSelect label="Шрифт заголовков" value={t.serif}

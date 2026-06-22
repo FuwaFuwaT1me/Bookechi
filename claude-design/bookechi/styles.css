@@ -227,6 +227,77 @@
 }
 .bk-root[data-theme="dark"] .bk-seg button.active { background: var(--surface-pure); }
 
+.bk-pframe { position: relative; flex: none; filter: drop-shadow(0 14px 30px rgba(56,42,32,0.42)); }
+.bk-pframe-flag {
+  position: absolute; left: 50%; bottom: -3px; transform: translateX(-50%);
+  height: 24px; padding: 0 11px; border-radius: 999px; line-height: 24px;
+  background: var(--accent); color: var(--on-accent);
+  font-size: 12.5px; font-weight: 700;
+  border: 2px solid var(--canvas);
+  box-shadow: 0 3px 10px -2px rgba(132,59,34,0.55);
+}
+
+/* progress cover — live read-fill */
+.bk-pcover {
+  position: relative; flex: none;
+  filter: drop-shadow(0 14px 30px rgba(56,42,32,0.42));
+}
+.bk-pcover-scrim {
+  position: absolute; left: 0; right: 0; top: 0; height: 100%;
+  transform-origin: top center;
+  background: color-mix(in oklab, var(--canvas) 70%, transparent);
+  backdrop-filter: saturate(0.5) brightness(1.04);
+}
+.bk-root[data-theme="dark"] .bk-pcover-scrim {
+  background: color-mix(in oklab, var(--canvas) 64%, transparent);
+  backdrop-filter: saturate(0.4) brightness(0.8);
+}
+.bk-pcover-gain {
+  position: absolute; left: 0; right: 0;
+  background: linear-gradient(0deg, color-mix(in oklab, var(--accent) 36%, transparent), color-mix(in oklab, var(--accent) 12%, transparent));
+}
+.bk-pcover-line {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+}
+.bk-pcover-line.tgt {
+  background: var(--accent);
+  box-shadow: 0 0 0 1px var(--surface-pure), 0 0 10px var(--goal-glow);
+}
+.bk-pcover-flag {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  height: 20px; padding: 0 8px; border-radius: 999px;
+  background: var(--accent); color: var(--on-accent);
+  font-size: 10.5px; font-weight: 700; line-height: 20px;
+  border: 1.5px solid var(--surface-pure);
+  box-shadow: 0 2px 8px -1px rgba(132,59,34,0.5);
+}
+
+/* cover hero (add/edit book) */
+.bk-cover-stage {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 14px 0 20px; margin-bottom: 4px;
+  background:
+    radial-gradient(120% 80% at 50% 8%, color-mix(in oklab, var(--accent-soft) 40%, transparent), transparent 70%);
+  border-radius: var(--r-card);
+}
+.bk-cover-hero {
+  position: relative; background: none; border: none; padding: 0; cursor: pointer;
+  transition: transform 0.18s cubic-bezier(.32,.72,.28,1);
+}
+.bk-cover-hero:active { transform: scale(0.97); }
+.bk-cover-hero > div { box-shadow: 0 14px 34px -10px rgba(56,42,32,0.5); }
+.bk-cover-cam {
+  position: absolute; right: -8px; bottom: -8px;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--accent); color: var(--on-accent);
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid var(--canvas);
+  box-shadow: 0 4px 12px -2px rgba(132,59,34,0.5);
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+.bk-cover-hero:hover .bk-cover-cam { background: var(--accent-deep); }
+.bk-cover-hero:active .bk-cover-cam { transform: scale(0.9); }
+
 /* status picker (3 options w/ icons) */
 .bk-statuspick { display: flex; gap: 8px; }
 .bk-statuspick button {
@@ -250,7 +321,10 @@
 .bk-heat-cell[data-l="3"] { background: var(--heat3); border-color: transparent; }
 .bk-heat-cell[data-l="4"] { background: var(--heat4); border-color: transparent; }
 .bk-heat-cell[data-l="5"] { background: var(--heat5); border-color: transparent; }
-.bk-heat-cell.today { box-shadow: 0 0 0 1.5px var(--accent-deep); }
+.bk-heat-cell.today {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--text);
+}
 
 /* ── FAB ── */
 .bk-fab {
@@ -389,6 +463,48 @@
 }
 .bk-slider::-moz-range-progress { background: var(--accent); height: 6px; border-radius: 999px; }
 .bk-slider { accent-color: var(--accent); }
+
+/* ── Time ruler (progress screen) ── */
+.bk-ruler { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.bk-ruler::-webkit-scrollbar { display: none; }
+
+/* ── Time picker button (progress screen) ── */
+.bk-timebtn {
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  padding: 12px 16px; border-radius: var(--r-card);
+  background: var(--surface); border: 1.5px solid var(--stroke);
+  text-align: left; transition: transform 0.1s ease;
+}
+.bk-timebtn:active { transform: scale(0.985); }
+.bk-timebtn.set { border-color: var(--accent-soft); background: color-mix(in oklab, var(--accent-soft) 22%, var(--surface)); }
+.bk-timebtn-ic {
+  width: 42px; height: 42px; border-radius: 14px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--accent-soft); color: var(--accent-deep);
+}
+.bk-root[data-theme="dark"] .bk-timebtn-ic { color: var(--accent-pressed); }
+.bk-timebtn-act {
+  flex: none; font-size: 13px; font-weight: 600; color: var(--accent-deep);
+  display: flex; align-items: center; justify-content: center;
+}
+.bk-root[data-theme="dark"] .bk-timebtn-act { color: var(--accent-pressed); }
+
+/* ── Duration chips (progress screen) ── */
+.bk-timechip {
+  height: 42px; padding: 0 16px; border-radius: 14px;
+  background: var(--surface); border: 1.5px solid var(--stroke);
+  color: var(--text2); font-size: 14px; font-weight: 600;
+  display: inline-flex; align-items: center; justify-content: center;
+  white-space: nowrap;
+  transition: transform 0.1s ease;
+}
+.bk-timechip:active { transform: scale(0.94); }
+.bk-timechip.active {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+  background: color-mix(in oklab, var(--accent-soft) 45%, var(--surface));
+}
+.bk-root[data-theme="dark"] .bk-timechip.active { color: var(--accent-pressed); }
 
 /* ── Goal block (startup-style) ── */
 .bk-goal-chip {

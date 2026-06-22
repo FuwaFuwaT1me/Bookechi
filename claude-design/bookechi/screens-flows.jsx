@@ -1,5 +1,5 @@
 // Bookechi — flow screens: Добавить/Редактировать книгу, Отметить прогресс, Успех
-const { useState: useFState, useEffect: useFEffect } = React;
+const { useState: useFState, useEffect: useFEffect, useRef: useFRef } = React;
 
 /* ═══ ADD / EDIT BOOK (bottom sheet) ═══ */
 function BookFormSheet({ app }) {
@@ -25,6 +25,13 @@ function BookFormSheet({ app }) {
   }, [open, src && src.id, prefill && prefill.title]);
 
   const set = (k) => (v) => { setF((p) => ({ ...p, [k]: v })); setErrs((p) => ({ ...p, [k]: null })); };
+
+  // live cover preview reflecting typed title/author
+  const previewTone = isEdit && src ? src.cover
+    : prefill ? BK_DATA.COVER_TONES[prefill.tone]
+    : BK_DATA.COVER_TONES[(f.title.trim().length * 3) % BK_DATA.COVER_TONES.length];
+  const hasPreview = !!(isEdit || prefill || f.title.trim());
+  const previewBook = { title: f.title.trim() || 'Без названия', author: f.author.trim() || 'Автор', cover: previewTone };
 
   function submit() {
     const e = {};
@@ -56,23 +63,21 @@ function BookFormSheet({ app }) {
             {isEdit && <FavoriteToggle value={f.fav} onChange={set('fav')} size={24} />}
           </div>
 
-          {/* cover block */}
-          <button className="bk-row" style={{
-            gap: 16, width: '100%', textAlign: 'left', padding: 16,
-            borderRadius: 'var(--r-card)', background: 'var(--addblock)',
-            border: '1.6px dashed var(--divider)',
-          }}>
-            {isEdit && src ? <BookCover book={src} width={56} radius={10} />
-              : prefill ? <BookCover book={{ title: prefill.title, author: prefill.author, cover: BK_DATA.COVER_TONES[prefill.tone] }} width={56} radius={10} />
-              : <BookCover placeholder width={56} radius={10} />}
-            <div className="bk-grow">
-              <div style={{ fontSize: 14.5, fontWeight: 600 }}>{isEdit ? 'Сменить обложку' : prefill ? 'Обложка найдена' : 'Добавить обложку'}</div>
-              <div className="bk-caption" style={{ marginTop: 2 }}>{prefill ? 'Можно заменить своим фото' : 'Фото или из каталога — по желанию'}</div>
+          {/* cover hero — large, centered, live preview */}
+          <div className="bk-cover-stage">
+            <button className="bk-cover-hero" aria-label={isEdit ? 'Сменить обложку' : 'Добавить обложку'}>
+              {hasPreview
+                ? <BookCover book={previewBook} width={116} radius={14} />
+                : <BookCover placeholder width={116} radius={14} />}
+              <span className="bk-cover-cam"><BkIcon name="camera" size={18} /></span>
+            </button>
+            <div className="bk-caption" style={{ textAlign: 'center', marginTop: 12, textWrap: 'pretty' }}>
+              {isEdit ? 'Нажмите, чтобы сменить обложку'
+                : prefill ? 'Обложка из каталога — можно заменить своим фото'
+                : hasPreview ? 'Превью обложки — добавьте своё фото по желанию'
+                : 'Добавьте обложку: фото или из каталога'}
             </div>
-            <div className="bk-iconbtn" style={{ width: 40, height: 40, background: 'var(--surface)' }}>
-              <BkIcon name="camera" size={19} />
-            </div>
-          </button>
+          </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 20 }}>
             <WarmTextField label="Название" value={f.title} onChange={set('title')} placeholder="Например, «Норвежский лес»" error={errs.title} />
@@ -122,14 +127,141 @@ function BookFormSheet({ app }) {
 }
 
 /* ═══ MARK PROGRESS (push screen) ═══ */
+/* TimeRuler — horizontal scroll-ruler, 1-minute resolution, optional (0 = не указано) */
+function TimeRuler({ value, onChange, variant }) {
+  const STEP = 1, GAP = 9, MAX = 180;
+  const ref = useFRef(null);
+  const ticks = [];
+  for (let m = 0; m <= MAX; m += STEP) ticks.push(m);
+
+  const onScroll = React.useCallback(() => {
+    const el = ref.current; if (!el) return;
+    const i = Math.round(el.scrollLeft / GAP);
+    const v = Math.max(0, Math.min(MAX, i * STEP));
+    onChange(v === 0 ? null : v);
+  }, [onChange]);
+
+  // external resets (value→null) re-sync scroll; user scrolling won't (diff < GAP)
+  useFEffect(() => {
+    const el = ref.current; if (!el) return;
+    const target = (value || 0) / STEP * GAP;
+    if (Math.abs(el.scrollLeft - target) > GAP * 1.5) el.scrollLeft = target;
+  }, [value]);
+
+  return (
+    <div>
+      {variant !== 'sheet' && (
+        <>
+          <div className="bk-row" style={{ gap: 7, marginBottom: 8 }}>
+            <BkIcon name="clock" size={16} style={{ color: 'var(--accent-deep)', flex: 'none' }} />
+            <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', flex: 'none' }}>Сколько читали?</span>
+            <span className="bk-caption" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>— необязательно</span>
+          </div>
+          <div style={{
+            fontFamily: 'var(--serif)', fontWeight: 600, fontSize: 26, lineHeight: 1.1,
+            color: value ? 'var(--accent-deep)' : 'var(--text2)', marginBottom: 6,
+          }}>
+            {value ? fmtDuration(value) : 'Не указано'}
+          </div>
+        </>
+      )}
+      <div style={{ position: 'relative' }}>
+        {/* center caret */}
+        <div style={{ position: 'absolute', left: '50%', top: 0, transform: 'translateX(-50%)', zIndex: 3, width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '8px solid var(--accent)' }}></div>
+        <div style={{ position: 'absolute', left: '50%', top: 6, height: 30, width: 2, transform: 'translateX(-50%)', background: 'var(--accent)', zIndex: 3, borderRadius: 2 }}></div>
+        <div ref={ref} onScroll={onScroll} className="bk-ruler" style={{
+          overflowX: 'scroll', scrollSnapType: 'x mandatory',
+          maskImage: 'linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent)',
+          WebkitMaskImage: 'linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent)',
+          padding: '10px 0 6px',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', height: 46, width: 'max-content', padding: '0 calc(50% - 1px)' }}>
+            {ticks.map((m) => {
+              const major = m % 15 === 0, mid = m % 5 === 0;
+              const label = m % 60 === 0 ? (m / 60) + ' ч' : (major ? String(m) : null);
+              return (
+                <div key={m} style={{ width: GAP, flex: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', scrollSnapAlign: 'center' }}>
+                  <div style={{
+                    width: 2, borderRadius: 2,
+                    height: major ? 30 : mid ? 18 : 11,
+                    background: major ? 'var(--accent-deep)' : mid ? 'var(--text2)' : 'var(--divider)',
+                  }}></div>
+                  {label && <div style={{ fontSize: 9.5, color: 'var(--text2)', marginTop: 4, whiteSpace: 'nowrap' }}>{label}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* half perimeter path: bottom-center → up the right side → top-center */
+function bkHalfPath(W, H, rr) {
+  return `M ${W / 2} ${H} L ${W - rr} ${H} Q ${W} ${H} ${W} ${H - rr} L ${W} ${rr} Q ${W} 0 ${W - rr} 0 L ${W / 2} 0`;
+}
+
+/* cover progress visual — two styles:
+   «Заливка» read part full colour, unread dimmed, waterline rises;
+   «Рамка»   bright cover, gradient frame fills bottom-up both sides. */
+function ProgressCover({ book, curFrac, targetFrac, variant = 'Заливка' }) {
+  const W = 100, H = Math.round(W * 1.45), r = 14;
+  const cur = Math.max(0, Math.min(1, curFrac));
+  const tgt = Math.max(cur, Math.min(1, targetFrac));
+
+  if (variant === 'Рамка') {
+    const pad = 8, ow = W + pad * 2, oh = H + pad * 2, rr = r + 5;
+    const d = bkHalfPath(ow - 8, oh - 8, rr);
+    const mirror = `scale(-1,1) translate(${-(ow - 8)},0)`;
+    const off = (1 - tgt) * 100;
+    return (
+      <div className="bk-pframe" style={{ width: ow, height: oh }}>
+        <svg width={ow} height={oh} style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
+          <g transform="translate(4,4)">
+            <path d={d} fill="none" stroke="var(--chip)" strokeWidth="4" strokeLinecap="round"></path>
+            <path d={d} transform={mirror} fill="none" stroke="var(--chip)" strokeWidth="4" strokeLinecap="round"></path>
+            <path d={d} fill="none" stroke="url(#bk-pframe-g)" strokeWidth="4" strokeLinecap="round" pathLength="100" strokeDasharray="100" strokeDashoffset={off}></path>
+            <path d={d} transform={mirror} fill="none" stroke="url(#bk-pframe-g)" strokeWidth="4" strokeLinecap="round" pathLength="100" strokeDasharray="100" strokeDashoffset={off}></path>
+          </g>
+          <defs><linearGradient id="bk-pframe-g" x1="0" y1="1" x2="0.4" y2="0"><stop offset="0" stopColor="var(--goal-g1)"></stop><stop offset="1" stopColor="var(--goal-g2)"></stop></linearGradient></defs>
+        </svg>
+        <div style={{ position: 'absolute', left: pad, top: pad }}><BookCover book={book} width={W} radius={r} /></div>
+        <span className="bk-pframe-flag">{Math.round(tgt * 100)}%</span>
+      </div>
+    );
+  }
+
+  const gain = tgt > cur + 0.001;
+  return (
+    <div className="bk-pcover" style={{ width: W, height: H }}>
+      <BookCover book={book} width={W} radius={r} />
+      {/* unread dim — full-height layer scaled from the top (transform animates reliably) */}
+      <div className="bk-pcover-scrim" style={{ transform: 'scaleY(' + (1 - tgt) + ')', borderRadius: r + 'px ' + r + 'px 0 0' }}></div>
+      {/* today's gain band (keyed to remount so its px box always resolves) */}
+      {gain && (
+        <div key={Math.round(cur * 1000) + '-' + Math.round(tgt * 1000)} className="bk-pcover-gain"
+          style={{ bottom: cur * H, height: (tgt - cur) * H }}></div>
+      )}
+      {/* target waterline (where you are now) */}
+      {tgt > 0.01 && tgt < 0.995 && (
+        <div className="bk-pcover-line tgt" style={{ transform: 'translateY(' + (-tgt * H) + 'px)' }}>
+          <span className="bk-pcover-flag">{Math.round(tgt * 100)}%</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ProgressScreen({ app }) {
   const ov = app.overlay;
   const open = ov && ov.type === 'progress';
   const book = open ? ov.book : null;
 
   const [val, setVal] = useFState('');
-  const [mins, setMins] = useFState('');
-  useFEffect(() => { if (open) { setVal(''); setMins(''); } }, [open, book && book.id]);
+  const [mins, setMins] = useFState(null);
+  const [timeOpen, setTimeOpen] = useFState(false);
+  useFEffect(() => { if (open) { setVal(''); setMins(null); setTimeOpen(false); } }, [open, book && book.id]);
 
   const start = book ? book.current : 0;
   const total = book ? book.pages : 1;
@@ -159,18 +291,16 @@ function ProgressScreen({ app }) {
     <div className={'bk-push top' + (open ? ' open' : '')} data-screen-label="Отметить прогресс">
       {book && (
         <>
-          <div className="bk-row" style={{ justifyContent: 'space-between', marginBottom: 18 }}>
+          <div className="bk-row" style={{ justifyContent: 'space-between', marginBottom: 6 }}>
             <button className="bk-iconbtn" aria-label="Назад" onClick={() => app.closeOverlay()}>
               <BkIcon name="back" size={20} />
             </button>
           </div>
 
-          <div className="bk-row" style={{ gap: 14, marginBottom: 22 }}>
-            <BookCover book={book} width={56} radius={10} />
-            <div className="bk-grow">
-              <div className="bk-title" style={{ fontSize: 18 }}>{book.title}</div>
-              <div className="bk-caption" style={{ marginTop: 3 }}>сейчас — стр. {start} / {total} · {curPct}%</div>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 22 }}>
+            <ProgressCover book={book} curFrac={start / total} targetFrac={(valid ? endN : start) / total} variant={app.coverStyle} />
+            <div className="bk-title" style={{ fontSize: 18, textAlign: 'center', marginTop: 16, textWrap: 'pretty' }}>{book.title}</div>
+            <div className="bk-caption" style={{ marginTop: 4 }}>сейчас — стр. {start} / {total} · {curPct}%</div>
           </div>
 
           <h1 className="bk-display" style={{ margin: '0 0 24px', fontSize: 26 }}>Где остановились сегодня?</h1>
@@ -207,20 +337,70 @@ function ProgressScreen({ app }) {
             )}
           </div>
 
-          <div className="bk-field" style={{ marginTop: 10, maxWidth: 220 }}>
-            <label>Время чтения, мин — необязательно</label>
-            <input className="bk-input" inputMode="numeric" placeholder="30" value={mins}
-              onChange={(e) => setMins(e.target.value.replace(/\D/g, ''))} />
-          </div>
+          <button type="button" className={'bk-timebtn' + (mins ? ' set' : '')} style={{ marginTop: 14 }}
+            onClick={() => setTimeOpen(true)}>
+            <span className="bk-timebtn-ic"><BkIcon name="clock" size={19} /></span>
+            <span className="bk-grow" style={{ textAlign: 'left' }}>
+              {mins ? (
+                <>
+                  <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text2)', fontWeight: 500 }}>Время чтения</span>
+                  <span style={{ fontFamily: 'var(--serif)', fontWeight: 600, fontSize: 18, color: 'var(--accent-deep)' }}>{fmtDuration(mins)}</span>
+                </>
+              ) : (
+                <>
+                  <span style={{ fontSize: 15, fontWeight: 600 }}>Выбрать время</span>
+                  <span style={{ display: 'block', fontSize: 12, color: 'var(--text2)' }}>необязательно</span>
+                </>
+              )}
+            </span>
+            <span className="bk-timebtn-act">{mins ? 'Изменить' : <BkIcon name="plus" size={18} stroke={2.2} />}</span>
+          </button>
 
           <button className="bk-btn bk-btn-primary" disabled={!valid}
             style={{ marginTop: 24, opacity: valid ? 1 : 0.45 }}
-            onClick={() => valid && app.saveProgress(book, endN, parseInt(mins, 10) || null)}>
+            onClick={() => valid && app.saveProgress(book, endN, mins || null)}>
             Сохранить прогресс
           </button>
         </>
       )}
+
+      {/* time picker sheet (nested above the progress push) */}
+      <TimeSheet open={timeOpen} initial={mins}
+        onClose={() => setTimeOpen(false)}
+        onSave={(v) => { setMins(v); setTimeOpen(false); }} />
     </div>
+  );
+}
+
+/* ── TimeSheet — bottom sheet with the minute ruler ── */
+function TimeSheet({ open, initial, onClose, onSave }) {
+  const [val, setVal] = useFState(initial || null);
+  useFEffect(() => { if (open) setVal(initial || null); }, [open]);
+  return (
+    <>
+      <div onClick={onClose} style={{
+        position: 'absolute', inset: 0, zIndex: 80, background: 'var(--scrim)',
+        opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition: 'opacity 0.3s ease',
+      }}></div>
+      <div style={{
+        position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 81,
+        background: 'var(--canvas)', borderRadius: '32px 32px 0 0',
+        transform: open ? 'translateY(0)' : 'translateY(108%)',
+        transition: 'transform 0.4s cubic-bezier(.32,.72,.28,1)',
+        boxShadow: '0 -20px 60px rgba(0,0,0,0.28)', padding: '10px 20px 26px',
+      }}>
+        <div className="bk-sheet-grab"></div>
+        <h2 className="bk-title" style={{ margin: '6px 0 4px', textAlign: 'center' }}>Сколько читали?</h2>
+        <p className="bk-caption" style={{ margin: '0 0 8px', textAlign: 'center' }}>Перетащите линейку — поминутно</p>
+        <div style={{ textAlign: 'center', margin: '8px 0 2px' }}>
+          <span style={{ fontFamily: 'var(--serif)', fontWeight: 600, fontSize: 38, color: val ? 'var(--accent-deep)' : 'var(--text2)' }}>
+            {val ? fmtDuration(val) : 'Не указано'}
+          </span>
+        </div>
+        <TimeRuler value={val} onChange={setVal} variant="sheet" />
+        <button className="bk-btn bk-btn-primary" style={{ marginTop: 22 }} onClick={() => onSave(val)}>Сохранить</button>
+      </div>
+    </>
   );
 }
 
@@ -328,4 +508,4 @@ function SuccessScreen({ app }) {
   );
 }
 
-Object.assign(window, { BookFormSheet, ProgressScreen, SuccessScreen });
+Object.assign(window, { BookFormSheet, ProgressScreen, SuccessScreen, TimeRuler });

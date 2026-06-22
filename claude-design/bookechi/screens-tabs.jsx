@@ -166,15 +166,45 @@ function Heatmap({ period }) {
   const D = BK_DATA;
   if (period === 'Год') {
     const months = D.yearGrid();
+    const past = months.filter((m) => m.total >= 0);
+    const max = Math.max(...past.map((m) => m.total), 1);
+    const bestIdx = months.findIndex((m) => m.total === max);
+    const curIdx = D.TODAY.getMonth();
     return (
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-        {months.map((m) => (
-          <div key={m.label} style={{ textAlign: 'center' }}>
-            <div className="bk-heat-cell" data-l={m.level > 0 ? m.level : undefined}
-              style={{ aspectRatio: 'auto', height: 40, borderRadius: 10, opacity: m.level < 0 ? 0.45 : 1 }}></div>
-            <div className="bk-caption" style={{ fontSize: 11, marginTop: 5 }}>{m.label}</div>
-          </div>
-        ))}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 5, height: 116 }}>
+          {months.map((m, i) => {
+            const future = m.total < 0;
+            const isBest = i === bestIdx;
+            return (
+              <div key={m.label} title={future ? m.label : m.label + ' — ' + m.total.toLocaleString('ru-RU') + ' стр.'}
+                style={{ flex: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' }}>
+                {isBest && (
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--accent-deep)', marginBottom: 4, whiteSpace: 'nowrap' }}>
+                    {m.total.toLocaleString('ru-RU')}
+                  </div>
+                )}
+                <div style={{
+                  width: '100%',
+                  height: future ? 4 : Math.max(5, (m.total / max) * 88) + '%',
+                  borderRadius: '6px 6px 3px 3px',
+                  background: future ? 'var(--chip-bg)'
+                    : isBest ? 'linear-gradient(180deg, var(--goal-g1), var(--goal-g2))'
+                    : 'var(--heat2)',
+                  boxShadow: i === curIdx && !future ? '0 0 0 2px var(--surface), 0 0 0 3.5px var(--text)' : 'none',
+                }}></div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ display: 'flex', gap: 5, marginTop: 7 }}>
+          {months.map((m, i) => (
+            <div key={m.label} className="bk-caption"
+              style={{ flex: 1, textAlign: 'center', fontSize: 9.5, fontWeight: i === curIdx ? 700 : 400, color: i === curIdx ? 'var(--text)' : undefined }}>
+              {m.label}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -237,6 +267,16 @@ function StatsScreen({ app }) {
             <BkIcon name="flame" size={18} />
             <span style={{ whiteSpace: 'nowrap' }}>Личный рекорд серии: {record} {plural(record, 'день', 'дня', 'дней')}</span>
           </div>
+          <button className="bk-listitem" style={{ width: '100%', justifyContent: 'space-between' }} onClick={() => app.openJournal()}>
+            <span className="bk-row" style={{ gap: 12 }}>
+              <span className="bk-iconbtn" style={{ width: 40, height: 40, background: 'var(--accent-soft)', color: 'var(--accent-deep)' }}><BkIcon name="book" size={20} /></span>
+              <span>
+                <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600 }}>Журнал чтения</span>
+                <span className="bk-caption" style={{ fontSize: 12.5 }}>Все сессии по дням</span>
+              </span>
+            </span>
+            <BkIcon name="dots" size={18} style={{ color: 'var(--text2)', transform: 'rotate(-90deg)' }} />
+          </button>
         </div>
       )}
 
@@ -245,9 +285,12 @@ function StatsScreen({ app }) {
       </div>
 
       <section className="bk-card" style={{ padding: 18 }}>
-        <div className="bk-row" style={{ marginBottom: 16 }}>
-          <div className="bk-title bk-grow" style={{ fontSize: 18 }}>
+        <div style={{ marginBottom: 16 }}>
+          <div className="bk-title" style={{ fontSize: 18 }}>
             {isMonth ? D.MONTHS_RU[D.TODAY.getMonth()] + ' ' + D.TODAY.getFullYear() : D.TODAY.getFullYear() + ' год'}
+          </div>
+          <div className="bk-caption" style={{ fontSize: 12, marginTop: 3 }}>
+            {isMonth ? 'Страницы за каждый день — чем темнее, тем больше' : 'Итог каждого месяца в страницах'}
           </div>
         </div>
         {hasHistory
@@ -255,19 +298,22 @@ function StatsScreen({ app }) {
           : <div style={{ opacity: 0.5, pointerEvents: 'none' }}><Heatmap period={period} /></div>}
       </section>
 
+      {hasHistory && <div style={{ marginTop: 12 }}><TimeStatCard period={period} /></div>}
+
       {hasHistory ? (
         <section className="bk-card" style={{ padding: 18, marginTop: 12, background: 'var(--card-tint)' }}>
           <div className="bk-label" style={{ marginBottom: 12 }}>{isMonth ? 'Итоги месяца' : 'Итоги года'}</div>
           {isMonth ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
               <SummaryRow k="Всего страниц" v={ms.total.toLocaleString('ru-RU')} />
+              <SummaryRow k="Время за чтением" v={fmtDuration(ms.totalMin)} />
               <SummaryRow k="Лучший день" v={ms.bestDay + ' июня · ' + ms.best + ' стр.'} />
               <SummaryRow k="Лучшая серия" v={ms.bestStreak + ' ' + plural(ms.bestStreak, 'день', 'дня', 'дней')} />
-              <SummaryRow k="Скорость" v="~38 стр/час" />
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
               <SummaryRow k="Всего страниц" v={ys.total.toLocaleString('ru-RU')} />
+              <SummaryRow k="Время за чтением" v={fmtDuration(ys.totalMin)} />
               <SummaryRow k="Книг закончено" v={finished} />
               <SummaryRow k="Лучший месяц" v={ys.bestMonth} />
             </div>

@@ -78,7 +78,10 @@ function BookCardScreen({ app }) {
 
           {app.state.hasHistory && book.status !== 'planned' && (
             <section style={{ marginTop: 24 }}>
-              <div className="bk-label" style={{ marginBottom: 12 }}>История чтения</div>
+              <div className="bk-row" style={{ justifyContent: 'space-between', marginBottom: 12 }}>
+                <span className="bk-label">История чтения</span>
+                <button onClick={() => app.openBookJournal(book)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: 'var(--accent-deep)', padding: 0 }}>Все сессии →</button>
+              </div>
               <div className="bk-card" style={{ padding: '16px 18px 14px', boxShadow: 'none' }}>
                 <SessionBars book={book} />
               </div>

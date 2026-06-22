@@ -21,6 +21,10 @@ function BkIcon({ name, size = 22, stroke = 1.8, style }) {
     camera: <><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13" r="3.5"/><path d="M8.5 7l1.5-2.5h4L15.5 7"/></>,
     star: <path d="M12 3l2.7 5.8 6.3.7-4.7 4.3 1.3 6.2L12 16.8 6.4 20l1.3-6.2L3 9.5l6.3-.7z"/>,
     pencil: <><path d="M4 20l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19l-4 1z"/></>,
+    clock: <><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></>,
+    help: <><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.3a2.8 2.8 0 0 1 5.4 1c0 1.9-2.8 2.5-2.8 2.5"/><circle cx="12" cy="17.2" r="0.55" fill="currentColor"/></>,
+    pin: <path d="M12 2c-3.9 0-7 3-7 6.9 0 4.7 5.7 10.6 6.3 11.2.4.4 1 .4 1.4 0 .6-.6 6.3-6.5 6.3-11.2C19 5 15.9 2 12 2zm0 9.4a2.4 2.4 0 1 1 0-4.8 2.4 2.4 0 0 1 0 4.8z" fill="currentColor" stroke="none"/>,
+    close: <><path d="M6 6l12 12M18 6L6 18"/></>,
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -245,7 +249,7 @@ function SessionBars({ book }) {
       </div>
       <div className="bk-row" style={{ justifyContent: 'space-between', marginTop: 8 }}>
         <span className="bk-caption" style={{ fontSize: 11.5 }}>Последние 10 дней</span>
-        <span className="bk-caption" style={{ fontSize: 11.5 }}>{total} стр.</span>
+        <span className="bk-caption" style={{ fontSize: 11.5 }}>{total} стр. · {fmtDuration(BK_DATA.minutesFor(total), { short: true })}</span>
       </div>
     </div>
   );
@@ -338,8 +342,92 @@ function plural(n, one, few, many) {
   return many;
 }
 
+/* ── duration formatting ── */
+function fmtDuration(min, opts = {}) {
+  if (!min || min <= 0) return '0 мин';
+  const h = Math.floor(min / 60), m = min % 60;
+  if (opts.short) {
+    if (h && m) return h + ' ч ' + m + ' м';
+    return h ? h + ' ч' : m + ' мин';
+  }
+  if (h && m) return h + ' ч ' + m + ' мин';
+  return h ? h + ' ' + plural(h, 'час', 'часа', 'часов') : m + ' мин';
+}
+
+/* ── DurationChips — tasteful optional time picker for the progress screen ── */
+const BK_DURATIONS = [15, 30, 45, 60, 90];
+function DurationChips({ value, onChange }) {
+  return (
+    <div>
+      <div className="bk-row" style={{ gap: 7, marginBottom: 11 }}>
+        <BkIcon name="clock" size={16} style={{ color: 'var(--accent-deep)', flex: 'none' }} />
+        <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', flex: 'none' }}>Сколько читали?</span>
+        <span className="bk-caption" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>— необязательно</span>
+      </div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {BK_DURATIONS.map((m) => {
+          const active = value === m;
+          return (
+            <button key={m} className={'bk-timechip' + (active ? ' active' : '')}
+              aria-pressed={active} onClick={() => onChange(active ? null : m)}>
+              {fmtDuration(m, { short: true })}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── TimeStatCard — surfaces reading-time on the stats screen ── */
+function TimeStatCard({ period }) {
+  const D = BK_DATA;
+  const isMonth = period === 'Месяц';
+  const ms = D.monthSummary();
+  const ys = D.yearSummary();
+  const totalMin = isMonth ? ms.totalMin : ys.totalMin;
+  const week = D.weekMinutes();
+  const maxW = Math.max(...week, 1);
+  return (
+    <section className="bk-card" data-comment-anchor="time-card" style={{ padding: 18 }}>
+      <div className="bk-row" style={{ gap: 12, marginBottom: 16 }}>
+        <div style={{
+          width: 42, height: 42, borderRadius: 14, flex: 'none',
+          background: 'var(--accent-soft)', color: 'var(--accent-deep)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <BkIcon name="clock" size={22} />
+        </div>
+        <div className="bk-grow">
+          <div className="bk-label" style={{ fontSize: 10.5 }}>Время за чтением{isMonth ? ' · месяц' : ' · год'}</div>
+          <div style={{ marginTop: 2 }}>
+            <span style={{ fontFamily: 'var(--serif)', fontWeight: 600, fontSize: 26, lineHeight: 1 }}>{fmtDuration(totalMin)}</span>
+          </div>
+        </div>
+      </div>
+      <div className="bk-row" style={{ alignItems: 'flex-end', gap: 6, height: 44, marginBottom: 8 }}>
+        {week.map((m, i) => (
+          <div key={i} className="bk-grow" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%' }}>
+            <div style={{
+              width: '100%', maxWidth: 22, borderRadius: '4px 4px 2px 2px',
+              height: Math.max(4, (m / maxW) * 100) + '%',
+              background: i === week.length - 1 ? 'var(--accent-deep)' : 'var(--heat2)',
+            }} title={fmtDuration(m, { short: true })}></div>
+          </div>
+        ))}
+      </div>
+      <div className="bk-row" style={{ justifyContent: 'space-between' }}>
+        <span className="bk-caption" style={{ fontSize: 11.5 }}>Последние 7 дней</span>
+        {isMonth && ms.sessions > 0 && (
+          <span className="bk-caption" style={{ fontSize: 11.5 }}>~{fmtDuration(ms.avgSession, { short: true })} за вечер</span>
+        )}
+      </div>
+    </section>
+  );
+}
+
 Object.assign(window, {
   BkIcon, BookCover, StatusChip, FavoriteToggle, ProgressBar, StreakBlock,
   MetricCard, PeriodSwitcher, EmptyState, BottomNav, WarmTextField, plural, STATUS_LABEL,
-  GoalBar, SessionBars,
+  GoalBar, SessionBars, fmtDuration, DurationChips, TimeStatCard,
 });

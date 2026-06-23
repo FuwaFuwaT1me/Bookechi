@@ -33,4 +33,6 @@ data class BookDetailsState(
     val rating: Int = 0,
     /** Открыт ли лист редактирования метаданных книги. */
     val isEditing: Boolean = false,
+    /** Открыта ли шторка проставления оценки. */
+    val isRatingSheetOpen: Boolean = false,
 ) : State

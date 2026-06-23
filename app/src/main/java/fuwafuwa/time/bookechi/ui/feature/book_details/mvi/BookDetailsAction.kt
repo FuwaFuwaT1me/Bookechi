@@ -13,10 +13,16 @@ sealed interface BookDetailsAction : Action {
     data object StartReadingAgain : BookDetailsAction
     data object ToggleFavorite : BookDetailsAction
     data object NavigateToUpdateProgress : BookDetailsAction
+    data object NavigateToReadingLog : BookDetailsAction
 
     // Редактирование метаданных книги (лист).
     data object OpenEdit : BookDetailsAction
     data object CloseEdit : BookDetailsAction
+
+    // Оценка книги.
+    data object OpenRatingSheet : BookDetailsAction
+    data object CloseRatingSheet : BookDetailsAction
+    data class SetRating(val rating: Int) : BookDetailsAction
     data class UpdateBook(val book: Book) : BookDetailsAction
     data object DeleteBook : BookDetailsAction
 }

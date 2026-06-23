@@ -53,6 +53,7 @@ fun CornerBadgeSpec.badgeShape(): RoundedCornerShape = RoundedCornerShape(
 class CoverCornerCutoutShape(
     private val coverRadius: Dp,
     private val badge: CornerBadgeSpec,
+    private val bottomRadius: Dp = coverRadius,
 ) : Shape {
     override fun createOutline(
         size: Size,
@@ -62,6 +63,7 @@ class CoverCornerCutoutShape(
         val w = size.width
         val h = size.height
         val r = with(density) { coverRadius.toPx() }
+        val rb = with(density) { bottomRadius.toPx() }
         val s = with(density) { badge.size.toPx() }
         val g = with(density) { badge.gap.toPx() }
         val cInner = with(density) { badge.cornerInner.toPx() }
@@ -93,22 +95,30 @@ class CoverCornerCutoutShape(
             lineTo(w - fr, yMoatBottom)
             // Галтель: нижняя стенка рва плавно загибается вверх на правую кромку.
             quadraticTo(w, yMoatBottom, w, yMoatBottom + fr)
-            // Правая кромка вниз до правого-нижнего скругления.
-            lineTo(w, h - r)
-            arcTo(
-                rect = Rect(w - 2 * r, h - 2 * r, w, h),
-                startAngleDegrees = 0f,
-                sweepAngleDegrees = 90f,
-                forceMoveTo = false,
-            )
-            // Нижняя кромка влево до левого-нижнего скругления.
-            lineTo(r, h)
-            arcTo(
-                rect = Rect(0f, h - 2 * r, 2 * r, h),
-                startAngleDegrees = 90f,
-                sweepAngleDegrees = 90f,
-                forceMoveTo = false,
-            )
+            // Правая кромка вниз до правого-нижнего угла (скругление [bottomRadius]).
+            lineTo(w, h - rb)
+            if (rb > 0f) {
+                arcTo(
+                    rect = Rect(w - 2 * rb, h - 2 * rb, w, h),
+                    startAngleDegrees = 0f,
+                    sweepAngleDegrees = 90f,
+                    forceMoveTo = false,
+                )
+            } else {
+                lineTo(w, h)
+            }
+            // Нижняя кромка влево до левого-нижнего угла.
+            lineTo(rb, h)
+            if (rb > 0f) {
+                arcTo(
+                    rect = Rect(0f, h - 2 * rb, 2 * rb, h),
+                    startAngleDegrees = 90f,
+                    sweepAngleDegrees = 90f,
+                    forceMoveTo = false,
+                )
+            } else {
+                lineTo(0f, h)
+            }
             // Левая кромка вверх до левого-верхнего скругления.
             lineTo(0f, r)
             arcTo(

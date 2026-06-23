@@ -6,6 +6,7 @@ import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
 import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.NavigateToBookDetails
+import fuwafuwa.time.bookechi.ui.feature.read_shelf.mvi.NavigateToReadShelf
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.NavigateToUpdateProgress
 import fuwafuwa.time.bookechi.utils.file.CacheHelper
 import kotlinx.coroutines.launch
@@ -82,6 +83,8 @@ class LibraryModel(
             is LibraryAction.NavigateToUpdateProgress -> sendNavigationEvent(
                 NavigateToUpdateProgress(action.book)
             )
+
+            is LibraryAction.OpenReadShelf -> sendNavigationEvent(NavigateToReadShelf)
 
             is LibraryAction.EditBook -> {
                 updateState {

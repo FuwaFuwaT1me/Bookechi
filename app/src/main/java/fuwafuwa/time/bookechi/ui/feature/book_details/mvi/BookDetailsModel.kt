@@ -6,6 +6,7 @@ import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
 import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent
+import fuwafuwa.time.bookechi.ui.feature.reading_log.mvi.NavigateToReadingLog
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.NavigateToUpdateProgress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -20,6 +21,7 @@ class BookDetailsModel(
 
     init {
         loadRecentSessions()
+        updateState { copy(rating = book?.rating ?: 0) }
     }
 
     override fun onAction(action: BookDetailsAction) {
@@ -28,6 +30,10 @@ class BookDetailsModel(
             is BookDetailsAction.NavigateToUpdateProgress -> {
                 val book = state.value.book ?: return
                 sendNavigationEvent(NavigateToUpdateProgress(book))
+            }
+            is BookDetailsAction.NavigateToReadingLog -> {
+                val book = state.value.book ?: return
+                sendNavigationEvent(NavigateToReadingLog(bookId = book.id))
             }
             is BookDetailsAction.ToggleFavorite -> scope.launch {
                 handleToggleFavorite()
@@ -52,6 +58,11 @@ class BookDetailsModel(
             }
             is BookDetailsAction.OpenEdit -> updateState { copy(isEditing = true) }
             is BookDetailsAction.CloseEdit -> updateState { copy(isEditing = false) }
+            is BookDetailsAction.OpenRatingSheet -> updateState { copy(isRatingSheetOpen = true) }
+            is BookDetailsAction.CloseRatingSheet -> updateState { copy(isRatingSheetOpen = false) }
+            is BookDetailsAction.SetRating -> scope.launch {
+                handleSetRating(action.rating)
+            }
             is BookDetailsAction.UpdateBook -> scope.launch {
                 handleUpdateBook(action.book)
             }
@@ -59,6 +70,15 @@ class BookDetailsModel(
                 handleDeleteBook()
             }
         }
+    }
+
+    private suspend fun handleSetRating(rating: Int) {
+        val book = state.value.book ?: return
+        val updated = book.copy(rating = rating)
+        withContext(Dispatchers.IO) {
+            bookRepository.updateBook(updated)
+        }
+        updateState { copy(book = updated, rating = rating, isRatingSheetOpen = false) }
     }
 
     private suspend fun handleUpdateBook(book: Book) {
@@ -111,13 +131,18 @@ class BookDetailsModel(
 
     private suspend fun handleUpdateCurrentPage(page: Int) {
         val book = state.value.book ?: return
+        val reachedEnd = book.pages > 0 && page >= book.pages
+        val updated = book.copy(
+            currentPage = page,
+            readingStatus = if (reachedEnd) ReadingStatus.Completed else book.readingStatus,
+        )
 
         withContext(Dispatchers.IO) {
-            bookRepository.updateBook(book.copy(currentPage = page))
+            bookRepository.updateBook(updated)
         }
 
         updateState {
-            copy(book = book.copy(currentPage = page))
+            copy(book = updated)
         }
     }
 

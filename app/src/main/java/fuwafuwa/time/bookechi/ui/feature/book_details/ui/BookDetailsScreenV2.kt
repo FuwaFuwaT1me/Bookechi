@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,6 +27,8 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,7 +54,7 @@ import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
 import fuwafuwa.time.bookechi.base.ui.ds.EmptyState
 import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
 import fuwafuwa.time.bookechi.base.ui.ds.ProgressBar
-import fuwafuwa.time.bookechi.base.ui.ds.RatingStars
+import fuwafuwa.time.bookechi.base.ui.ds.RatingSheet
 import fuwafuwa.time.bookechi.base.ui.ds.SectionLabel
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.base.ui.ds.StatusChip
@@ -114,6 +117,16 @@ private fun BookDetailsScreenV2Content(
 
         // Лист редактирования метаданных книги.
         BookDetailsEditSheet(state = state, onAction = onAction)
+
+        // Шторка проставления оценки.
+        if (state.isRatingSheetOpen) {
+            RatingSheet(
+                current = state.rating,
+                onDismiss = { onAction(BookDetailsAction.CloseRatingSheet) },
+                onSave = { onAction(BookDetailsAction.SetRating(it)) },
+                onClear = { onAction(BookDetailsAction.SetRating(0)) },
+            )
+        }
     }
 }
 
@@ -174,7 +187,11 @@ private fun BookDetailsContent(
 
         Spacer(modifier = Modifier.height(Spacing.xl))
 
-        HeaderSection(book = book)
+        HeaderSection(
+            book = book,
+            rating = rating,
+            onRateClick = { onAction(BookDetailsAction.OpenRatingSheet) },
+        )
 
         Spacer(modifier = Modifier.height(Spacing.xl))
 
@@ -193,21 +210,67 @@ private fun BookDetailsContent(
 
         Spacer(modifier = Modifier.height(Spacing.xxl))
 
-        SectionLabel(text = stringResource(R.string.details_reading_history))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            SectionLabel(text = stringResource(R.string.details_reading_history))
+            if (recentSessionPages.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.log_all_sessions),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = BookechiTheme.colors.accentDeep,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable { onAction(BookDetailsAction.NavigateToReadingLog) }
+                        .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(Spacing.md))
-        ReadingHistorySparkline(recentSessionPages = recentSessionPages)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(DsShapes.card)
+                .clickable(enabled = recentSessionPages.isNotEmpty()) {
+                    onAction(BookDetailsAction.NavigateToReadingLog)
+                },
+        ) {
+            ReadingHistorySparkline(recentSessionPages = recentSessionPages)
+        }
 
         Spacer(modifier = Modifier.height(Spacing.xxl))
 
         SectionLabel(text = stringResource(R.string.details_quotes_and_notes))
         Spacer(modifier = Modifier.height(Spacing.md))
 
-        if (rating > 0) {
-            RatingStars(rating = rating)
-            Spacer(modifier = Modifier.height(Spacing.lg))
+        val hasNote = book.note.isNotBlank()
+        if (hasNote) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(DsShapes.card)
+                    .background(BookechiTheme.colors.surfaceElevated)
+                    .border(1.dp, BookechiTheme.colors.stroke, DsShapes.card)
+                    .padding(Spacing.lg),
+            ) {
+                Text(
+                    text = book.note,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = BookechiTheme.colors.textPrimary,
+                )
+            }
+            if (quotes.isNotEmpty()) Spacer(modifier = Modifier.height(Spacing.md))
         }
 
-        if (quotes.isEmpty()) {
+        if (quotes.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                quotes.forEach { quote ->
+                    QuoteCard(quote = quote)
+                }
+            }
+        } else if (!hasNote) {
             EmptyState(
                 icon = Icons.Default.FormatQuote,
                 title = stringResource(R.string.details_quotes_empty_title),
@@ -215,15 +278,38 @@ private fun BookDetailsContent(
                 ctaText = null,
                 onCta = null
             )
-        } else {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
-                quotes.forEach { quote ->
-                    QuoteCard(quote = quote)
-                }
-            }
         }
 
         Spacer(modifier = Modifier.height(Spacing.xxl))
+    }
+}
+
+@Composable
+private fun RatingRow(rating: Int, onClick: () -> Unit) {
+    val colors = BookechiTheme.colors
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = Spacing.xs),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            repeat(5) { i ->
+                Icon(
+                    imageVector = if (i < rating) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                    contentDescription = null,
+                    tint = if (i < rating) colors.accent else colors.textSecondary.copy(alpha = 0.35f),
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+        }
+        Text(
+            text = if (rating > 0) "$rating,0" else stringResource(R.string.details_rate_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (rating > 0) colors.accentDeep else colors.textSecondary,
+        )
     }
 }
 
@@ -291,39 +377,56 @@ private fun CircleIconButton(
 }
 
 @Composable
-private fun HeaderSection(book: Book) {
+private fun HeaderSection(
+    book: Book,
+    rating: Int,
+    onRateClick: () -> Unit,
+) {
     val colors = BookechiTheme.colors
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
     ) {
+        // Высота обложки = ширина × 3/2 (соотношение 2:3): к ней привязываем колонку.
+        val coverWidth = 104.dp
+        val coverHeight = coverWidth * 1.5f
+
         BookCover(
             coverPath = book.coverPath,
             title = book.name,
             author = book.author,
-            width = 104.dp
+            width = coverWidth
         )
 
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(top = Spacing.xs)
+                .heightIn(min = coverHeight),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                text = book.name,
-                style = MaterialTheme.typography.titleLarge,
-                color = colors.textPrimary,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(Spacing.xs))
-            Text(
-                text = book.author,
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.textSecondary
-            )
-            Spacer(modifier = Modifier.height(Spacing.md))
-            StatusChip(status = readingStatusLabel(book.readingStatus))
+            // Верх: название + автор.
+            Column {
+                Text(
+                    text = book.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = colors.textPrimary,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(Spacing.xs))
+                Text(
+                    text = book.author,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.textSecondary
+                )
+            }
+
+            // Низ (к кромке обложки): статус + оценка.
+            Column {
+                StatusChip(status = readingStatusLabel(book.readingStatus))
+                Spacer(modifier = Modifier.height(Spacing.sm))
+                RatingRow(rating = rating, onClick = onRateClick)
+            }
         }
     }
 }
@@ -364,24 +467,7 @@ private fun ProgressCard(
 
         ProgressBar(progress = progress, height = 10.dp)
 
-        Spacer(modifier = Modifier.height(Spacing.md))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
-        ) {
-            Icon(
-                imageVector = Icons.Default.LocalFireDepartment,
-                contentDescription = null,
-                tint = colors.accent,
-                modifier = Modifier.size(14.dp)
-            )
-            Text(
-                text = paceForecast(currentPage, totalPages),
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textSecondary
-            )
-        }
+        // Прогноз темпа временно убран из UI (логика paceForecast сохранена ниже).
     }
 }
 

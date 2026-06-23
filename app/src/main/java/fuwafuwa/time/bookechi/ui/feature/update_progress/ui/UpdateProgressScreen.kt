@@ -1,14 +1,25 @@
 package fuwafuwa.time.bookechi.ui.feature.update_progress.ui
 
+import android.view.HapticFeedbackConstants
+import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,29 +34,45 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
@@ -53,12 +80,18 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,15 +100,16 @@ import androidx.compose.ui.unit.sp
 import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.BookCover
 import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
+import fuwafuwa.time.bookechi.base.ui.ds.MinutesRuler
 import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
-import fuwafuwa.time.bookechi.base.ui.ds.WarmTextField
 import fuwafuwa.time.bookechi.data.model.Book
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.UpdateProgressAction
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.UpdateProgressState
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.UpdateProgressViewModel
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.serialization.Serializable
 import kotlin.math.roundToInt
 
@@ -107,10 +141,10 @@ private fun UpdateProgressScreenContent(
 ) {
     val colors = BookechiTheme.colors
 
+    Box(modifier = modifier.fillMaxSize().background(colors.canvas)) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .background(colors.canvas)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = Spacing.xxl)
             .padding(top = Spacing.xxl, bottom = Spacing.xxl),
@@ -181,9 +215,9 @@ private fun UpdateProgressScreenContent(
 
         Spacer(Modifier.height(Spacing.xxxl))
 
-        ReadingTimeField(
-            value = state.readingTimeMinutes,
-            onValueChange = { onAction(UpdateProgressAction.UpdateReadingTime(it)) },
+        ReadingTimeCard(
+            minutes = state.readingTimeMinutes,
+            onClick = { onAction(UpdateProgressAction.OpenReadingTimeSheet) },
         )
 
         Spacer(Modifier.height(Spacing.xxxl))
@@ -193,6 +227,9 @@ private fun UpdateProgressScreenContent(
             enabled = isValidProgress(state) && !state.isSaving,
             onClick = { onAction(UpdateProgressAction.SaveChanges(state.updatedInputPages)) },
         )
+    }
+
+        ReadingTimeSheet(state = state, onAction = onAction)
     }
 }
 
@@ -233,12 +270,14 @@ private fun ProgressHeader(
     val colors = BookechiTheme.colors
     val savedPercent = if (book.pages > 0) (book.currentPage * 100) / book.pages else 0
     val fraction = if (book.pages > 0) inputPages.toFloat() / book.pages.toFloat() else 0f
+    // Старт сессии — сохранённая страница книги (откуда пользователь начал читать).
+    val startFraction = if (book.pages > 0) book.currentPage.toFloat() / book.pages.toFloat() else 0f
 
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ProgressCover(book = book, fraction = fraction)
+        ProgressCover(book = book, fraction = fraction, startFraction = startFraction)
 
         Spacer(Modifier.height(Spacing.lg))
 
@@ -274,6 +313,7 @@ private val CoverWidth = 124.dp
 private fun ProgressCover(
     book: Book,
     fraction: Float,
+    startFraction: Float = 0f,
     modifier: Modifier = Modifier,
 ) {
     val colors = BookechiTheme.colors
@@ -329,6 +369,22 @@ private fun ProgressCover(
                         }
                     },
                 )
+                // Черточка — откуда пользователь начал читать (старт сессии).
+                // Пунктир, чтобы отличать от сплошной линии текущей заливки.
+                if (startFraction > 0.001f && startFraction < animFraction - 0.005f) {
+                    Canvas(modifier = Modifier.matchParentSize()) {
+                        val y = size.height * (1f - startFraction)
+                        drawLine(
+                            color = Color.White.copy(alpha = 0.9f),
+                            start = Offset(0f, y),
+                            end = Offset(size.width, y),
+                            strokeWidth = 1.5.dp.toPx(),
+                            pathEffect = PathEffect.dashPathEffect(
+                                floatArrayOf(5.dp.toPx(), 4.dp.toPx()),
+                            ),
+                        )
+                    }
+                }
                 // Линия-граница заливки.
                 if (animFraction > 0.001f && animFraction < 0.999f) {
                     Box(
@@ -346,6 +402,31 @@ private fun ProgressCover(
                     title = book.name,
                     author = book.author,
                     width = CoverWidth,
+                )
+            }
+        }
+
+        // Подпись «начало» у черточки старта — вне клипа, слева (чтобы не
+        // пересекаться с центральным бейджем процента).
+        if (hasPages && startFraction > 0.001f && startFraction < animFraction - 0.005f) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    // Выносим левее края обложки — чтобы не пересекаться с
+                    // центральным бейджем процента на близких уровнях.
+                    .offset(x = (-22).dp, y = coverHeight * (1f - startFraction) - 9.dp)
+                    .height(18.dp)
+                    .shadow(elevation = 4.dp, shape = CircleShape)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.92f))
+                    .padding(horizontal = Spacing.sm),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(R.string.update_start_marker),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.accentDeep,
+                    fontWeight = FontWeight.Bold,
                 )
             }
         }
@@ -392,6 +473,23 @@ private fun PageCounter(
         lineHeight = 60.sp,
     )
 
+    // Локальный TextFieldValue — сохраняет позицию курсора. Внешнее значение
+    // (пресеты +10, слайдер) принимаем, только если оно пришло не «эхом» нашего
+    // ввода, иначе асинхронный StateFlow сбрасывает курсор (170 → 107).
+    var fieldValue by remember {
+        mutableStateOf(
+            (if (value == 0) "" else value.toString()).let { TextFieldValue(it, TextRange(it.length)) }
+        )
+    }
+    var lastEmitted by remember { mutableStateOf(value) }
+    LaunchedEffect(value) {
+        if (value != lastEmitted) {
+            val d = if (value == 0) "" else value.toString()
+            fieldValue = TextFieldValue(d, TextRange(d.length))
+            lastEmitted = value
+        }
+    }
+
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Bottom,
@@ -399,10 +497,16 @@ private fun PageCounter(
         // Поле ввода во всю ширину: число слева, поле занимает всё свободное место,
         // подчёркивание (drawBehind) тянется по всей ширине поля, обрываясь до «/ 320».
         BasicTextField(
-            value = if (value == 0) "" else value.toString(),
-            onValueChange = { text ->
-                val digits = text.filter { it.isDigit() }.take(6)
-                onValueChange(digits.toIntOrNull() ?: 0)
+            value = fieldValue,
+            onValueChange = { new ->
+                val digits = new.text.filter { it.isDigit() }.take(6)
+                val sel = minOf(new.selection.end, digits.length)
+                fieldValue = TextFieldValue(digits, TextRange(sel))
+                val intValue = digits.toIntOrNull() ?: 0
+                if (intValue != lastEmitted) {
+                    lastEmitted = intValue
+                    onValueChange(intValue)
+                }
             },
             textStyle = numberStyle.copy(color = numberColor),
             singleLine = true,
@@ -421,7 +525,7 @@ private fun PageCounter(
                 }
                 .padding(bottom = Spacing.sm),
             decorationBox = { inner ->
-                if (value == 0) {
+                if (fieldValue.text.isEmpty()) {
                     Text(
                         text = "0",
                         style = numberStyle,
@@ -455,7 +559,7 @@ private fun ProgressSlider(
     val upper = total.coerceAtLeast(lower + 1)
     val fraction = (value.coerceIn(lower, upper) - lower).toFloat() / (upper - lower).toFloat()
 
-    val thumbRadius = 12.dp
+    val thumbRadius = 10.dp
     val trackHeight = 8.dp
     val trackColor = colors.stroke
     val activeColor = colors.accent
@@ -491,22 +595,36 @@ private fun ProgressSlider(
                 val usable = (size.width - 2 * r).coerceAtLeast(1f)
                 val th = trackHeight.toPx()
                 val corner = CornerRadius(th / 2f, th / 2f)
-                // неактивный трек
+                val cx = left + usable * fraction
+                // неактивный трек на всю ширину (вровень с подписями и подчёркиванием числа)
                 drawRoundRect(
                     color = trackColor,
-                    topLeft = Offset(left, cy - th / 2f),
-                    size = Size(usable, th),
+                    topLeft = Offset(0f, cy - th / 2f),
+                    size = Size(size.width, th),
                     cornerRadius = corner,
                 )
-                // активная часть
+                // активная часть от левого края до точки
                 drawRoundRect(
                     color = activeColor,
-                    topLeft = Offset(left, cy - th / 2f),
-                    size = Size(usable * fraction, th),
+                    topLeft = Offset(0f, cy - th / 2f),
+                    size = Size(cx, th),
                     cornerRadius = corner,
                 )
-                // thumb: плоская сплошная терракотовая точка (как в макете)
-                val cx = left + usable * fraction
+                // thumb: терракотовая точка с белой обводкой и мягкой тенью
+                val borderPx = 4.dp.toPx()
+                // мягкая тень — радиальный градиент чуть ниже точки
+                val shadowCenter = Offset(cx, cy + 2.dp.toPx())
+                val shadowRadius = r + borderPx + 6.dp.toPx()
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(Color.Black.copy(alpha = 0.22f), Color.Transparent),
+                        center = shadowCenter,
+                        radius = shadowRadius,
+                    ),
+                    radius = shadowRadius,
+                    center = shadowCenter,
+                )
+                drawCircle(color = Color.White, radius = r + borderPx, center = Offset(cx, cy))
                 drawCircle(color = thumbColor, radius = r, center = Offset(cx, cy))
             }
         }
@@ -558,30 +676,124 @@ private fun ReadTodayCounter(
 }
 
 @Composable
-private fun ReadingTimeField(
-    value: Int,
-    onValueChange: (Int) -> Unit,
+private fun readingTimeLabel(minutes: Int): String = when {
+    minutes <= 0 -> stringResource(R.string.update_time_unset)
+    minutes < 60 -> stringResource(R.string.update_time_minutes, minutes)
+    minutes % 60 == 0 -> stringResource(R.string.update_time_hours, minutes / 60)
+    else -> stringResource(R.string.update_time_hours_minutes, minutes / 60, minutes % 60)
+}
+
+/** Карточка «Время чтения» на экране: открывает лист с линейкой. */
+@Composable
+private fun ReadingTimeCard(
+    minutes: Int,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = BookechiTheme.colors
-    Column(modifier = modifier.fillMaxWidth()) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(DsShapes.card)
+            .background(colors.surface)
+            .border(1.dp, colors.stroke, DsShapes.card)
+            .clickable(onClick = onClick)
+            .padding(Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(colors.accentSoft),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Schedule,
+                contentDescription = null,
+                tint = colors.accent,
+                modifier = Modifier.size(22.dp),
+            )
+        }
+        Spacer(Modifier.size(Spacing.md))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.update_time_card_label),
+                style = MaterialTheme.typography.labelMedium,
+                color = colors.textSecondary,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = readingTimeLabel(minutes),
+                style = MaterialTheme.typography.titleLarge,
+                color = if (minutes > 0) colors.accentDeep else colors.textSecondary,
+            )
+        }
         Text(
-            text = stringResource(R.string.update_reading_time_label),
-            style = MaterialTheme.typography.labelMedium,
-            color = colors.textSecondary,
+            text = stringResource(R.string.update_time_change),
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.accent,
         )
-        Spacer(Modifier.height(Spacing.sm))
-        // Поле времени — примерно половина ширины, без плавающего лейбла (как в макете).
-        WarmTextField(
-            value = value.takeIf { it > 0 }?.toString() ?: "",
-            onValueChange = { text ->
-                onValueChange(text.filter { it.isDigit() }.toIntOrNull() ?: 0)
-            },
-            placeholder = "25",
-            keyboardType = KeyboardType.Number,
-            modifier = Modifier.fillMaxWidth(0.62f),
-            fillWidth = false,
-        )
+    }
+}
+
+/** Лист «Сколько читали?» с линейкой-пикером минут. Высота — по контенту (wrap). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReadingTimeSheet(
+    state: UpdateProgressState,
+    onAction: (UpdateProgressAction) -> Unit,
+) {
+    if (!state.isReadingTimeSheetOpen) return
+    val colors = BookechiTheme.colors
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var draft by remember { mutableIntStateOf(state.readingTimeMinutes) }
+
+    ModalBottomSheet(
+        onDismissRequest = { onAction(UpdateProgressAction.CloseReadingTimeSheet) },
+        sheetState = sheetState,
+        containerColor = colors.canvas,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.xl)
+                .padding(bottom = Spacing.xl),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(R.string.update_time_question),
+                style = MaterialTheme.typography.headlineSmall,
+                color = colors.textPrimary,
+            )
+            Spacer(Modifier.height(Spacing.xs))
+            Text(
+                text = stringResource(R.string.update_time_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = colors.textSecondary,
+            )
+            Spacer(Modifier.height(Spacing.lg))
+            Text(
+                text = readingTimeLabel(draft),
+                style = MaterialTheme.typography.displaySmall,
+                color = if (draft > 0) colors.accent else colors.textSecondary,
+            )
+            Spacer(Modifier.height(Spacing.lg))
+            MinutesRuler(
+                value = draft,
+                onValueChange = { draft = it },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(Spacing.xl))
+            PrimaryButton(
+                text = stringResource(R.string.lib_save),
+                onClick = {
+                    onAction(UpdateProgressAction.UpdateReadingTime(draft))
+                    onAction(UpdateProgressAction.CloseReadingTimeSheet)
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 

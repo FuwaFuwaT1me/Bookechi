@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import fuwafuwa.time.bookechi.R
 import fuwafuwa.time.bookechi.base.ui.ds.EmptyState
+import fuwafuwa.time.bookechi.base.ui.ds.SecondaryButton
 import fuwafuwa.time.bookechi.base.ui.ds.Spacing
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.AddingBookDraft
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.LibraryAction
@@ -133,6 +134,15 @@ fun LibraryContent(
             )
 
             Spacer(modifier = Modifier.height(Spacing.lg))
+
+            if (activeFilter == LibraryFilter.Completed && filteredBooks.isNotEmpty()) {
+                SecondaryButton(
+                    text = stringResource(R.string.lib_show_as_shelf),
+                    onClick = { onAction(LibraryAction.OpenReadShelf) },
+                    modifier = Modifier.padding(horizontal = horizontalPadding),
+                )
+                Spacer(modifier = Modifier.height(Spacing.lg))
+            }
 
             when {
                 state.isLoading -> {

@@ -6,6 +6,7 @@ import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
 import fuwafuwa.time.bookechi.mvi.impl.BaseNavigationEvent
 import fuwafuwa.time.bookechi.ui.feature.update_result.mvi.NavigateToUpdateResult
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class UpdateProgressModel(
@@ -40,12 +41,27 @@ class UpdateProgressModel(
                     copy(readingTimeMinutes = action.value.coerceAtLeast(0))
                 }
             }
+            is UpdateProgressAction.OpenReadingTimeSheet -> {
+                updateState { copy(isReadingTimeSheetOpen = true) }
+            }
+            is UpdateProgressAction.CloseReadingTimeSheet -> {
+                updateState { copy(isReadingTimeSheetOpen = false) }
+            }
             is UpdateProgressAction.SaveChanges -> scope.launch {
                 val state = currentState()
+                // Дошли до конца книги — автоматически помечаем «Прочитано».
+                val reachedEnd = state.book.pages > 0 && action.value >= state.book.pages
                 val updatedBook = state.book.copy(
                     currentPage = action.value,
-                    readingStatus = ReadingStatus.Reading
+                    readingStatus = if (reachedEnd) ReadingStatus.Completed else ReadingStatus.Reading
                 )
+
+                // Был ли сегодня стрик-день ДО записи: если нет — этой записью
+                // серия продлевается (показываем перебивку один раз за день).
+                val wasStreakToday = readingSessionRepository
+                    .getCurrentStreak()
+                    .first()
+                    .isTodayStreak
 
                 bookRepository.updateBook(updatedBook)
                 readingSessionRepository.recordReadingProgress(
@@ -59,7 +75,13 @@ class UpdateProgressModel(
                     NavigateToUpdateResult(
                         startPages = state.startPages,
                         updatedPages = action.value,
-                        allBookPages = updatedBook.pages
+                        allBookPages = updatedBook.pages,
+                        bookId = updatedBook.id,
+                        streakExtended = !wasStreakToday,
+                        readingTimeMinutes = state.readingTimeMinutes,
+                        bookName = updatedBook.name,
+                        bookAuthor = updatedBook.author,
+                        coverPath = updatedBook.coverPath.orEmpty(),
                     )
                 )
             }

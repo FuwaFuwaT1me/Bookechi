@@ -28,4 +28,5 @@ sealed interface LibraryAction : Action {
 
     data class NavigateToBookDetails(val book: Book) : LibraryAction
     data class NavigateToUpdateProgress(val book: Book) : LibraryAction
+    data object OpenReadShelf : LibraryAction
 }

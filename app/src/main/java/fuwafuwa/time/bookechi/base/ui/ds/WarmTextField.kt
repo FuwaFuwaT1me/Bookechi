@@ -11,12 +11,15 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 
@@ -33,19 +36,44 @@ fun WarmTextField(
     label: String? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     fillWidth: Boolean = true,
+    minLines: Int = 1,
 ) {
     val colors = BookechiTheme.colors
+    // Локальный TextFieldValue хранит позицию курсора. Значение из вне
+    // (асинхронный StateFlow) принимаем, только если оно реально пришло снаружи,
+    // а не «эхом» нашего же ввода — иначе курсор скачет (170 → 107).
+    var fieldValue by remember { mutableStateOf(TextFieldValue(value, TextRange(value.length))) }
+    var lastEmitted by remember { mutableStateOf(value) }
+    LaunchedEffect(value) {
+        if (value != lastEmitted) {
+            fieldValue = TextFieldValue(value, TextRange(value.length))
+            lastEmitted = value
+        }
+    }
     OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
+        value = fieldValue,
+        onValueChange = { new ->
+            fieldValue = new
+            if (new.text != lastEmitted) {
+                lastEmitted = new.text
+                onValueChange(new.text)
+            }
+        },
         modifier = modifier.then(if (fillWidth) Modifier.fillMaxWidth() else Modifier),
         shape = DsShapes.button,
         label = label?.let { lbl -> { Text(text = lbl) } },
         placeholder = {
-            Text(text = placeholder, color = colors.textSecondary)
+            // Тот же стиль, что и у вводимого текста, чтобы подсказка ложилась
+            // ровно туда, где появится текст (одинаковые метрики/перенос строк).
+            Text(
+                text = placeholder,
+                color = colors.textSecondary,
+                style = MaterialTheme.typography.bodyLarge,
+            )
         },
         textStyle = MaterialTheme.typography.bodyLarge,
-        singleLine = true,
+        singleLine = minLines <= 1,
+        minLines = minLines,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = colors.surface,

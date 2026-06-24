@@ -45,6 +45,8 @@ fun NavGraphBuilder.addBookNavRoot(
                     is BaseNavigationEvent.NavigateBack -> {
                         navController.popBackStack()
                     }
+
+                    is BaseNavigationEvent.NavigateToStack -> Unit
                 }
             }
         }

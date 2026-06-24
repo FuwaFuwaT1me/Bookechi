@@ -28,6 +28,30 @@ fun BaseScreen(
                 is BaseNavigationEvent.NavigateBackTo -> {
                     navController.popBackStack(navEvent.screen, false)
                 }
+                is BaseNavigationEvent.NavigateToStack -> {
+                    // 1) Стираем промежуточные экраны (стек завершённой книги) до
+                    //    стартового, БЕЗ сохранения — иначе он восстановится при
+                    //    переходе на стартовый таб.
+                    navController.popBackStack(
+                        navController.graph.startDestinationId,
+                        inclusive = false,
+                        saveState = false,
+                    )
+                    // 2) Первый экран открываем ровно как переключение таба в нижней
+                    //    навигации (теми же опциями), чтобы её save/restore остался
+                    //    согласованным и табы продолжали работать. Остальные — поверх.
+                    navEvent.screens.forEachIndexed { index, screen ->
+                        navController.navigate(screen) {
+                            if (index == 0) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    }
+                }
                 is BaseNavigationEvent.NavigateBack -> {
                     navController.popBackStack()
                 }

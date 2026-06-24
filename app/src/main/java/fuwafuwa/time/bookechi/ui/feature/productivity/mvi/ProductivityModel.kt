@@ -5,6 +5,8 @@ import fuwafuwa.time.bookechi.data.model.ReadingStatus
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.data.repository.ReadingSessionRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
+import fuwafuwa.time.bookechi.ui.feature.read_shelf.mvi.NavigateToReadShelf
+import fuwafuwa.time.bookechi.ui.feature.reading_log.mvi.NavigateToReadingLog
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -31,12 +33,18 @@ class ProductivityModel(
                     val daysOfCurrentYear = LocalDate.now().dayOfYear
                     val totalPagesRead = sessions.sumOf { it.totalPagesRead }
 
+                    val spark = sessions
+                        .sortedBy { it.date }
+                        .takeLast(12)
+                        .map { it.totalPagesRead }
+
                     updateState {
                         copy(
                             averagePages = 1f * totalPagesRead / daysOfCurrentYear,
                             dayStreak = streakDays,
                             pagesRead = totalPagesRead,
-                            sessions = sessions
+                            sessions = sessions,
+                            journalSpark = spark,
                         )
                     }
                 }
@@ -51,13 +59,24 @@ class ProductivityModel(
         }
 
         scope.launch {
-            bookRepository.getAllBooks().collect { books ->
-                updateState {
-                    copy(
-                        booksRead = books.filter { it.readingStatus == ReadingStatus.Completed }.size
-                    )
+            bookRepository.getAllBooks()
+                .combine(readingSessionRepository.getLastReadDates()) { books, lastRead ->
+                    books to lastRead
                 }
-            }
+                .collect { (books, lastRead) ->
+                    val completed = books.filter { it.readingStatus == ReadingStatus.Completed }
+                    val covers = completed
+                        .sortedByDescending { lastRead[it.id] ?: "" }
+                        .take(3)
+                        .map { ShelfCover(coverPath = it.coverPath, title = it.name, author = it.author) }
+                    updateState {
+                        copy(
+                            booksRead = completed.size,
+                            shelfCovers = covers,
+                            shelfPagesTotal = completed.sumOf { it.pages },
+                        )
+                    }
+                }
         }
 
         updateState {
@@ -76,6 +95,12 @@ class ProductivityModel(
                         activityChartTab = action.tab
                     )
                 }
+            }
+            ProductivityAction.OpenReadingLog -> {
+                sendNavigationEvent(NavigateToReadingLog())
+            }
+            ProductivityAction.OpenReadShelf -> {
+                sendNavigationEvent(NavigateToReadShelf)
             }
             is ProductivityAction.DebugOverwriteYear -> {
                 scope.launch {

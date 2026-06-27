@@ -8,7 +8,8 @@
     <string name="home_empty_cta">Добавить книгу</string>
     <string name="home_what_reading_now">Что читаете сейчас?</string>
     <string name="home_more_reading_planned">Ещё в чтении и планах</string>
-    <string name="home_greeting">Добрый вечер, Иван</string>
+    <string name="home_greeting">Добрый вечер,</string>
+    <string name="home_greeting_name">Иван</string>
     <string name="home_greeting_question">Что читаем сегодня?</string>
     <string name="home_toggle_theme">Переключить тему</string>
     <string name="home_streak_comeback_title">С возвращением</string>
@@ -21,7 +22,7 @@
     <string name="home_page_prefix">"стр. "</string>
     <string name="home_add_more_pages">Добавить ещё страницы</string>
     <string name="home_pages_not_marked">Сегодняшние страницы ещё не отмечены — это займёт минуту</string>
-    <string name="home_mark_progress">Отметить прогресс</string>
+    <string name="home_mark_progress">Обновить прогресс</string>
     <string name="home_action_continue">Дальше</string>
     <string name="home_action_start">Начать</string>
     <string name="home_status_reading">Читаю</string>
@@ -126,8 +127,20 @@
     </plurals>
 
     <!-- Productivity -->
-    <string name="prod_header_subtitle">Статистика чтения</string>
-    <string name="prod_header_title">Продуктивность</string>
+    <string name="prod_header_subtitle">Сводка чтения</string>
+    <string name="prod_header_title">Статистика</string>
+    <string name="stat_shelf_card_title">Полка прочитанного</string>
+    <string name="stat_journal_subtitle">Серия %1$s · %2$d стр/день</string>
+    <string name="stat_shelf_empty_title">Полка пока пуста</string>
+    <string name="stat_shelf_empty_subtitle">Дочитанные книги встанут сюда на полку</string>
+    <string name="stat_journal_empty_title">Журнал чтения пуст</string>
+    <string name="stat_journal_empty_subtitle">Отметьте первый прогресс — и здесь появятся ваши сессии</string>
+    <plurals name="stat_pages_word">
+        <item quantity="one">страница</item>
+        <item quantity="few">страницы</item>
+        <item quantity="many">страниц</item>
+        <item quantity="other">страниц</item>
+    </plurals>
     <string name="prod_metric_books_read">книг прочитано</string>
     <string name="prod_metric_pages_read">страниц прочитано</string>
     <string name="prod_metric_avg_per_day">стр. в день в среднем</string>
@@ -192,9 +205,10 @@
     <string name="details_edit">Редактировать</string>
     <string name="details_favorite_remove">Убрать из избранного</string>
     <string name="details_favorite_add">В избранное</string>
-    <string name="details_mark_progress">Отметить прогресс</string>
+    <string name="details_mark_progress">Обновить прогресс</string>
     <string name="details_reading_history">История чтения</string>
     <string name="details_quotes_and_notes">Цитаты и заметки</string>
+    <string name="details_rate_hint">Оценить</string>
     <string name="details_quotes_empty_title">Здесь будут ваши цитаты</string>
     <string name="details_quotes_empty_subtitle">Сохраняйте любимые строки и заметки прямо во время чтения.</string>
     <string name="details_page_of">стр. %1$d / %2$d</string>
@@ -267,6 +281,110 @@
     <!-- Update progress / result -->
     <string name="update_done">Готово</string>
     <string name="update_cozy_phrase">Хороший вечер для книги.</string>
+    <!-- Экран результатов: акцент на приросте за сессию -->
+    <string name="result_pages_chip">+%1$d стр</string>
+    <string name="result_session_progress">прогресс за сессию</string>
+    <string name="result_book_behind">книги позади</string>
+    <string name="result_minutes_value">%1$d мин</string>
+    <string name="result_session_caption">сессия</string>
+    <string name="result_page_caption">страница</string>
+    <string name="result_finished_title">Книга прочитана</string>
+    <string name="result_finished_subtitle">«%1$s» переехала на полку „Прочитано“</string>
+    <string name="result_rate_question">Как вам книга?</string>
+    <string name="result_note_placeholder">Заметка или любимая цитата — по желанию</string>
+    <string name="result_next">Дальше</string>
+    <string name="result_read_badge">ПРОЧИТАНО</string>
+    <string name="result_finished_books_behind">«%1$s» · %2$d страниц позади</string>
+    <string name="result_rate_prompt">Оцените книгу</string>
+    <string name="result_rating_value">Ваша оценка: %1$d/5</string>
+    <string name="result_nth_book_year">%1$d-я книга в этом году</string>
+    <string name="result_to_shelf">На полку «Прочитано»</string>
+    <string name="result_replay">Заново</string>
+
+    <!-- Журнал чтения -->
+    <string name="log_title">Журнал чтения</string>
+    <string name="log_crumb_productivity">Продуктивность</string>
+    <string name="log_crumb_book">История книги</string>
+    <string name="log_period_week">Неделя</string>
+    <string name="log_period_month">Месяц</string>
+    <string name="log_period_all">Всё время</string>
+    <string name="log_summary_sessions">сессии</string>
+    <string name="log_summary_pages">страниц</string>
+    <string name="log_summary_time">времени</string>
+    <string name="log_delta_week">к прошлой неделе</string>
+    <string name="log_delta_month">к прошлому месяцу</string>
+    <string name="log_alltime_since">с %1$s</string>
+    <string name="log_hint">Удалять можно записи с меткой текущая — это ваша позиция в книге. Прошлые сессии заморожены, чтобы прогресс оставался цельным.</string>
+    <string name="log_hint_toast">Подсказку можно открыть по «?» сверху</string>
+    <string name="log_current_tag">текущая</string>
+    <string name="log_group_today">Сегодня</string>
+    <string name="log_group_yesterday">Вчера</string>
+    <string name="log_group_week">На этой неделе</string>
+    <string name="log_group_earlier">Раньше</string>
+    <string name="log_empty">Здесь появятся сессии чтения.</string>
+    <string name="log_empty_book">Здесь появятся сессии чтения этой книги.</string>
+    <string name="log_pages_short">стр</string>
+    <string name="log_time_minutes">%1$d мин</string>
+    <string name="log_time_hours">%1$d ч</string>
+    <string name="log_time_hours_minutes">%1$d ч %2$d м</string>
+    <string name="log_edit_title">Изменить запись</string>
+    <string name="log_edit_pages_label">Страницы за сессию</string>
+    <string name="log_edit_from">с</string>
+    <string name="log_edit_to">до страницы</string>
+    <string name="log_edit_delta">+%1$d стр · %2$d%% книги</string>
+    <string name="log_edit_time">Время чтения</string>
+    <string name="log_edit_time_unset">Не указано</string>
+    <string name="log_save">Сохранить</string>
+    <string name="log_delete_entry">Удалить запись</string>
+    <string name="log_delete_title">Удалить запись?</string>
+    <string name="log_delete_message">Это ваша текущая позиция в книге «%1$s». Прогресс откатится со стр. %2$d до %3$d.</string>
+    <string name="log_keep">Оставить</string>
+    <string name="log_delete">Удалить</string>
+    <string name="log_all_sessions">Все сессии →</string>
+    <string name="prod_journal_card_title">Журнал чтения</string>
+    <string name="prod_journal_card_subtitle">Все сессии по дням</string>
+
+    <!-- Полка прочитанного -->
+    <string name="shelf_title">Прочитано</string>
+    <string name="shelf_crumb">Моя библиотека</string>
+    <string name="shelf_sort_recent">Сначала недавние</string>
+    <string name="shelf_no_date">Без даты</string>
+    <string name="shelf_share">Поделиться полкой</string>
+    <string name="shelf_share_text">Моя полка прочитанного — %1$d книг 📚</string>
+    <string name="shelf_empty">Здесь появятся прочитанные книги.</string>
+    <string name="shelf_detail_crumb">Прочитано · %1$s</string>
+    <string name="shelf_my_rating">Моя оценка</string>
+    <string name="shelf_read_label">Прочитано</string>
+    <string name="shelf_book_page">Страница книги</string>
+    <string name="shelf_tile_pages">страниц</string>
+    <string name="shelf_tile_sessions">сессий</string>
+    <string name="shelf_tile_time">за чтением</string>
+    <string name="shelf_progress_title">Как продвигалось чтение</string>
+    <string name="shelf_record">+%1$d стр · рекорд</string>
+    <string name="shelf_one_sitting">За один присест!</string>
+    <string name="shelf_rate_title">Оцените книгу</string>
+    <string name="shelf_rating_clear">Убрать оценку</string>
+    <string name="prod_shelf_card_title">Полка прочитанного</string>
+    <string name="prod_shelf_by_months">по месяцам</string>
+    <string name="lib_show_as_shelf">Показать полкой</string>
+    <plurals name="shelf_books_word">
+        <item quantity="one">книга</item>
+        <item quantity="few">книги</item>
+        <item quantity="many">книг</item>
+        <item quantity="other">книг</item>
+    </plurals>
+    <plurals name="shelf_days">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дня</item>
+        <item quantity="many">%1$d дней</item>
+        <item quantity="other">%1$d дней</item>
+    </plurals>
+    <plurals name="shelf_sessions">
+        <item quantity="one">%1$d сессия</item>
+        <item quantity="few">%1$d сессии</item>
+        <item quantity="many">%1$d сессий</item>
+        <item quantity="other">%1$d сессий</item>
+    </plurals>
     <string name="update_book_finished_title">Книга прочитана</string>
     <string name="update_book_finished_subtitle">Книга переехала на полку «Прочитано».</string>
     <string name="update_rating_label">Как вам книга?</string>
@@ -278,9 +396,27 @@
     <string name="update_save_progress">Сохранить прогресс</string>
     <string name="update_back">Назад</string>
     <string name="update_now_page_of">сейчас — стр. %1$d / %2$d · %3$d%%</string>
+    <string name="update_start_marker">начало</string>
     <string name="update_slash_total">/ %1$d</string>
     <string name="update_page_short">стр. %1$d</string>
     <string name="update_reading_time_label">Время чтения, мин — необязательно</string>
+    <string name="update_time_question">Сколько читали?</string>
+    <string name="update_time_hint">Перетащите линейку — поминутно</string>
+    <string name="update_time_unset">Не указано</string>
+    <string name="update_time_card_label">Время чтения</string>
+    <string name="update_time_change">Изменить</string>
+    <string name="update_time_minutes">%1$d мин</string>
+    <string name="update_time_hours">%1$d ч</string>
+    <string name="update_time_hours_minutes">%1$d ч %2$d мин</string>
+    <string name="streak_intro_subtitle">Серия продолжается. Так держать.</string>
+    <string name="streak_intro_tap">Нажмите, чтобы продолжить</string>
+    <string name="streak_intro_today">сегодня</string>
+    <plurals name="streak_intro_days">
+        <item quantity="one">день подряд!</item>
+        <item quantity="few">дня подряд!</item>
+        <item quantity="many">дней подряд!</item>
+        <item quantity="other">дней подряд!</item>
+    </plurals>
 
     <plurals name="update_streak_days_in_row">
         <item quantity="one">%1$d день подряд</item>
@@ -319,8 +455,8 @@
     <!-- Design system / navigation -->
     <string name="ds_weekly_goal_eyebrow">На этой неделе</string>
     <string name="ds_weekly_goal_done">Цель недели выполнена</string>
-    <string name="ds_nav_activity">Активность</string>
-    <string name="ds_nav_productivity">Продуктивность</string>
+    <string name="ds_nav_activity">Сегодня</string>
+    <string name="ds_nav_productivity">Статистика</string>
     <string name="ds_nav_library">Библиотека</string>
 
     <plurals name="ds_weekly_goal_target_pages">

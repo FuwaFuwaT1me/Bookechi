@@ -18,17 +18,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import fuwafuwa.time.bookechi.ui.theme.LocalBottomBarHeight
-import fuwafuwa.time.bookechi.ui.theme.LocalThemeToggle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,18 +36,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import fuwafuwa.time.bookechi.base.ui.ds.BookCover
 import fuwafuwa.time.bookechi.base.ui.ds.DayDot
 import fuwafuwa.time.bookechi.base.ui.ds.DayState
@@ -142,7 +151,6 @@ private fun BookListScreenPrivate(
             else -> BookListContent(
                 state = state,
                 onAction = onAction,
-                onToggleTheme = onToggleTheme,
             )
         }
     }
@@ -162,82 +170,81 @@ private fun BookListScreenPrivate(
 private fun BookListContent(
     state: BookListState,
     onAction: (BookListAction) -> Unit,
-    onToggleTheme: () -> Unit,
 ) {
-    val activeBook = state.books.firstOrNull { it.readingStatus == ReadingStatus.Reading }
-        ?: state.books.firstOrNull { it.readingStatus == ReadingStatus.None }
-    val restBooks = state.books.filter { it != activeBook }
-    val plannedBooks = state.books.filter { it.readingStatus == ReadingStatus.Planned }
-    val hasBooks = state.books.isNotEmpty()
+    // Прочитанные книги на главной не показываем — они живут на «Полке прочитанного».
+    // Единый отсортированный список; первая книга — герой, остальные — следом.
+    val visibleBooks = state.books.filter { it.readingStatus != ReadingStatus.Completed }
+    val activeBook = visibleBooks.firstOrNull()
+    val restBooks = visibleBooks.drop(1)
+    val plannedBooks = visibleBooks.filter { it.readingStatus == ReadingStatus.Planned }
+    val hasBooks = visibleBooks.isNotEmpty()
     val markedToday = state.isTodayStreak || state.pagesReadToday > 0
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            start = Spacing.lg,
-            end = Spacing.lg,
-            top = Spacing.lg,
-            bottom = LocalBottomBarHeight.current + Spacing.lg,
-        ),
-        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
-    ) {
-        item { HomeHeader(onToggleTheme = onToggleTheme) }
+    // Купол — full-bleed (во всю ширину), поэтому боковой contentPadding не задаём,
+    // а навешиваем его на каждый элемент обычного потока под куполом.
+    val hPad = Modifier.padding(horizontal = Spacing.lg)
 
-        item {
-            StreakCard(
+    // Пустое состояние: купол сверху, а «Добавьте первую книгу» по центру
+    // свободного места между куполом и нижним баром.
+    if (!hasBooks) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            StreakDome(
                 state = state,
                 isComeback = state.isComeback,
                 hasBooks = hasBooks,
                 markedToday = markedToday,
-                onBellClick = { onAction(BookListAction.OpenReminderSheet) },
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = Spacing.lg)
+                    .padding(bottom = LocalBottomBarHeight.current),
+                contentAlignment = Alignment.Center,
+            ) {
+                EmptyState(
+                    icon = Icons.AutoMirrored.Outlined.MenuBook,
+                    title = stringResource(R.string.home_empty_title),
+                    subtitle = stringResource(R.string.home_empty_subtitle),
+                    ctaText = stringResource(R.string.home_empty_cta),
+                    onCta = { onAction(BookListAction.NavigateToAddBook) },
+                )
+            }
+        }
+        return
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            bottom = LocalBottomBarHeight.current + Spacing.lg,
+        ),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+    ) {
+        // Купол прижат к верху контент-области (уже под статусбаром) и тянется
+        // во всю ширину, «паря» над остальным контентом.
+        item {
+            StreakDome(
+                state = state,
+                isComeback = state.isComeback,
+                hasBooks = hasBooks,
+                markedToday = markedToday,
             )
         }
 
         when {
-            !hasBooks -> {
-                item {
-                    EmptyState(
-                        icon = Icons.AutoMirrored.Outlined.MenuBook,
-                        title = stringResource(R.string.home_empty_title),
-                        subtitle = stringResource(R.string.home_empty_subtitle),
-                        ctaText = stringResource(R.string.home_empty_cta),
-                        onCta = { onAction(BookListAction.NavigateToAddBook) },
-                    )
-                }
-            }
-
             activeBook == null -> {
                 item {
-                    Text(
-                        text = stringResource(R.string.home_what_reading_now),
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = BookechiTheme.colors.textPrimary,
-                    )
+                    Box(hPad) {
+                        Text(
+                            text = stringResource(R.string.home_what_reading_now),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = BookechiTheme.colors.textPrimary,
+                        )
+                    }
                 }
                 items(items = plannedBooks, key = { it.id }) { book ->
-                    BookListRow(
-                        book = book,
-                        onClick = { onAction(BookListAction.NavigateToBookDetails(book)) },
-                        onAction = { onAction(BookListAction.NavigateToEditBook(book)) },
-                    )
-                }
-            }
-
-            else -> {
-                item {
-                    ActiveBookHeroCard(
-                        book = activeBook,
-                        markedToday = markedToday,
-                        pagesReadToday = state.pagesReadToday,
-                        onClick = { onAction(BookListAction.NavigateToBookDetails(activeBook)) },
-                        onQuickLog = { onAction(BookListAction.NavigateToEditBook(activeBook)) },
-                        onMarkProgress = { onAction(BookListAction.NavigateToEditBook(activeBook)) },
-                    )
-                }
-
-                if (restBooks.isNotEmpty()) {
-                    item { SectionLabel(text = stringResource(R.string.home_more_reading_planned)) }
-                    items(items = restBooks, key = { it.id }) { book ->
+                    Box(hPad) {
                         BookListRow(
                             book = book,
                             onClick = { onAction(BookListAction.NavigateToBookDetails(book)) },
@@ -246,77 +253,84 @@ private fun BookListContent(
                     }
                 }
             }
+
+            else -> {
+                item {
+                    Box(hPad) {
+                        ActiveBookHeroCard(
+                            book = activeBook,
+                            markedToday = markedToday,
+                            pagesReadToday = state.pagesReadToday,
+                            onClick = { onAction(BookListAction.NavigateToBookDetails(activeBook)) },
+                            onQuickLog = { onAction(BookListAction.NavigateToEditBook(activeBook)) },
+                            onMarkProgress = { onAction(BookListAction.NavigateToEditBook(activeBook)) },
+                        )
+                    }
+                }
+
+                if (restBooks.isNotEmpty()) {
+                    item {
+                        Box(hPad) {
+                            SectionLabel(text = stringResource(R.string.home_more_reading_planned))
+                        }
+                    }
+                    items(items = restBooks, key = { it.id }) { book ->
+                        Box(hPad) {
+                            BookListRow(
+                                book = book,
+                                onClick = { onAction(BookListAction.NavigateToBookDetails(book)) },
+                                onAction = { onAction(BookListAction.NavigateToEditBook(book)) },
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 /* ----------------------------------------------------------------------------
- * Шапка
+ * Купол-хедер: приветствие + кнопки + стрик + полоска недели в одной панели
+ * с выпуклой нижней кромкой, «парящей» над контентом.
  * ------------------------------------------------------------------------- */
-@Composable
-private fun HomeHeader(onToggleTheme: () -> Unit) {
-    val colors = BookechiTheme.colors
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.home_greeting),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.textSecondary,
+private val DomeArcDepth = 38.dp
+
+/** Тёплая тень купола/бейджа (espresso). */
+private val DomeShadow = Color(0xFF382A20)
+
+/** Прямоугольник с выпуклой вниз эллиптической нижней кромкой (CSS-дуга 50%/38px). */
+private class DomeShape(private val depth: Dp) : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density,
+    ): Outline {
+        val d = with(density) { depth.toPx() }.coerceAtMost(size.height / 2f)
+        val path = Path().apply {
+            moveTo(0f, 0f)
+            lineTo(size.width, 0f)
+            lineTo(size.width, size.height - d)
+            // Нижняя кромка — нижняя половина эллипса rx=width/2, ry=depth:
+            // от правого края вниз к центру и вверх к левому краю.
+            arcTo(
+                rect = Rect(0f, size.height - 2f * d, size.width, size.height),
+                startAngleDegrees = 0f,
+                sweepAngleDegrees = 180f,
+                forceMoveTo = false,
             )
-            Spacer(Modifier.height(Spacing.xs))
-            Text(
-                text = stringResource(R.string.home_greeting_question),
-                style = MaterialTheme.typography.headlineMedium,
-                color = colors.textPrimary,
-            )
+            lineTo(0f, 0f)
+            close()
         }
-        CircleIconButton(
-            icon = if (colors.isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
-            contentDescription = stringResource(R.string.home_toggle_theme),
-            onClick = LocalThemeToggle.current,
-        )
+        return Outline.Generic(path)
     }
 }
 
 @Composable
-private fun CircleIconButton(
-    icon: ImageVector,
-    contentDescription: String?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val colors = BookechiTheme.colors
-    Box(
-        modifier = modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(colors.surface)
-            .border(BorderStroke(1.dp, colors.stroke), CircleShape)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = colors.textPrimary,
-            modifier = Modifier.size(20.dp),
-        )
-    }
-}
-
-/* ----------------------------------------------------------------------------
- * Стрик-карточка
- * ------------------------------------------------------------------------- */
-@Composable
-private fun StreakCard(
+private fun StreakDome(
     state: BookListState,
     isComeback: Boolean,
     hasBooks: Boolean,
     markedToday: Boolean,
-    onBellClick: () -> Unit,
 ) {
     val colors = BookechiTheme.colors
 
@@ -349,41 +363,96 @@ private fun StreakCard(
         }
     }
 
+    val domeShape = remember { DomeShape(DomeArcDepth) }
+    val g1 = colors.streakGradientStart
+    val g2 = colors.streakGradientEnd
+    val glowColor = colors.accentSoft
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                brush = Brush.verticalGradient(
-                    listOf(colors.streakGradientStart, colors.streakGradientEnd),
-                ),
-                shape = DsShapes.card,
+            .shadow(
+                elevation = 16.dp,
+                shape = domeShape,
+                clip = false,
+                ambientColor = DomeShadow,
+                spotColor = DomeShadow,
             )
-            .border(1.dp, colors.streakCurrentDay, DsShapes.card)
-            .padding(Spacing.xl),
-        verticalArrangement = Arrangement.spacedBy(Spacing.lg),
+            .clip(domeShape)
+            .drawWithCache {
+                // Тёплый градиент g1→g2 + мягкий радиальный блик в правом-верхнем углу.
+                val base = Brush.verticalGradient(
+                    colors = listOf(g1, g2),
+                    startY = 0f,
+                    endY = size.height,
+                )
+                val glow = Brush.radialGradient(
+                    colors = listOf(glowColor.copy(alpha = 0.55f), Color.Transparent),
+                    center = Offset(size.width * 0.84f, -size.height * 0.22f),
+                    radius = size.width * 0.95f,
+                )
+                onDrawBehind {
+                    drawRect(base)
+                    drawRect(glow)
+                }
+            }
+            .padding(top = Spacing.xl, start = 22.dp, end = 22.dp, bottom = 46.dp),
     ) {
+        // Приветствие в одну строку: обращение + крупное жирное имя (по базовой линии).
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = stringResource(R.string.home_greeting) + " ",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                ),
+                color = colors.textSecondary,
+                modifier = Modifier.alignByBaseline(),
+            )
+            Text(
+                text = stringResource(R.string.home_greeting_name),
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.3).sp,
+                ),
+                color = colors.textPrimary,
+                modifier = Modifier.alignByBaseline(),
+            )
+        }
+
+        Spacer(Modifier.height(Spacing.lg))
+
+        // Строка стрика: бейдж-огонёк + крупный заголовок и подпись.
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.Top,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            val flameScale = 1f + state.totalDaysWithStreak.coerceAtMost(12) * 0.02f
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .background(colors.surface, DsShapes.tile),
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(colors.surface.copy(alpha = 0.58f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Default.LocalFireDepartment,
                     contentDescription = null,
-                    tint = colors.accent,
-                    modifier = Modifier.size(26.dp),
+                    tint = colors.fire,
+                    modifier = Modifier
+                        .size(26.dp)
+                        .scale(flameScale),
                 )
             }
-            Spacer(Modifier.size(Spacing.md))
+            Spacer(Modifier.size(Spacing.md + 2.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = (-0.3).sp,
+                    ),
                     color = colors.textPrimary,
                 )
                 Spacer(Modifier.height(Spacing.xs))
@@ -393,14 +462,11 @@ private fun StreakCard(
                     color = colors.textSecondary,
                 )
             }
-            CircleIconButton(
-                icon = Icons.Outlined.NotificationsNone,
-                contentDescription = stringResource(R.string.home_reminders_cd),
-                onClick = onBellClick,
-                modifier = Modifier.size(36.dp),
-            )
         }
 
+        Spacer(Modifier.height(Spacing.lg))
+
+        // Полоска 7 дней (Пн–Вс).
         val dayLabels = weekDayLabels()
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -421,6 +487,7 @@ private fun StreakCard(
         }
     }
 }
+
 
 /* ----------------------------------------------------------------------------
  * Hero-карточка активной книги
@@ -514,26 +581,28 @@ private fun ActiveBookHeroCard(
             }
         }
 
-        if (pagesLeft > 0) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.LocalFireDepartment,
-                    contentDescription = null,
-                    tint = colors.accent,
-                    modifier = Modifier.size(16.dp),
-                )
-                Spacer(Modifier.size(Spacing.xs))
-                Text(
-                    text = pluralStringResource(
-                        R.plurals.home_pace_days_left,
-                        daysLeft,
-                        daysLeft,
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colors.textSecondary,
-                )
-            }
-        }
+        // Прогноз темпа («осталось ~N дней») временно убран из UI.
+        // Оставлено в коде на будущее: для возврата раскомментировать.
+        // if (pagesLeft > 0) {
+        //     Row(verticalAlignment = Alignment.CenterVertically) {
+        //         Icon(
+        //             imageVector = Icons.Default.LocalFireDepartment,
+        //             contentDescription = null,
+        //             tint = colors.accent,
+        //             modifier = Modifier.size(16.dp),
+        //         )
+        //         Spacer(Modifier.size(Spacing.xs))
+        //         Text(
+        //             text = pluralStringResource(
+        //                 R.plurals.home_pace_days_left,
+        //                 daysLeft,
+        //                 daysLeft,
+        //             ),
+        //             style = MaterialTheme.typography.bodySmall,
+        //             color = colors.textSecondary,
+        //         )
+        //     }
+        // }
 
         // Чипы быстрого лога временно убраны — прогресс отмечается кнопкой ниже.
         // Оставлены в коде на будущее: для возврата раскомментировать.

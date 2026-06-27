@@ -9,7 +9,8 @@
     <string name="home_empty_cta">Add a book</string>
     <string name="home_what_reading_now">What are you reading now?</string>
     <string name="home_more_reading_planned">Also reading and planned</string>
-    <string name="home_greeting">Good evening, Ivan</string>
+    <string name="home_greeting">Good evening,</string>
+    <string name="home_greeting_name">Ivan</string>
     <string name="home_greeting_question">What are we reading today?</string>
     <string name="home_toggle_theme">Toggle theme</string>
     <string name="home_streak_comeback_title">Welcome back</string>
@@ -22,7 +23,7 @@
     <string name="home_page_prefix">"p. "</string>
     <string name="home_add_more_pages">Add more pages</string>
     <string name="home_pages_not_marked">Today\'s pages aren\'t marked yet — it takes a minute</string>
-    <string name="home_mark_progress">Mark progress</string>
+    <string name="home_mark_progress">Update progress</string>
     <string name="home_action_continue">Continue</string>
     <string name="home_action_start">Start</string>
     <string name="home_status_reading">Reading</string>
@@ -117,8 +118,18 @@
     </plurals>
 
     <!-- Productivity -->
-    <string name="prod_header_subtitle">Reading stats</string>
-    <string name="prod_header_title">Productivity</string>
+    <string name="prod_header_subtitle">Reading summary</string>
+    <string name="prod_header_title">Statistics</string>
+    <string name="stat_shelf_card_title">Read shelf</string>
+    <string name="stat_journal_subtitle">Streak %1$s · %2$d pages/day</string>
+    <string name="stat_shelf_empty_title">The shelf is empty</string>
+    <string name="stat_shelf_empty_subtitle">Finished books will line up here</string>
+    <string name="stat_journal_empty_title">Reading log is empty</string>
+    <string name="stat_journal_empty_subtitle">Log your first progress — your sessions will appear here</string>
+    <plurals name="stat_pages_word">
+        <item quantity="one">page</item>
+        <item quantity="other">pages</item>
+    </plurals>
     <string name="prod_metric_books_read">books read</string>
     <string name="prod_metric_pages_read">pages read</string>
     <string name="prod_metric_avg_per_day">pages per day on average</string>
@@ -179,9 +190,10 @@
     <string name="details_edit">Edit</string>
     <string name="details_favorite_remove">Remove from favorites</string>
     <string name="details_favorite_add">Add to favorites</string>
-    <string name="details_mark_progress">Log progress</string>
+    <string name="details_mark_progress">Update progress</string>
     <string name="details_reading_history">Reading history</string>
     <string name="details_quotes_and_notes">Quotes &amp; notes</string>
+    <string name="details_rate_hint">Rate</string>
     <string name="details_quotes_empty_title">Your quotes will appear here</string>
     <string name="details_quotes_empty_subtitle">Save your favorite lines and notes right while you read.</string>
     <string name="details_page_of">p. %1$d / %2$d</string>
@@ -248,6 +260,104 @@
     <!-- Update progress / result -->
     <string name="update_done">Done</string>
     <string name="update_cozy_phrase">A good evening for a book.</string>
+    <!-- Экран результатов: акцент на приросте за сессию -->
+    <string name="result_pages_chip">+%1$d pages</string>
+    <string name="result_session_progress">progress this session</string>
+    <string name="result_book_behind">of the book behind you</string>
+    <string name="result_minutes_value">%1$d min</string>
+    <string name="result_session_caption">session</string>
+    <string name="result_page_caption">page</string>
+    <string name="result_finished_title">Book finished</string>
+    <string name="result_finished_subtitle">“%1$s” moved to your Read shelf</string>
+    <string name="result_rate_question">How was the book?</string>
+    <string name="result_note_placeholder">A note or favorite quote — optional</string>
+    <string name="result_next">Next</string>
+    <string name="result_read_badge">READ</string>
+    <string name="result_finished_books_behind">“%1$s” · %2$d pages behind</string>
+    <string name="result_rate_prompt">Rate the book</string>
+    <string name="result_rating_value">Your rating: %1$d/5</string>
+    <string name="result_nth_book_year">Book No. %1$d this year</string>
+    <string name="result_to_shelf">Move to Read shelf</string>
+    <string name="result_replay">Replay</string>
+
+    <!-- Reading log / journal -->
+    <string name="log_title">Reading log</string>
+    <string name="log_crumb_productivity">Productivity</string>
+    <string name="log_crumb_book">Book history</string>
+    <string name="log_period_week">Week</string>
+    <string name="log_period_month">Month</string>
+    <string name="log_period_all">All time</string>
+    <string name="log_summary_sessions">sessions</string>
+    <string name="log_summary_pages">pages</string>
+    <string name="log_summary_time">time</string>
+    <string name="log_delta_week">vs last week</string>
+    <string name="log_delta_month">vs last month</string>
+    <string name="log_alltime_since">since %1$s</string>
+    <string name="log_hint">You can delete entries marked current — that\'s your position in the book. Past sessions are frozen so progress stays whole.</string>
+    <string name="log_hint_toast">Open the hint again from “?” at the top</string>
+    <string name="log_current_tag">current</string>
+    <string name="log_group_today">Today</string>
+    <string name="log_group_yesterday">Yesterday</string>
+    <string name="log_group_week">This week</string>
+    <string name="log_group_earlier">Earlier</string>
+    <string name="log_empty">Reading sessions will show up here.</string>
+    <string name="log_empty_book">This book\'s reading sessions will show up here.</string>
+    <string name="log_pages_short">pp</string>
+    <string name="log_time_minutes">%1$d min</string>
+    <string name="log_time_hours">%1$d h</string>
+    <string name="log_time_hours_minutes">%1$d h %2$d m</string>
+    <string name="log_edit_title">Edit entry</string>
+    <string name="log_edit_pages_label">Pages this session</string>
+    <string name="log_edit_from">from</string>
+    <string name="log_edit_to">to page</string>
+    <string name="log_edit_delta">+%1$d pp · %2$d%% of book</string>
+    <string name="log_edit_time">Reading time</string>
+    <string name="log_edit_time_unset">Not set</string>
+    <string name="log_save">Save</string>
+    <string name="log_delete_entry">Delete entry</string>
+    <string name="log_delete_title">Delete entry?</string>
+    <string name="log_delete_message">This is your current position in “%1$s”. Progress will roll back from p. %2$d to %3$d.</string>
+    <string name="log_keep">Keep</string>
+    <string name="log_delete">Delete</string>
+    <string name="log_all_sessions">All sessions →</string>
+    <string name="prod_journal_card_title">Reading log</string>
+    <string name="prod_journal_card_subtitle">All sessions by day</string>
+
+    <!-- Read shelf -->
+    <string name="shelf_title">Read</string>
+    <string name="shelf_crumb">My library</string>
+    <string name="shelf_sort_recent">Recent first</string>
+    <string name="shelf_no_date">No date</string>
+    <string name="shelf_share">Share shelf</string>
+    <string name="shelf_share_text">My read shelf — %1$d books 📚</string>
+    <string name="shelf_empty">Finished books will show up here.</string>
+    <string name="shelf_detail_crumb">Read · %1$s</string>
+    <string name="shelf_my_rating">My rating</string>
+    <string name="shelf_read_label">Read</string>
+    <string name="shelf_book_page">Book page</string>
+    <string name="shelf_tile_pages">pages</string>
+    <string name="shelf_tile_sessions">sessions</string>
+    <string name="shelf_tile_time">reading</string>
+    <string name="shelf_progress_title">Reading progress</string>
+    <string name="shelf_record">+%1$d pp · record</string>
+    <string name="shelf_one_sitting">In one sitting!</string>
+    <string name="shelf_rate_title">Rate the book</string>
+    <string name="shelf_rating_clear">Clear rating</string>
+    <string name="prod_shelf_card_title">Read shelf</string>
+    <string name="prod_shelf_by_months">by month</string>
+    <string name="lib_show_as_shelf">Show as shelf</string>
+    <plurals name="shelf_books_word">
+        <item quantity="one">book</item>
+        <item quantity="other">books</item>
+    </plurals>
+    <plurals name="shelf_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="shelf_sessions">
+        <item quantity="one">%1$d session</item>
+        <item quantity="other">%1$d sessions</item>
+    </plurals>
     <string name="update_book_finished_title">Book finished</string>
     <string name="update_book_finished_subtitle">The book has moved to the Read shelf.</string>
     <string name="update_rating_label">How was the book?</string>
@@ -259,9 +369,25 @@
     <string name="update_save_progress">Save progress</string>
     <string name="update_back">Back</string>
     <string name="update_now_page_of">now — p. %1$d / %2$d · %3$d%%</string>
+    <string name="update_start_marker">start</string>
     <string name="update_slash_total">/ %1$d</string>
     <string name="update_page_short">p. %1$d</string>
     <string name="update_reading_time_label">Reading time, min — optional</string>
+    <string name="update_time_question">How long did you read?</string>
+    <string name="update_time_hint">Drag the ruler — minute by minute</string>
+    <string name="update_time_unset">Not set</string>
+    <string name="update_time_card_label">Reading time</string>
+    <string name="update_time_change">Change</string>
+    <string name="update_time_minutes">%1$d min</string>
+    <string name="update_time_hours">%1$d h</string>
+    <string name="update_time_hours_minutes">%1$d h %2$d min</string>
+    <string name="streak_intro_subtitle">Your streak continues. Keep it up.</string>
+    <string name="streak_intro_tap">Tap to continue</string>
+    <string name="streak_intro_today">today</string>
+    <plurals name="streak_intro_days">
+        <item quantity="one">day in a row!</item>
+        <item quantity="other">days in a row!</item>
+    </plurals>
 
     <plurals name="update_streak_days_in_row">
         <item quantity="one">%1$d day in a row</item>
@@ -292,8 +418,8 @@
     <!-- Design system / navigation -->
     <string name="ds_weekly_goal_eyebrow">This week</string>
     <string name="ds_weekly_goal_done">Weekly goal reached</string>
-    <string name="ds_nav_activity">Activity</string>
-    <string name="ds_nav_productivity">Productivity</string>
+    <string name="ds_nav_activity">Today</string>
+    <string name="ds_nav_productivity">Stats</string>
     <string name="ds_nav_library">Library</string>
 
     <plurals name="ds_weekly_goal_target_pages">

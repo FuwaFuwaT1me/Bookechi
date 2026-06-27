@@ -49,18 +49,18 @@ fun DayDot(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = colors.textSecondary,
+            color = if (state == DayState.Today) colors.accent else colors.textSecondary,
         )
         Box(
-            modifier = Modifier.size(28.dp),
+            modifier = Modifier.size(26.dp),
             contentAlignment = Alignment.Center,
         ) {
             when (state) {
                 DayState.Done -> {
                     Box(
                         modifier = Modifier
-                            .size(28.dp)
-                            .background(colors.accentDeep, CircleShape),
+                            .size(26.dp)
+                            .background(colors.accent, CircleShape),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
@@ -72,34 +72,19 @@ fun DayDot(
                     }
                 }
                 DayState.Today -> {
+                    // Двойное кольцо: внешнее акцентное + внутреннее тёплое (streak-g2).
                     Box(
                         modifier = Modifier
-                            .size(28.dp)
+                            .size(26.dp)
                             .border(2.dp, colors.accent, CircleShape)
-                            .padding(4.dp)
-                        ,
-                    ) {
-
-                        val ringColor = colors.streakCurrentDay
-                        Canvas(modifier = Modifier.size(28.dp)) {
-                            drawCircle(
-                                color = ringColor,
-                                radius = size.minDimension / 2f - 1.dp.toPx(),
-                                style = Stroke(
-                                    width = 1.5.dp.toPx(),
-                                    pathEffect = PathEffect.dashPathEffect(
-                                        intervals = floatArrayOf(3.dp.toPx(), 3.dp.toPx()),
-                                        phase = 0f,
-                                    ),
-                                ),
-                            )
-                        }
-                    }
+                            .padding(2.dp)
+                            .border(2.5.dp, colors.streakGradientEnd, CircleShape),
+                    )
                 }
                 DayState.Empty -> {
                     // Пунктирное кольцо (как в макете), но видимым тёплым тоном, не блёклым.
                     val ringColor = colors.streakCurrentDay
-                    Canvas(modifier = Modifier.size(28.dp)) {
+                    Canvas(modifier = Modifier.size(26.dp)) {
                         drawCircle(
                             color = ringColor,
                             radius = size.minDimension / 2f - 1.dp.toPx(),

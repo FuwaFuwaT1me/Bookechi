@@ -6,7 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
 import fuwafuwa.time.bookechi.data.local.BookDao
+import fuwafuwa.time.bookechi.data.local.DeletedRecordDao
 import fuwafuwa.time.bookechi.data.model.Book
+import fuwafuwa.time.bookechi.data.model.DeletedRecord
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.mvi.ui.Screen
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.LibraryModel
@@ -56,8 +58,18 @@ private fun previewLibraryViewModel(): LibraryViewModel {
         override suspend fun deleteBookById(id: Long) = Unit
 
         override suspend fun deleteAllBooks() = Unit
+
+        override suspend fun getAllBooksOnce(): List<Book> = previewBooks
+
+        override suspend fun getDirtyBooks(): List<Book> = emptyList()
+
+        override suspend fun getBookByUuid(uuid: String): Book? = null
+
+        override suspend fun markBookSynced(uuid: String) = Unit
+
+        override suspend fun deleteBookByUuid(uuid: String) = Unit
     }
-    val repository = BookRepository(fakeDao)
+    val repository = BookRepository(fakeDao, previewDeletedDao)
     val model = LibraryModel(
         defaultState = LibraryState(
             books = previewBooks,
@@ -67,4 +79,11 @@ private fun previewLibraryViewModel(): LibraryViewModel {
         bookRepository = repository
     )
     return LibraryViewModel(model)
+}
+
+private val previewDeletedDao = object : DeletedRecordDao {
+    override suspend fun upsert(record: DeletedRecord) = Unit
+    override suspend fun getDirty(): List<DeletedRecord> = emptyList()
+    override suspend fun markSynced(uuid: String) = Unit
+    override fun dirtyCount(): Flow<Int> = flowOf(0)
 }

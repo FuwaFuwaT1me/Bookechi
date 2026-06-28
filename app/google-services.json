@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1065488199700",
+    "project_id": "bokechi",
+    "storage_bucket": "bokechi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1065488199700:android:4ad6dbf49db11605ebf701",
+        "android_client_info": {
+          "package_name": "fuwafuwa.time.bookechi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1065488199700-k705a28ebvdgmk6ob3134npn7qpk5g3r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fuwafuwa.time.bookechi",
+            "certificate_hash": "85e52039b9d8e9fa74ef7c700ae3b932433aad78"
+          }
+        },
+        {
+          "client_id": "1065488199700-1emsnkcjqjddd4ragbb26qegm9vfmfmh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHDoamYXFydHrkpdIWsrxHNezgNnilzbQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1065488199700-1emsnkcjqjddd4ragbb26qegm9vfmfmh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

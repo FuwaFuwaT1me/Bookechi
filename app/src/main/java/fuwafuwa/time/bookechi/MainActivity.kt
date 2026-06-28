@@ -4,6 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +33,7 @@ import fuwafuwa.time.bookechi.navigation.NavigationHost
 import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.library.ui.LibraryScreen
 import fuwafuwa.time.bookechi.ui.feature.navigation.BottomNavigationBar
+import fuwafuwa.time.bookechi.ui.feature.onboarding.ui.OnboardingScreenRoute
 import fuwafuwa.time.bookechi.ui.feature.productivity.ui.ProductivityScreen
 import fuwafuwa.time.bookechi.ui.theme.BookechiTheme
 import fuwafuwa.time.bookechi.ui.theme.DarkCanvas
@@ -46,6 +52,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             val appPreferences = koinInject<AppPreferences>()
             val isDarkTheme by appPreferences.isDarkTheme.collectAsState()
+
+            // Стартовый экран: онбординг для новых пользователей, иначе сразу библиотека.
+            val startDestination = remember {
+                if (appPreferences.onboardingCompleted) BookListScreen else OnboardingScreenRoute
+            }
 
             val systemUiController = rememberSystemUiController()
             systemUiController.setSystemBarsColor(
@@ -69,7 +80,9 @@ class MainActivity : ComponentActivity() {
 
                 CompositionLocalProvider(
                     LocalThemeToggle provides { appPreferences.toggleDarkTheme() },
-                    LocalBottomBarHeight provides if (showBottomBar) barHeight else 0.dp,
+                    // Держим высоту стабильной даже во время анимации скрытия бара —
+                    // иначе нижний паддинг таб-экранов скачет при переходе во вложенные.
+                    LocalBottomBarHeight provides barHeight,
                 ) {
                     Box(
                         modifier = Modifier
@@ -83,16 +96,20 @@ class MainActivity : ComponentActivity() {
                                 .fillMaxSize()
                                 .statusBarsPadding(),
                             navController = navController,
+                            startDestination = startDestination,
                         )
 
-                        if (showBottomBar) {
+                        AnimatedVisibility(
+                            visible = showBottomBar,
+                            modifier = Modifier.align(Alignment.BottomCenter),
+                            enter = slideInVertically { it } + fadeIn(),
+                            exit = slideOutVertically { it } + fadeOut(),
+                        ) {
                             BottomNavigationBar(
                                 navController = navController,
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .onSizeChanged {
-                                        barHeight = with(density) { it.height.toDp() }
-                                    },
+                                modifier = Modifier.onSizeChanged {
+                                    barHeight = with(density) { it.height.toDp() }
+                                },
                             )
                         }
                     }

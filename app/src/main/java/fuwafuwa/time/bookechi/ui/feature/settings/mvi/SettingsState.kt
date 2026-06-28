@@ -1,10 +1,15 @@
 package fuwafuwa.time.bookechi.ui.feature.settings.mvi
 
+import fuwafuwa.time.bookechi.data.auth.AuthUser
 import fuwafuwa.time.bookechi.data.preferences.BookListViewType
 import fuwafuwa.time.bookechi.mvi.api.State
 
 data class SettingsState(
     val isLoading: Boolean = false,
+    // Account / auth
+    val authUser: AuthUser? = null,
+    val authInProgress: Boolean = false,
+    val authError: String? = null,
     val isDarkMode: Boolean = false,
     val notificationsEnabled: Boolean = true,
     val dailyReminderTime: String = "20:00",

@@ -45,6 +45,14 @@ class AppPreferences(context: Context) {
         prefs.edit().putString(KEY_REMINDER_TIME, time).apply()
         _reminderTime.value = time
     }
+
+    /** Прошёл ли пользователь онбординг/авторизацию — гейтит стартовый экран. */
+    val onboardingCompleted: Boolean
+        get() = prefs.getBoolean(KEY_ONBOARDING_COMPLETED, false)
+
+    fun setOnboardingCompleted(completed: Boolean) {
+        prefs.edit().putBoolean(KEY_ONBOARDING_COMPLETED, completed).apply()
+    }
     
     private fun loadDesignPreferences(): DesignPreferences {
         return DesignPreferences(
@@ -79,5 +87,6 @@ class AppPreferences(context: Context) {
         private const val KEY_DARK_THEME = "dark_theme"
         private const val KEY_REMINDER_ENABLED = "reminder_enabled"
         private const val KEY_REMINDER_TIME = "reminder_time"
+        private const val KEY_ONBOARDING_COMPLETED = "onboarding_completed"
     }
 }

@@ -12,7 +12,10 @@ import fuwafuwa.time.bookechi.ui.feature.book_details.mvi.bookDetailsNavRoot
 import fuwafuwa.time.bookechi.ui.feature.book_list.mvi.bookListNavRoot
 import fuwafuwa.time.bookechi.ui.feature.book_list.ui.BookListScreen
 import fuwafuwa.time.bookechi.ui.feature.library.mvi.libraryNavRoot
+import fuwafuwa.time.bookechi.ui.feature.onboarding.mvi.onboardingNavRoot
 import fuwafuwa.time.bookechi.ui.feature.productivity.mvi.productivityNavRoot
+import fuwafuwa.time.bookechi.ui.feature.read_shelf.mvi.readShelfNavRoot
+import fuwafuwa.time.bookechi.ui.feature.reading_log.mvi.readingLogNavRoot
 import fuwafuwa.time.bookechi.ui.feature.settings.mvi.settingsNavRoot
 import fuwafuwa.time.bookechi.ui.feature.update_progress.mvi.updateProgressNavRoot
 import fuwafuwa.time.bookechi.ui.feature.update_result.mvi.updateResultNavRoot
@@ -20,13 +23,16 @@ import fuwafuwa.time.bookechi.ui.feature.update_result.mvi.updateResultNavRoot
 @Composable
 fun NavigationHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startDestination: Any = BookListScreen
 ) {
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = BookListScreen
+        startDestination = startDestination
     ) {
+        onboardingNavRoot(navController)
+
         bookListScenario(navController)
         addBookScenario(navController)
         bookDetailsScenario(navController)
@@ -38,6 +44,10 @@ fun NavigationHost(
         libraryScenario(navController)
 
         settingsNavRoot(navController)
+
+        readingLogNavRoot(navController)
+
+        readShelfNavRoot(navController)
     }
 }
 

@@ -27,7 +27,24 @@ interface BookDao {
     
     @Query("DELETE FROM Book WHERE id = :id")
     suspend fun deleteBookById(id: Long)
-    
+
     @Query("DELETE FROM Book")
     suspend fun deleteAllBooks()
+
+    // --- Sync ---
+
+    @Query("SELECT * FROM Book")
+    suspend fun getAllBooksOnce(): List<Book>
+
+    @Query("SELECT * FROM Book WHERE dirty = 1")
+    suspend fun getDirtyBooks(): List<Book>
+
+    @Query("SELECT * FROM Book WHERE uuid = :uuid")
+    suspend fun getBookByUuid(uuid: String): Book?
+
+    @Query("UPDATE Book SET dirty = 0 WHERE uuid = :uuid")
+    suspend fun markBookSynced(uuid: String)
+
+    @Query("DELETE FROM Book WHERE uuid = :uuid")
+    suspend fun deleteBookByUuid(uuid: String)
 }

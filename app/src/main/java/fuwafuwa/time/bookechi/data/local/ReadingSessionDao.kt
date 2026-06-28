@@ -1,12 +1,16 @@
 package fuwafuwa.time.bookechi.data.local
 
 import androidx.room.*
+import fuwafuwa.time.bookechi.data.model.BookLastRead
 import fuwafuwa.time.bookechi.data.model.DailyReadingStats
 import fuwafuwa.time.bookechi.data.model.ReadingSession
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ReadingSessionDao {
+
+    @Query("SELECT * FROM ReadingSession ORDER BY date DESC")
+    fun getAllSessions(): Flow<List<ReadingSession>>
 
     @Query("SELECT * FROM ReadingSession WHERE bookId = :bookId ORDER BY date DESC")
     fun getSessionsForBook(bookId: Long): Flow<List<ReadingSession>>
@@ -74,6 +78,9 @@ interface ReadingSessionDao {
     """)
     fun getActiveSessionDatesUpTo(endDate: String): Flow<List<String>>
 
+    @Query("SELECT bookId, MAX(date) AS lastReadDate FROM ReadingSession GROUP BY bookId")
+    fun getLastReadDates(): Flow<List<BookLastRead>>
+
     @Query("SELECT SUM(pagesRead) FROM ReadingSession WHERE bookId = :bookId")
     suspend fun getTotalPagesReadForBook(bookId: Long): Int?
 
@@ -97,6 +104,26 @@ interface ReadingSessionDao {
 
     @Query("DELETE FROM ReadingSession")
     suspend fun deleteAllSessions()
+
+    // --- Sync ---
+
+    @Query("SELECT * FROM ReadingSession")
+    suspend fun getAllSessionsOnce(): List<ReadingSession>
+
+    @Query("SELECT * FROM ReadingSession WHERE bookId = :bookId")
+    suspend fun getSessionsForBookOnce(bookId: Long): List<ReadingSession>
+
+    @Query("SELECT * FROM ReadingSession WHERE dirty = 1")
+    suspend fun getDirtySessions(): List<ReadingSession>
+
+    @Query("SELECT * FROM ReadingSession WHERE uuid = :uuid")
+    suspend fun getSessionByUuid(uuid: String): ReadingSession?
+
+    @Query("UPDATE ReadingSession SET dirty = 0 WHERE uuid = :uuid")
+    suspend fun markSessionSynced(uuid: String)
+
+    @Query("DELETE FROM ReadingSession WHERE uuid = :uuid")
+    suspend fun deleteSessionByUuid(uuid: String)
 
     /**
      * Добавляет или обновляет сессию чтения за день.

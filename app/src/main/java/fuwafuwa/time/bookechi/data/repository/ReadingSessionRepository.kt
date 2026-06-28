@@ -1,7 +1,10 @@
 package fuwafuwa.time.bookechi.data.repository
 
+import fuwafuwa.time.bookechi.data.local.BookDao
+import fuwafuwa.time.bookechi.data.local.DeletedRecordDao
 import fuwafuwa.time.bookechi.data.local.ReadingSessionDao
 import fuwafuwa.time.bookechi.data.model.DailyReadingStats
+import fuwafuwa.time.bookechi.data.model.DeletedRecord
 import fuwafuwa.time.bookechi.data.model.ReadingSession
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -33,12 +36,23 @@ data class WeekStreakDay(
 )
 
 class ReadingSessionRepository(
-    private val readingSessionDao: ReadingSessionDao
+    private val readingSessionDao: ReadingSessionDao,
+    private val bookDao: BookDao,
+    private val deletedDao: DeletedRecordDao,
 ) {
     private val dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE // YYYY-MM-DD
 
+    fun getAllSessions(): Flow<List<ReadingSession>> =
+        readingSessionDao.getAllSessions()
+
     fun getSessionsForBook(bookId: Long): Flow<List<ReadingSession>> =
         readingSessionDao.getSessionsForBook(bookId)
+
+    /** Карта bookId → последняя дата чтения (YYYY-MM-DD). */
+    fun getLastReadDates(): Flow<Map<Long, String>> =
+        readingSessionDao.getLastReadDates().map { list ->
+            list.associate { it.bookId to it.lastReadDate }
+        }
 
     fun getSessionsForDate(date: LocalDate): Flow<List<ReadingSession>> =
         readingSessionDao.getSessionsForDate(date.format(dateFormatter))
@@ -105,27 +119,57 @@ class ReadingSessionRepository(
     }
 
     suspend fun insertSession(session: ReadingSession) = withContext(Dispatchers.IO) {
-        readingSessionDao.insertSession(session)
+        readingSessionDao.insertSession(stamp(session))
     }
 
     suspend fun insertSessions(sessions: List<ReadingSession>) = withContext(Dispatchers.IO) {
-        readingSessionDao.insertSessions(sessions)
+        readingSessionDao.insertSessions(sessions.map { stamp(it) })
     }
 
     suspend fun updateSession(session: ReadingSession) = withContext(Dispatchers.IO) {
-        readingSessionDao.updateSession(session)
+        readingSessionDao.updateSession(stamp(session))
     }
 
     suspend fun deleteSession(session: ReadingSession) = withContext(Dispatchers.IO) {
+        tombstone(session.uuid)
         readingSessionDao.deleteSession(session)
     }
 
     suspend fun deleteSessionsForBook(bookId: Long) = withContext(Dispatchers.IO) {
+        readingSessionDao.getSessionsForBookOnce(bookId).forEach { tombstone(it.uuid) }
         readingSessionDao.deleteSessionsForBook(bookId)
     }
 
     suspend fun deleteAllSessions() = withContext(Dispatchers.IO) {
+        readingSessionDao.getAllSessionsOnce().forEach { tombstone(it.uuid) }
         readingSessionDao.deleteAllSessions()
+    }
+
+    /**
+     * Проставляет sync-метки: bookUuid (резолвится из книги по bookId), детерминированный
+     * uuid "${bookUuid}_${date}", время и dirty. Если uuid/bookUuid уже заданы (запись из БД) —
+     * сохраняем их и только обновляем время.
+     */
+    private suspend fun stamp(session: ReadingSession): ReadingSession {
+        val bookUuid = session.bookUuid.ifBlank { runCatching { bookDao.getBookById(session.bookId).uuid }.getOrDefault("") }
+        return session.copy(
+            bookUuid = bookUuid,
+            uuid = session.uuid.ifBlank { "${bookUuid}_${session.date}" },
+            updatedAt = System.currentTimeMillis(),
+            dirty = true,
+        )
+    }
+
+    private suspend fun tombstone(uuid: String) {
+        if (uuid.isBlank()) return
+        deletedDao.upsert(
+            DeletedRecord(
+                uuid = uuid,
+                type = DeletedRecord.TYPE_SESSION,
+                updatedAt = System.currentTimeMillis(),
+                dirty = true,
+            ),
+        )
     }
 
     /**
@@ -145,22 +189,26 @@ class ReadingSessionRepository(
         val existing = readingSessionDao.getSessionForBookAndDate(bookId, dateKey)
         if (existing == null) {
             readingSessionDao.insertSession(
-                ReadingSession(
-                    bookId = bookId,
-                    date = dateKey,
-                    pagesRead = pagesRead,
-                    readingTimeMinutes = readingTimeMinutes,
-                    startPage = startPage,
-                    endPage = endPage
+                stamp(
+                    ReadingSession(
+                        bookId = bookId,
+                        date = dateKey,
+                        pagesRead = pagesRead,
+                        readingTimeMinutes = readingTimeMinutes,
+                        startPage = startPage,
+                        endPage = endPage
+                    )
                 )
             )
         } else {
             readingSessionDao.updateSession(
-                existing.copy(
-                    pagesRead = existing.pagesRead + pagesRead,
-                    readingTimeMinutes = existing.readingTimeMinutes + readingTimeMinutes,
-                    startPage = if (existing.startPage == 0) startPage else minOf(existing.startPage, startPage),
-                    endPage = maxOf(existing.endPage, endPage)
+                stamp(
+                    existing.copy(
+                        pagesRead = existing.pagesRead + pagesRead,
+                        readingTimeMinutes = existing.readingTimeMinutes + readingTimeMinutes,
+                        startPage = if (existing.startPage == 0) startPage else minOf(existing.startPage, startPage),
+                        endPage = maxOf(existing.endPage, endPage)
+                    )
                 )
             )
         }
@@ -175,8 +223,7 @@ class ReadingSessionRepository(
         readingTimeMinutes: Int = 0
     ) = withContext(Dispatchers.IO) {
         if (pagesRead <= 0) return@withContext
-        val today = LocalDate.now().format(dateFormatter)
-        readingSessionDao.addOrUpdateSession(bookId, today, pagesRead, readingTimeMinutes)
+        addOrUpdateStamped(bookId, LocalDate.now().format(dateFormatter), pagesRead, readingTimeMinutes)
     }
 
     /**
@@ -189,12 +236,44 @@ class ReadingSessionRepository(
         readingTimeMinutes: Int = 0
     ) = withContext(Dispatchers.IO) {
         if (pagesRead <= 0) return@withContext
-        readingSessionDao.addOrUpdateSession(
-            bookId,
-            date.format(dateFormatter),
-            pagesRead,
-            readingTimeMinutes
-        )
+        addOrUpdateStamped(bookId, date.format(dateFormatter), pagesRead, readingTimeMinutes)
+    }
+
+    /**
+     * Добавляет или обновляет сессию за день (суммируя страницы) со sync-метками.
+     * Аналог [ReadingSessionDao.addOrUpdateSession], но проставляет uuid/updatedAt/dirty.
+     */
+    private suspend fun addOrUpdateStamped(
+        bookId: Long,
+        dateKey: String,
+        pagesRead: Int,
+        readingTimeMinutes: Int
+    ) {
+        val existing = readingSessionDao.getSessionForBookAndDate(bookId, dateKey)
+        if (existing == null) {
+            readingSessionDao.insertSession(
+                stamp(
+                    ReadingSession(
+                        bookId = bookId,
+                        date = dateKey,
+                        pagesRead = pagesRead,
+                        readingTimeMinutes = readingTimeMinutes,
+                        startPage = 0,
+                        endPage = pagesRead
+                    )
+                )
+            )
+        } else {
+            readingSessionDao.updateSession(
+                stamp(
+                    existing.copy(
+                        pagesRead = existing.pagesRead + pagesRead,
+                        readingTimeMinutes = existing.readingTimeMinutes + readingTimeMinutes,
+                        endPage = existing.endPage + pagesRead
+                    )
+                )
+            )
+        }
     }
 
     /**

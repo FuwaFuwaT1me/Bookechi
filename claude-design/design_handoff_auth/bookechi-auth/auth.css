@@ -1,0 +1,174 @@
+/* ───────────────────────────────────────────────
+   Bookechi — Auth screens (extends Terracotta & Linen)
+   ─────────────────────────────────────────────── */
+
+/* ── Screen scaffold (no bottom nav) ── */
+.auth-screen {
+  position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column;
+  background: var(--canvas); scrollbar-width: none;
+}
+.auth-screen::-webkit-scrollbar { display: none; }
+.auth-pad { padding: 0 24px; }
+
+/* ── Brand mark (rounded tile w/ stacked-books glyph) ── */
+.auth-mark {
+  display: grid; place-items: center; flex: none;
+  border-radius: 28%;
+  background: linear-gradient(157deg, var(--accent), var(--accent-deep));
+  box-shadow: 0 14px 30px -12px var(--goal-glow), inset 0 1px 0 rgba(255,255,255,0.18);
+}
+.auth-mark.light {
+  background: linear-gradient(157deg, #FFF6EE, #F4E6D7);
+  box-shadow: 0 12px 26px -14px rgba(56,42,32,0.5), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* ── Wordmark ── */
+.auth-word {
+  font-family: var(--serif); font-weight: 600; letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+/* ── Button stack ── */
+.auth-stack { display: flex; flex-direction: column; gap: 12px; }
+
+/* Google / provider button: leading brand chip + centered label */
+.auth-pbtn {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  gap: 10px; min-height: 54px; width: 100%; padding: 0 20px;
+  border-radius: var(--r-btn); font-size: 16px; font-weight: 600;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+.auth-pbtn:active { transform: scale(0.98); }
+.auth-pbtn .auth-glyph { position: absolute; left: 18px; display: flex; }
+
+/* filled (primary) variant */
+.auth-pbtn.fill { background: var(--accent); color: var(--on-accent); }
+.auth-pbtn.fill:active { background: var(--accent-pressed); }
+.auth-pbtn.fill .auth-gchip {
+  width: 30px; height: 30px; border-radius: 50%; background: #fff;
+  display: grid; place-items: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+
+/* outline (secondary) variant */
+.auth-pbtn.outline {
+  background: var(--surface-pure); color: var(--text);
+  border: 1.5px solid var(--stroke);
+}
+.bk-root[data-theme="dark"] .auth-pbtn.outline { background: var(--surface); }
+.auth-pbtn.outline:active { background: var(--card-tint); }
+
+/* ── Tertiary text button (anonymous) ── */
+.auth-textbtn {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 46px; width: 100%; border-radius: var(--r-btn);
+  font-size: 15px; font-weight: 600; color: var(--text2);
+  transition: color 0.15s ease;
+}
+.auth-textbtn:active { color: var(--text); }
+.auth-textbtn .auth-chev { transition: transform 0.15s ease; }
+.auth-textbtn:active .auth-chev { transform: translateX(3px); }
+
+/* ── Divider with label ── */
+.auth-or {
+  display: flex; align-items: center; gap: 14px;
+  color: var(--text2); font-size: 12.5px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: lowercase;
+}
+.auth-or::before, .auth-or::after {
+  content: ''; flex: 1; height: 1px; background: var(--divider);
+}
+
+/* ── Legal fine print ── */
+.auth-legal {
+  font-size: 12px; line-height: 1.5; color: var(--text2);
+  text-align: center; text-wrap: pretty;
+}
+.auth-legal a { color: var(--accent-deep); font-weight: 600; text-decoration: none; }
+.bk-root[data-theme="dark"] .auth-legal a { color: var(--accent-pressed); }
+
+/* ── Curved brand dome (variant «Дуга») ── */
+.auth-dome {
+  position: relative; flex: none; overflow: hidden;
+  padding: 64px 28px 52px;
+  color: var(--on-accent);
+  background:
+    radial-gradient(120% 90% at 80% -10%, color-mix(in oklab, #fff 26%, transparent), transparent 55%),
+    linear-gradient(168deg, var(--accent), var(--accent-deep));
+  border-radius: 0 0 46px 46px / 0 0 72px 72px;
+  box-shadow: 0 22px 44px -26px var(--goal-glow);
+}
+.auth-dome .auth-word { color: var(--on-accent); }
+
+/* faint stacked-spine motif in the dome corner */
+.auth-dome-deco {
+  position: absolute; right: -18px; bottom: -22px; opacity: 0.16;
+  pointer-events: none; color: #fff;
+}
+
+/* ── Cover-fan hero (variant «Обложки») ── */
+.auth-fan {
+  position: relative; width: 196px; height: 150px; margin: 0 auto;
+}
+.auth-fan > div {
+  position: absolute; bottom: 0; left: 50%;
+  transform-origin: bottom center;
+  filter: drop-shadow(0 16px 26px rgba(56,42,32,0.34));
+}
+
+/* ── Form push header ── */
+.auth-head { display: flex; align-items: center; gap: 6px; padding: 4px 0 18px; }
+
+/* link-style button (forgot password) */
+.auth-link {
+  background: none; border: none; padding: 0; font-size: 13px; font-weight: 600;
+  color: var(--accent-deep);
+}
+.bk-root[data-theme="dark"] .auth-link { color: var(--accent-pressed); }
+
+/* ── Anonymous sheet limitation rows ── */
+.auth-limit { display: flex; align-items: flex-start; gap: 13px; padding: 11px 0; }
+.auth-limit-ic {
+  width: 38px; height: 38px; border-radius: 12px; flex: none;
+  display: grid; place-items: center;
+}
+.auth-limit-ic.warn { background: var(--error-bg); color: var(--error); }
+.auth-limit-ic.ok { background: var(--sage-soft); color: var(--sage); }
+.auth-limit + .auth-limit { border-top: 1px solid var(--divider); }
+
+/* ── Success check seal ── */
+.auth-seal {
+  width: 88px; height: 88px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; color: var(--on-accent);
+  background: linear-gradient(157deg, var(--accent), var(--accent-deep));
+  box-shadow: 0 18px 38px -14px var(--goal-glow);
+}
+
+/* ── Connecting spinner ── */
+.auth-spin {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2.5px solid color-mix(in oklab, var(--on-accent) 35%, transparent);
+  border-top-color: var(--on-accent);
+  animation: auth-rot 0.7s linear infinite;
+}
+.auth-spin.accent {
+  border-color: color-mix(in oklab, var(--accent) 28%, transparent);
+  border-top-color: var(--accent);
+}
+@keyframes auth-rot { to { transform: rotate(360deg); } }
+
+/* ── Entrance: gentle rise of welcome content (transform-only so it never
+   hides content at frame 0 — keeps print / PDF / raster captures visible) ── */
+@media (prefers-reduced-motion: no-preference) {
+  .auth-rise { animation: auth-rise 0.55s cubic-bezier(.32,.72,.28,1) both; }
+  .auth-rise-2 { animation: auth-rise 0.55s cubic-bezier(.32,.72,.28,1) 0.08s both; }
+  .auth-rise-3 { animation: auth-rise 0.55s cubic-bezier(.32,.72,.28,1) 0.16s both; }
+}
+@keyframes auth-rise { from { transform: translateY(16px); } to { transform: none; } }
+
+/* reduced motion: keep loading legible via a soft opacity pulse instead of spin */
+@media (prefers-reduced-motion: reduce) {
+  .auth-spin { animation: auth-pulse 1s ease-in-out infinite; }
+}
+@keyframes auth-pulse { 50% { opacity: 0.4; } }

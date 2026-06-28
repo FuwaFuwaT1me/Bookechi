@@ -22,7 +22,8 @@ import java.time.LocalDate
     ],
     indices = [
         Index("bookId"),
-        Index(value = ["bookId", "date"], unique = true)
+        Index(value = ["bookId", "date"], unique = true),
+        Index(value = ["uuid"], unique = true)
     ]
 )
 data class ReadingSession(
@@ -37,7 +38,19 @@ data class ReadingSession(
     /** Начальная страница на начало сессии */
     val startPage: Int = 0,
     /** Конечная страница на конец сессии */
-    val endPage: Int = 0
+    val endPage: Int = 0,
+    // --- Sync metadata (Firestore) ---
+    /**
+     * Глобальный id сессии = "${bookUuid}_${date}" (детерминированный: одна сессия на книгу в день).
+     * Благодаря этому одинаковая сессия с разных устройств — это один документ, без дублей.
+     */
+    val uuid: String = "",
+    /** uuid родительской книги — локальный [bookId] device-specific и для синка не годится. */
+    val bookUuid: String = "",
+    /** Время последнего изменения, мс. Для last-write-wins. */
+    val updatedAt: Long = System.currentTimeMillis(),
+    /** Есть незапушенные локальные изменения. */
+    val dirty: Boolean = true,
 )
 
 /**

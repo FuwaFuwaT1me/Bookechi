@@ -19,7 +19,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
@@ -27,6 +30,7 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.ViewList
@@ -47,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -55,7 +60,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import fuwafuwa.time.bookechi.R
+import fuwafuwa.time.bookechi.data.auth.GoogleSignIn
+import kotlinx.coroutines.launch
 import fuwafuwa.time.bookechi.base.ui.ds.DsShapes
 import fuwafuwa.time.bookechi.base.ui.ds.FilterChip
 import fuwafuwa.time.bookechi.base.ui.ds.PrimaryButton
@@ -148,6 +157,11 @@ private fun SettingsScreenContent(
                     CircularProgressIndicator(color = BlueMain)
                 }
             } else {
+                // Account Section
+                AccountSection(state = state, onAction = onAction)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // Design Section
                 SettingsSection(title = "🎨 Design") {
                     SettingsToggleItem(
@@ -584,6 +598,138 @@ private fun GridColumnsSelector(
                     modifier = Modifier.size(20.dp)
                 )
             }
+        }
+    }
+}
+
+/**
+ * Секция «Аккаунт»: показывает текущее состояние (гость / вошёл) и кнопку входа-выхода.
+ * Получение Google idToken (выбор аккаунта) делается тут, в UI, т.к. нужен Activity-контекст;
+ * сам вход обрабатывает модель через [SettingsAction.SignInWithGoogle].
+ */
+@Composable
+private fun AccountSection(
+    state: SettingsState,
+    onAction: (SettingsAction) -> Unit
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val user = state.authUser
+    val signedIn = user?.isSignedIn == true
+
+    SettingsSection(title = "Account") {
+        // Текущий пользователь
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF6366F1).copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (signedIn) Icons.Filled.AccountCircle else Icons.Filled.PersonOutline,
+                    contentDescription = null,
+                    tint = Color(0xFF6366F1),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = if (signedIn) (user?.displayName ?: user?.email ?: "Signed in") else "Guest",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF1E293B)
+                )
+                Text(
+                    text = if (signedIn) (user?.email ?: "Synced account")
+                    else "Sign in to sync across devices",
+                    fontSize = 13.sp,
+                    color = Color(0xFF94A3B8)
+                )
+            }
+
+            if (state.authInProgress) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(22.dp),
+                    strokeWidth = 2.dp,
+                    color = BlueMain
+                )
+            }
+        }
+
+        HorizontalDivider(
+            modifier = Modifier.padding(start = 56.dp),
+            color = Color(0xFFE2E8F0)
+        )
+
+        // Кнопка входа / выхода
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(enabled = !state.authInProgress) {
+                    if (signedIn) {
+                        onAction(SettingsAction.SignOut)
+                    } else {
+                        scope.launch {
+                            onAction(SettingsAction.SignInStarted)
+                            GoogleSignIn.getIdToken(context).fold(
+                                onSuccess = { onAction(SettingsAction.SignInWithGoogle(it)) },
+                                onFailure = { e ->
+                                    if (e is GetCredentialCancellationException) {
+                                        onAction(SettingsAction.SignInCancelled)
+                                    } else {
+                                        onAction(SettingsAction.SignInFailed(e.message ?: "Sign-in failed"))
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val accent = if (signedIn) Color(0xFFEF4444) else Color(0xFF3B82F6)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(accent.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (signedIn) Icons.AutoMirrored.Filled.Logout else Icons.AutoMirrored.Filled.Login,
+                    contentDescription = null,
+                    tint = accent,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = if (signedIn) "Sign out" else "Sign in with Google",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (signedIn) Color(0xFFEF4444) else Color(0xFF1E293B)
+            )
+        }
+
+        if (state.authError != null) {
+            Text(
+                text = state.authError,
+                fontSize = 13.sp,
+                color = Color(0xFFEF4444),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
         }
     }
 }

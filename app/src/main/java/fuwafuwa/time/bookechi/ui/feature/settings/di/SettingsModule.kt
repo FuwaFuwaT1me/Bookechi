@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.settings.di
 
+import fuwafuwa.time.bookechi.data.auth.AuthRepository
 import fuwafuwa.time.bookechi.data.preferences.AppPreferences
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.ui.feature.settings.mvi.SettingsModel
@@ -19,7 +20,8 @@ val settingsModule = module {
         SettingsModel(
             defaultState = get<SettingsState>(),
             bookRepository = get<BookRepository>(),
-            appPreferences = get<AppPreferences>()
+            appPreferences = get<AppPreferences>(),
+            authRepository = get<AuthRepository>()
         )
     }
 }

@@ -23,4 +23,13 @@ sealed interface SettingsAction : Action {
     data class ShowClearDataDialog(val show: Boolean) : SettingsAction
     data object ClearAllData : SettingsAction
     data object ExportData : SettingsAction
+
+    // Account / auth.
+    // idToken добывается в UI через Credential Manager, дальше вход обрабатывает модель.
+    data object SignInStarted : SettingsAction
+    data class SignInWithGoogle(val idToken: String) : SettingsAction
+    data object SignInCancelled : SettingsAction
+    data class SignInFailed(val message: String) : SettingsAction
+    data object SignOut : SettingsAction
+    data object DismissAuthError : SettingsAction
 }

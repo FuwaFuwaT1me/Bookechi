@@ -1,5 +1,6 @@
 package fuwafuwa.time.bookechi.ui.feature.settings.mvi
 
+import fuwafuwa.time.bookechi.data.auth.AuthRepository
 import fuwafuwa.time.bookechi.data.preferences.AppPreferences
 import fuwafuwa.time.bookechi.data.repository.BookRepository
 import fuwafuwa.time.bookechi.mvi.impl.BaseModel
@@ -9,12 +10,14 @@ import kotlinx.coroutines.launch
 class SettingsModel(
     defaultState: SettingsState,
     private val bookRepository: BookRepository,
-    private val appPreferences: AppPreferences
+    private val appPreferences: AppPreferences,
+    private val authRepository: AuthRepository
 ) : BaseModel<SettingsState, SettingsAction>(defaultState) {
 
     init {
         loadSettings()
         observePreferences()
+        observeAuthUser()
     }
 
     override fun onAction(action: SettingsAction) {
@@ -34,9 +37,40 @@ class SettingsModel(
             is SettingsAction.ShowClearDataDialog -> updateState { copy(showClearDataDialog = action.show) }
             is SettingsAction.ClearAllData -> handleClearAllData()
             is SettingsAction.ExportData -> handleExportData()
+            is SettingsAction.SignInStarted -> updateState { copy(authInProgress = true, authError = null) }
+            is SettingsAction.SignInWithGoogle -> handleSignInWithGoogle(action.idToken)
+            is SettingsAction.SignInCancelled -> updateState { copy(authInProgress = false) }
+            is SettingsAction.SignInFailed -> updateState { copy(authInProgress = false, authError = action.message) }
+            is SettingsAction.SignOut -> handleSignOut()
+            is SettingsAction.DismissAuthError -> updateState { copy(authError = null) }
         }
     }
-    
+
+    private fun observeAuthUser() {
+        scope.launch {
+            authRepository.authUser.collect { user ->
+                updateState { copy(authUser = user) }
+            }
+        }
+    }
+
+    private fun handleSignInWithGoogle(idToken: String) {
+        scope.launch {
+            authRepository.signInWithGoogle(idToken).fold(
+                onSuccess = { updateState { copy(authInProgress = false, authError = null) } },
+                onFailure = { e -> updateState { copy(authInProgress = false, authError = e.message) } },
+            )
+        }
+    }
+
+    private fun handleSignOut() {
+        scope.launch {
+            updateState { copy(authInProgress = true, authError = null) }
+            runCatching { authRepository.signOut() }
+            updateState { copy(authInProgress = false) }
+        }
+    }
+
     private fun observePreferences() {
         scope.launch {
             appPreferences.designPreferences.collect { prefs ->
